@@ -4,3 +4,6 @@ members = [
     "battle",
     "market"
 ]
+exclude=[
+    "step_monster"
+]
