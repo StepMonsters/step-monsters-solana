@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "nft/*",
-    "battle/*",
-    "market/*"
+    "nft",
+    "battle",
+    "market"
 ]

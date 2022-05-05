@@ -1,12 +1,12 @@
 [package]
-name = "step-monsters-solana"
+name = "nft"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "step_monsters_solana"
+name = "nft"
 
 [features]
 no-entrypoint = []
@@ -20,3 +20,4 @@ overflow-checks = true
 
 [dependencies]
 anchor-lang = "0.24.1"
+mpl-token-metadata = { version = "1.2.7", features = ["no-entrypoint"] }
