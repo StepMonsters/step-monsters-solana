@@ -2,13 +2,72 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token;
 use anchor_spl::token::{MintTo, Token};
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, utilize};
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 #[program]
 pub mod nft {
     use super::*;
+
+    pub fn burn(
+        ctx: Context<Burn>,
+    ) -> Result<()> {
+        let accounts = vec![
+            ctx.accounts.metadata.to_account_info(),
+            ctx.accounts.token_account.to_account_info(),
+            ctx.accounts.mint.to_account_info(),
+            ctx.accounts.use_authority.to_account_info(),
+            ctx.accounts.owner.to_account_info(),
+            ctx.accounts.token_program.to_account_info(),
+            ctx.accounts.ata_program.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+            ctx.accounts.rent.to_account_info(),
+        ];
+        invoke(
+            &utilize(
+                ctx.accounts.token_metadata_program.key(),
+                ctx.accounts.metadata.key(),
+                ctx.accounts.token_account.key(),
+                ctx.accounts.mint.key(),
+                Option::from(ctx.accounts.use_authority.key()),
+                ctx.accounts.use_authority.key(),
+                ctx.accounts.owner.key(),
+                Option::from(ctx.accounts.burner.key()),
+                1,
+            ),
+            accounts.as_slice(),
+        )?;
+        Ok(())
+    }
+
+    pub fn upgrade(
+        ctx: Context<PurchaseAndMint>,
+        amount: u64,
+    ) -> Result<()> {
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_accounts = anchor_spl::token::Transfer {
+            from: ctx.accounts.from.to_account_info(),
+            to: ctx.accounts.to.to_account_info(),
+            authority: ctx.accounts.payer.to_account_info(),
+        };
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, amount)?;
+        mint_token(ctx)?;
+        Ok(())
+    }
+
+    pub fn purchase_free(
+        ctx: Context<PurchaseAndMint>,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn purchase_whitelist(
+        ctx: Context<PurchaseAndMint>,
+    ) -> Result<()> {
+        Ok(())
+    }
 
     pub fn purchase_by_token(
         ctx: Context<PurchaseAndMint>,
@@ -225,6 +284,21 @@ pub mod nft {
 
         Ok(())
     }
+}
+
+#[derive(Accounts)]
+pub struct Burn<'info> {
+    pub metadata: AccountInfo<'info>,
+    pub token_account: AccountInfo<'info>,
+    pub mint: AccountInfo<'info>,
+    pub use_authority: AccountInfo<'info>,
+    pub owner: AccountInfo<'info>,
+    pub token_program: Program<'info, Token>,
+    pub ata_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+    pub rent: AccountInfo<'info>,
+    pub token_metadata_program: AccountInfo<'info>,
+    pub burner: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
