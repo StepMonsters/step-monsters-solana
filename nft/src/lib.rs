@@ -10,6 +10,22 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod nft {
     use super::*;
 
+    pub fn purchase_by_token(
+        ctx: Context<PurchaseAndMint>,
+        amount: u64,
+    ) -> Result<()> {
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_accounts = anchor_spl::token::Transfer {
+            from: ctx.accounts.from.to_account_info(),
+            to: ctx.accounts.to.to_account_info(),
+            authority: ctx.accounts.payer.to_account_info(),
+        };
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+        token::transfer(cpi_ctx, amount)?;
+        mint_token(ctx)?;
+        Ok(())
+    }
+
     pub fn purchase_by_sol(
         ctx: Context<PurchaseAndMint>,
         amount: u64,
