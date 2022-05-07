@@ -10,8 +10,23 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod nft {
     use super::*;
 
+    pub fn purchase_by_sol(
+        ctx: Context<PurchaseAndMint>,
+        amount: u64,
+    ) -> Result<()> {
+        let instruction = anchor_lang::solana_program::system_instruction::transfer(
+            &ctx.accounts.from.key(),
+            &ctx.accounts.to.key(),
+            amount,
+        );
+        let accounts = [ctx.accounts.from.to_account_info(), ctx.accounts.to.to_account_info()];
+        invoke(&instruction, &accounts)?;
+        mint_token(ctx)?;
+        Ok(())
+    }
+
     pub fn mint_token(
-        ctx: Context<MintToken>,
+        ctx: Context<PurchaseAndMint>,
     ) -> Result<()> {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_accounts = MintTo {
@@ -197,11 +212,13 @@ pub mod nft {
 }
 
 #[derive(Accounts)]
-pub struct MintToken<'info> {
+pub struct PurchaseAndMint<'info> {
     pub token_program: Program<'info, Token>,
     pub mint: AccountInfo<'info>,
     pub token_account: AccountInfo<'info>,
     pub payer: AccountInfo<'info>,
+    pub from: AccountInfo<'info>,
+    pub to: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
