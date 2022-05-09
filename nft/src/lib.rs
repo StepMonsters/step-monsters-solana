@@ -10,6 +10,12 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod nft {
     use super::*;
 
+    pub fn breed(
+        ctx: Context<PurchaseAndMint>,
+    ) -> Result<()> {
+        Ok(())
+    }
+
     pub fn burn(
         ctx: Context<Burn>,
     ) -> Result<()> {
