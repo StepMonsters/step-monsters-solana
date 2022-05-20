@@ -4,6 +4,24 @@ program_id:
 
 ## Instruction Call
 
+```
+pub enum AppInstruction {
+    /// Setting auction global configuration
+    Configure(ConfigureArgs),
+
+    /// Set whitelist of nft creator, then those can call `Create`
+    SetCreatorWhitelist(SetCreatorWhitelistArgs),
+
+    /// Create fixed price sale or english auction
+    Create(CreateArgs),
+
+    /// Bid fixed price sale or english auction
+    PlaceBid(PlaceBidArgs),
+
+    /// Cancel fixed price sale or english auction
+    Cancel,
+}
+```
 ### Create
 
 （固定拍）创建拍卖，需要提前将nft_creator加入白名单
@@ -11,17 +29,17 @@ program_id:
 | AccountInfo      | is_signer | is_writable |                                                           |
 | ---------------- | --------- | ----------- | --------------------------------------------------------- |
 | signer           | **true**  | false       | 交易发起者，即钱包地址                                    |
-| config           | false     | false       | ['fallen', program_id, 'configure']       
+| config           | false     | false       | ['market', program_id, 'configure']       
 | user_info        | false     | **true**    | [program_id, user, 'user_info']              
 | nft_creator      | false     | false       | nft creator，通常是钱包地址                               |
-| nft_creator_data | false     | false       | ['fallen', program_id, nft_creator,'creator_whitelist'] |
+| nft_creator_data | false     | false       | ['market', program_id, nft_creator,'creator_whitelist'] |
 | auction          | **true**  | **true**    | 新建地址                                                  |
-| authority        | false     | false       | ['fallen', program_id, auction,'authority']             |
+| authority        | false     | false       | ['market', program_id, auction,'authority']             |
 | nft_mint         | false     | false       | nft mint 地址                                             |
 | nft_metadata     | false     | false       | nft metadata 地址，是一个PDA                              |
 | nft_account      | false     | **true**    | 拥有nft的地址，并且已经approve给authority，数量为1        |
-| nft_store        | false     | **true**    | ['fallen', program_id, auction,'nft_store']             |
-| bid_store        | false     | **true**    | ['fallen', program_id, auction,'bid_store']             |
+| nft_store        | false     | **true**    | ['market', program_id, auction,'nft_store']             |
+| bid_store        | false     | **true**    | ['market', program_id, auction,'bid_store']             |
 | spl_token_id     | false     | false       | 标准spl token id                                          |
 | rent             | false     | false       | 系统rent                                                  |
 | system           | false     | false       | 系统 system                                               |
@@ -31,9 +49,7 @@ program_id:
 
 指令参数：
 pub struct CreateArgs {
-    pub sale_type: u8,           -- 1：FixedPriceSale，2：EnglishAuction
     pub price: Option<u64>,		   -- FixedPriceSale 指定价，单位：lamports
-    pub min_price: Option<u64>,  -- EnglishAuction 最低价，单位：lamports
     pub duration: Option<u64>,   -- EnglishAuction 持续时间，单位：秒；从创建拍卖开始计时
     pub begin_ts: Option<u64>,	 -- FixedPriceSale或EnglishAuction的拍卖开始时间戳
 }
@@ -47,16 +63,15 @@ pub struct CreateArgs {
 | ------------ | --------- | ----------- | ------------------------------------------------------------ |
 | signer       | **true**  | false       | 同上                                                         |
 | charge_addr  | false     | **true**    | 同上                                                         |
-| team_addr    | false     | **true**    | 同上                                                         |
-| config_info  | false     | **true**    |['fallen', program_id, 'configure']
+| config_info  | false     | **true**    |['market', program_id, 'configure']
 | user_info    | false     | **true**        | [program_id, signer 'user_info']         
 | auction_creator_user_info    | false     | **true**        | [program_id, auction_creator 'user_info']         
 | auction      | false     | **true**    | 同上                                                         |
 | authority    | false     | false       | 同上                                                         |
-| bid_info     | false     | **true**    | ['fallen', program_id, auction,signer,'bid']               |
+| bid_info     | false     | **true**    | ['market', program_id, auction,signer,'bid']               |
 | bid_store    | false     | **true**    | 同上                                                         |
 | auction_creator    | false     | **true**    | 同上                                                   |
-| nft_store        | false     | **true**    | ['fallen', program_id, auction,'nft_store']             |
+| nft_store        | false     | **true**    | ['market', program_id, auction,'nft_store']             |
 | nft_return   | false     | **true**    | 用于接收取消拍卖返回nft的地址；理论上是Create中nft_account |
 | last_bidder | false     | **true**       | 同上                                                         |
 | nft_metadata | false     | false       | 同上                                                         |
@@ -88,7 +103,6 @@ pub struct PlaceBidArgs {
 | spl_token_id | false     | false       | 同上                                                         |
 
 ```
-
 指令下标：4
 ```
 ## 接口查询
@@ -135,5 +149,4 @@ pub struct ConfigureData {
 数据结构：
 pub struct UserInfo {
     pub total_trade: u64,     --总交易量
-    pub daily_trade: u64,     --当前天交易量
 }

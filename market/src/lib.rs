@@ -7,6 +7,6 @@ pub mod utils;
 #[cfg(not(feature = "no-entrypoint"))]
 pub mod entrypoint;
 
-pub const PREFIX: &str = "fallen";
+pub const PREFIX: &str = "market";
 
 solana_program::declare_id!("2cZVDMdeRsuSmeD94PY8uotzqYfKTegbXPSAMbHaXyiF");

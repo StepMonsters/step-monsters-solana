@@ -45,12 +45,7 @@ pub fn process_configure(program_id: &Pubkey, accounts: &[AccountInfo], args: Co
     config_data.authority = args.authority;
     config_data.charge_rate = args.charge_rate;
     config_data.charge_addr = args.charge_addr;
-    
-
-        let now_ts = now_timestamp();
-        let day = now_ts / 86400;
-        let begin_ts = day * 86400;
-        config_data.total_trade = 0;
+    config_data.total_trade = 0;
     
     
 
