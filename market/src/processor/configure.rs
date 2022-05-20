@@ -1,0 +1,60 @@
+use borsh::BorshSerialize;
+use solana_program::{
+    account_info::{next_account_info, AccountInfo},
+    entrypoint::ProgramResult,
+    msg,
+    program_error::ProgramError,
+    pubkey::Pubkey,
+};
+
+use crate::{ferror, state::*, utils::*, PREFIX};
+
+pub fn process_configure(program_id: &Pubkey, accounts: &[AccountInfo], args: ConfigureArgs) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let signer_info = next_account_info(account_info_iter)?;
+    let config_info = next_account_info(account_info_iter)?;
+    let rent_info = next_account_info(account_info_iter)?;
+    let system_info = next_account_info(account_info_iter)?;
+
+    let bump = assert_config(&program_id, &config_info)?;
+
+    let mut is_created = true;
+    if config_info.data_is_empty() {
+        create_or_allocate_account_raw(
+            *program_id,
+            config_info,
+            rent_info,
+            system_info,
+            signer_info,
+            ConfigureData::LEN,
+            &[PREFIX.as_bytes(), program_id.as_ref(), "configure".as_bytes(), &[bump]],
+        )?;
+        is_created = false;
+    }
+
+    let mut config_data = ConfigureData::from_account_info(config_info)?;
+
+    if is_created {
+        if config_data.authority != *signer_info.key {
+            return ferror!("invalid authority");
+        }
+        assert_owned_by(config_info, &program_id)?;
+    }
+
+    config_data.is_initialized = args.is_initialized;
+    config_data.authority = args.authority;
+    config_data.charge_rate = args.charge_rate;
+    config_data.charge_addr = args.charge_addr;
+    
+
+        let now_ts = now_timestamp();
+        let day = now_ts / 86400;
+        let begin_ts = day * 86400;
+        config_data.total_trade = 0;
+    
+    
+
+    config_data.serialize(&mut &mut config_info.data.borrow_mut()[..])?;
+
+    Ok(())
+}
