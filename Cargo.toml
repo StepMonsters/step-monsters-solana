@@ -1,9 +1,0 @@
-[workspace]
-members = [
-    "nft",
-    "battle",
-    "market"
-]
-exclude=[
-    "step_monster"
-]

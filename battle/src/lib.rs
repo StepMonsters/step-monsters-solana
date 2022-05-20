@@ -1,14 +1,10 @@
-use anchor_lang::prelude::*;
+pub mod entrypoint;
+pub mod error;
+pub mod instruction;
+pub mod processor;
+pub mod state;
+pub mod utils;
+// Export current sdk types for downstream users building with a different sdk version
+pub use solana_program;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
-
-#[program]
-mod battle {
-    use super::*;
-    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
-        Ok(())
-    }
-}
-
-#[derive(Accounts)]
-pub struct Initialize {}
+solana_program::declare_id!("8RRS1XGbGYQdZUr754Lv3kcpj1t67KtjyemA7wxngiW8");
