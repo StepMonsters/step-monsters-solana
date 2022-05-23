@@ -6,6 +6,7 @@ pub use mint::*;
 pub use mint_nft::*;
 pub use mint_nft_create::*;
 pub use mint_nft_create_data::*;
+pub use upgrade::*;
 
 use crate::instruction::*;
 
@@ -14,28 +15,32 @@ pub mod mint;
 pub mod mint_nft;
 pub mod mint_nft_create;
 pub mod mint_nft_create_data;
+pub mod upgrade;
 
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
     input: &[u8],
 ) -> ProgramResult {
-    let instruction = StakePoolInstruction::try_from_slice(input)?;
+    let instruction = GameInstruction::try_from_slice(input)?;
     match instruction {
-        StakePoolInstruction::Init() => {
+        GameInstruction::Init() => {
             process_init(program_id, accounts)
         }
-        StakePoolInstruction::Mint() => {
+        GameInstruction::Mint() => {
             process_mint(program_id, accounts)
         }
-        StakePoolInstruction::MintNft() => {
+        GameInstruction::MintNft() => {
             process_mint_nft(program_id, accounts)
         }
-        StakePoolInstruction::CreateNft() => {
+        GameInstruction::CreateNft() => {
             process_mint_nft_create(program_id, accounts)
         }
-        StakePoolInstruction::CreateNftData() => {
+        GameInstruction::CreateNftData() => {
             process_mint_nft_create_data(program_id, accounts)
+        }
+        GameInstruction::Upgrade() => {
+            process_upgrade(program_id, accounts)
         }
     }
 }

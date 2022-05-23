@@ -10,12 +10,13 @@ use crate::state::*;
 
 #[repr(C)]
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize, PartialEq)]
-pub enum StakePoolInstruction {
+pub enum GameInstruction {
     Init(),
     Mint(),
     MintNft(),
     CreateNft(),
     CreateNftData(),
+    Upgrade(),
 }
 
 pub fn init(
@@ -37,7 +38,7 @@ pub fn init(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: StakePoolInstruction::Init().try_to_vec().unwrap(),
+        data: GameInstruction::Init().try_to_vec().unwrap(),
     })
 }
 
@@ -60,7 +61,7 @@ pub fn mint(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: StakePoolInstruction::Mint().try_to_vec().unwrap(),
+        data: GameInstruction::Mint().try_to_vec().unwrap(),
     })
 }
 
@@ -83,7 +84,7 @@ pub fn mintNft(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: StakePoolInstruction::MintNft().try_to_vec().unwrap(),
+        data: GameInstruction::MintNft().try_to_vec().unwrap(),
     })
 }
 
@@ -106,6 +107,6 @@ pub fn createNft(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: StakePoolInstruction::CreateNft().try_to_vec().unwrap(),
+        data: GameInstruction::CreateNft().try_to_vec().unwrap(),
     })
 }
