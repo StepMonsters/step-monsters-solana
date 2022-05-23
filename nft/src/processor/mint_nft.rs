@@ -1,4 +1,5 @@
 use borsh::BorshSerialize;
+use mpl_token_metadata::instruction::{create_master_edition, create_metadata_accounts_v2};
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
@@ -14,7 +15,7 @@ use spl_token::instruction::{initialize_mint, mint_to};
 
 use crate::{ferror, state::*, utils::*};
 
-pub fn process_init(
+pub fn process_mint_nft(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
@@ -27,6 +28,9 @@ pub fn process_init(
     let ass_token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+
+    let metadata_program_info = next_account_info(account_info_iter)?;
+    let metadata_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
     let size = 82;
@@ -52,7 +56,7 @@ pub fn process_init(
             mint_info.key,
             authority_info.key,
             Some(authority_info.key),
-            9,
+            0,
         )?,
         &[authority_info.clone(), mint_info.clone(), rent_info.clone(), token_program_info.clone(), ],
     )?;
@@ -71,6 +75,65 @@ pub fn process_init(
             mint_info.clone(),
             token_program_info.clone(),
             system_info.clone()
+        ],
+    )?;
+
+    msg!("Mint To");
+    invoke(
+        &mint_to(
+            token_program_info.key,
+            mint_info.key,
+            ata_info.key,
+            signer_info.key,
+            &[signer_info.key],
+            1,
+        )?,
+        &[
+            signer_info.clone(),
+            ata_info.clone(),
+            mint_info.clone(),
+            token_program_info.clone(),
+            system_info.clone()
+        ],
+    )?;
+
+    msg!("Create Metadata Account");
+    let creator = vec![
+        mpl_token_metadata::state::Creator {
+            address: *signer_info.key,
+            verified: false,
+            share: 100,
+        },
+    ];
+    let title = String::from("my_title");
+    let symbol = String::from("my_symbol");
+    let uri = String::from("https://arweave.net/y5e5DJsiwH0s_ayfMwYk-SnrZtVZzHLQDSTZ5dNRUHA");
+    invoke(
+        &create_metadata_accounts_v2(
+            *metadata_program_info.key,
+            *metadata_info.key,
+            *mint_info.key,
+            *signer_info.key,
+            *signer_info.key,
+            *signer_info.key,
+            title,
+            symbol,
+            uri,
+            Some(creator),
+            1,
+            true,
+            false,
+            None,
+            None,
+        ),
+        &[
+            metadata_info.clone(),
+            mint_info.clone(),
+            signer_info.clone(),
+            metadata_program_info.clone(),
+            token_program_info.clone(),
+            system_info.clone(),
+            rent_info.clone(),
         ],
     )?;
 

@@ -1,4 +1,5 @@
 use borsh::BorshSerialize;
+use mpl_token_metadata::instruction::create_master_edition;
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
@@ -14,7 +15,7 @@ use spl_token::instruction::{initialize_mint, mint_to};
 
 use crate::{ferror, state::*, utils::*};
 
-pub fn process_init(
+pub fn process_mint(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
@@ -52,7 +53,7 @@ pub fn process_init(
             mint_info.key,
             authority_info.key,
             Some(authority_info.key),
-            9,
+            0,
         )?,
         &[authority_info.clone(), mint_info.clone(), rent_info.clone(), token_program_info.clone(), ],
     )?;
@@ -68,6 +69,25 @@ pub fn process_init(
             signer_info.clone(),
             ata_info.clone(),
             ass_token_program_info.clone(),
+            mint_info.clone(),
+            token_program_info.clone(),
+            system_info.clone()
+        ],
+    )?;
+
+    msg!("Mint To");
+    invoke(
+        &mint_to(
+            token_program_info.key,
+            mint_info.key,
+            ata_info.key,
+            signer_info.key,
+            &[signer_info.key],
+            1,
+        )?,
+        &[
+            signer_info.clone(),
+            ata_info.clone(),
             mint_info.clone(),
             token_program_info.clone(),
             system_info.clone()
