@@ -13,12 +13,16 @@ use spl_token::state::Mint;
 
 use crate::{ferror, state::*, utils::*};
 //todo user_info low
-pub fn process_create(program_id: &Pubkey, accounts: &[AccountInfo], args: CreateArgs) -> ProgramResult {
+pub fn process_create(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    args: CreateArgs,
+) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
 
-    //add user_info 
+    //add user_info
     let user_info = next_account_info(account_info_iter)?;
     let nft_creator_info = next_account_info(account_info_iter)?;
     let nft_creator_data_info = next_account_info(account_info_iter)?;
@@ -28,7 +32,6 @@ pub fn process_create(program_id: &Pubkey, accounts: &[AccountInfo], args: Creat
     let nft_metadata_info = next_account_info(account_info_iter)?; // nft metadata account, [PREFIX, program_id, mint_pk]
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
     let nft_store_info = next_account_info(account_info_iter)?; // owned by authority_info to keep NFT
-    let bid_store_info = next_account_info(account_info_iter)?; // owned by authority_info to keep WSOL
     let spl_token_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
@@ -43,7 +46,6 @@ pub fn process_create(program_id: &Pubkey, accounts: &[AccountInfo], args: Creat
     let auth_bump = assert_auction_authority(&program_id, &new_auction_info, &authority_info)?;
     assert_mint_metadata(nft_mint_info.key, nft_metadata_info.key)?;
     let nft_store_bump = assert_nft_store(&program_id, &new_auction_info, &nft_store_info)?;
-    assert_bid_store(&program_id, &new_auction_info, &bid_store_info)?;
     assert_eq_pubkey(&spl_token_info, &spl_token::id())?;
     assert_eq_pubkey(&rent_info, &sysvar::rent::id())?;
     assert_eq_pubkey(&system_info, &solana_program::system_program::id())?;
@@ -60,7 +62,9 @@ pub fn process_create(program_id: &Pubkey, accounts: &[AccountInfo], args: Creat
         return ferror!("invalid nft_mint");
     }
     let nft_metadata = Metadata::from_account_info(nft_metadata_info)?;
-    if nft_metadata.key != metaplex_token_metadata::state::Key::MetadataV1 || nft_metadata.mint != *nft_mint_info.key {
+    if nft_metadata.key != metaplex_token_metadata::state::Key::MetadataV1
+        || nft_metadata.mint != *nft_mint_info.key
+    {
         return ferror!("invalid nft_metadata");
     }
     if nft_metadata.data.seller_fee_basis_points + config_account.charge_rate as u16 >= 10000 {
@@ -70,7 +74,8 @@ pub fn process_create(program_id: &Pubkey, accounts: &[AccountInfo], args: Creat
     if nft_metadata.data.creators.is_some() {
         for creator in nft_metadata.data.creators.unwrap().iter() {
             if creator.verified == true && creator.address == *nft_creator_info.key {
-                let nft_creator_data_account = SetCreatorWhitelistData::from_account_info(nft_creator_data_info)?;
+                let nft_creator_data_account =
+                    SetCreatorWhitelistData::from_account_info(nft_creator_data_info)?;
                 if nft_creator_data_account.is_activated != true {
                     return ferror!("creator is not activated");
                 }
@@ -129,17 +134,14 @@ pub fn process_create(program_id: &Pubkey, accounts: &[AccountInfo], args: Creat
         args.begin_ts
     };
 
-
     auction_data.creator = *signer_info.key;
     auction_data.nft_mint = *nft_mint_info.key;
     auction_data.nft_store = *nft_store_info.key;
-    auction_data.bid_store = *bid_store_info.key;
     auction_data.begin_ts = begin_ts;
     auction_data.duration = None;
     auction_data.is_claim = false;
     auction_data.last_bid = None;
     auction_data.price = args.price;
-
 
     spl_token_transfer_invoke(
         spl_token_info.clone(),

@@ -18,8 +18,14 @@ pub use place_bid::*;
 pub mod cancel;
 pub use cancel::*;
 
+pub mod change_price;
+pub use change_price::*;
 
-pub fn process_instruction(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
+pub fn process_instruction(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    input: &[u8],
+) -> ProgramResult {
     match AppInstruction::try_from_slice(input)? {
         AppInstruction::Configure(args) => {
             msg!("Instruction: Configure");
@@ -36,6 +42,10 @@ pub fn process_instruction(program_id: &Pubkey, accounts: &[AccountInfo], input:
         AppInstruction::PlaceBid(args) => {
             msg!("Instruction: PlaceBid");
             process_place_bid(program_id, accounts, args)
+        }
+        AppInstruction::ChangePrice(args) => {
+            msg!("Instruction: ChangePrice");
+            process_change_price(program_id, accounts, args)
         }
         AppInstruction::Cancel => {
             msg!("Instruction: Cancel");

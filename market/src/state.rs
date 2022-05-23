@@ -4,7 +4,6 @@ use solana_program::{
     borsh::try_from_slice_unchecked,
     program_error::ProgramError,
     pubkey::Pubkey,
-    sysvar::{clock::Clock, Sysvar},
 };
 
 // ======== ======== ======== ======== ======== ======== ======== ========
@@ -100,37 +99,25 @@ pub struct AuctionData {
     pub is_init: bool,
     /// creator
     pub creator: Pubkey,
-
     /// NFT mint address
     pub nft_mint: Pubkey,
-
     /// NFT store by auction
     pub nft_store: Pubkey,
-
-    /// WSOL store by auction
-    pub bid_store: Pubkey,
-
     /// fixed price sale
-    ///
     /// Price of sale
     pub price: Option<u64>,
-
-
     /// Auction begin at unix timestamp
     pub begin_ts: Option<u64>,
-
     /// Auction duration, unix seconds
     pub duration: Option<u64>,
-
     /// fixed price    : be true after creator cancel or claim token
     pub is_claim: bool,
-
     /// Last bid
     pub last_bid: Option<BidData>,
 }
 
 impl AuctionData {
-    pub const LEN: usize = 1 + 32 * 4 + 9 * 3 + 1 + (BidData::LEN + 1);
+    pub const LEN: usize = 1 + 32 * 3 + 9 * 3 + 1 + (BidData::LEN + 1);
 
     pub fn from_account_info(a: &AccountInfo) -> Result<AuctionData, ProgramError> {
         if a.data_len() != Self::LEN {
@@ -149,6 +136,13 @@ impl AuctionData {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
 pub struct PlaceBidArgs {
+    /// Price of bid
+    pub price: u64,
+}
+
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
+pub struct ChangePriceArgs {
     /// Price of bid
     pub price: u64,
 }

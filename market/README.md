@@ -39,7 +39,6 @@ pub enum AppInstruction {
 | nft_metadata     | false     | false       | nft metadata 地址，是一个PDA                              |
 | nft_account      | false     | **true**    | 拥有nft的地址，并且已经approve给authority，数量为1        |
 | nft_store        | false     | **true**    | ['market', program_id, auction,'nft_store']             |
-| bid_store        | false     | **true**    | ['market', program_id, auction,'bid_store']             |
 | spl_token_id     | false     | false       | 标准spl token id                                          |
 | rent             | false     | false       | 系统rent                                                  |
 | system           | false     | false       | 系统 system                                               |
@@ -69,11 +68,9 @@ pub struct CreateArgs {
 | auction      | false     | **true**    | 同上                                                         |
 | authority    | false     | false       | 同上                                                         |
 | bid_info     | false     | **true**    | ['market', program_id, auction,signer,'bid']               |
-| bid_store    | false     | **true**    | 同上                                                         |
 | auction_creator    | false     | **true**    | 同上                                                   |
 | nft_store        | false     | **true**    | ['market', program_id, auction,'nft_store']             |
 | nft_return   | false     | **true**    | 用于接收取消拍卖返回nft的地址；理论上是Create中nft_account |
-| last_bidder | false     | **true**       | 同上                                                         |
 | nft_metadata | false     | false       | 同上                                                         |
 | spl_token_id | false     | false       | 同上                                                         |
 | rent         | false     | false       | 同上                                                         |
@@ -89,9 +86,22 @@ pub struct PlaceBidArgs {
 }
 ```
 
+### ChangePrice
+
+（固定拍）重设价格，固定拍只要无人出价，即可重设；
+
+| AccountInfo  | is_signer | is_writable |                                                              |
+| ------------ | --------- | ----------- | ------------------------------------------------------------ |
+| signer       | **true**  | false       | 同上                                                         |
+| auction      | false     | **true**    | 同上                                                         |
+
+```
+指令下标：4
+```
+
 ### Cancel
 
-（固定拍 / 英式拍）拍卖取消，固定拍只要无人出价，即可取消；英式拍，需要等拍卖时间结束后才可取消
+（固定拍）拍卖取消，固定拍只要无人出价，即可取消；英式拍，需要等拍卖时间结束后才可取消
 
 | AccountInfo  | is_signer | is_writable |                                                              |
 | ------------ | --------- | ----------- | ------------------------------------------------------------ |
@@ -103,7 +113,7 @@ pub struct PlaceBidArgs {
 | spl_token_id | false     | false       | 同上                                                         |
 
 ```
-指令下标：4
+指令下标：5
 ```
 ## 接口查询
 
@@ -134,6 +144,8 @@ pub struct SetCreatorWhitelistArgs {
     pub symbol:  String,         -- symbol
 }
 ```
+
+```
 数据结构：
 pub struct ConfigureData {
     /// Initialized state.
@@ -142,11 +154,13 @@ pub struct ConfigureData {
     pub authority: Pubkey,
     /// Charge rate (* 10000) of auction deal
     pub charge_rate: u64,
-    /// Charge address with mint of WSOL
+    /// Charge address 
     pub charge_addr: Pubkey,
 }
-
+```
+```
 数据结构：
 pub struct UserInfo {
     pub total_trade: u64,     --总交易量
 }
+```

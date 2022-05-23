@@ -1,6 +1,6 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use crate::state::{ConfigureArgs, CreateArgs, PlaceBidArgs, SetCreatorWhitelistArgs};
+use crate::state::{ConfigureArgs, CreateArgs, PlaceBidArgs, SetCreatorWhitelistArgs, ChangePriceArgs};
 
 use solana_program::{
     instruction::{AccountMeta, Instruction},
@@ -23,6 +23,9 @@ pub enum AppInstruction {
 
     /// Bid fixed price sale or english auction
     PlaceBid(PlaceBidArgs),
+
+    ///change price
+    ChangePrice(ChangePriceArgs),
 
     /// Cancel fixed price sale or english auction
     Cancel,
@@ -87,7 +90,6 @@ pub fn create(
     nft_metadata_info: &Pubkey,
     nft_account_info: &Pubkey,
     nft_store_info: &Pubkey,
-    bid_store_info: &Pubkey,
     spl_token_info: &Pubkey,
     args: CreateArgs,
 ) -> Result<Instruction, ProgramError> {
@@ -103,7 +105,6 @@ pub fn create(
         AccountMeta::new(*nft_metadata_info, false),
         AccountMeta::new(*nft_account_info, false),
         AccountMeta::new(*nft_store_info, false),
-        AccountMeta::new(*bid_store_info, false),
         AccountMeta::new_readonly(*spl_token_info, false),
         AccountMeta::new_readonly(rent::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
@@ -113,6 +114,23 @@ pub fn create(
         program_id: *program_id,
         accounts,
         data: AppInstruction::Create(args).try_to_vec().unwrap(),
+    })
+}
+
+pub fn change_price(
+    program_id: &Pubkey,
+    siger: &Pubkey,
+    auction_info: &Pubkey,
+) -> Result<Instruction, ProgramError> {
+    let accounts = vec![
+        AccountMeta::new(*siger, true),
+        AccountMeta::new(*auction_info, false),
+    ];
+
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data: AppInstruction::Cancel.try_to_vec().unwrap(),
     })
 }
 
@@ -151,11 +169,9 @@ pub fn buy(
     auction_info: &Pubkey,
     authority_info: &Pubkey,
     bid_info: &Pubkey,
-    bid_store_info: &Pubkey,
     auction_creator_info: &Pubkey,
     nft_store_info: &Pubkey,
     nft_return_info: &Pubkey,
-    last_bidder_info: &Pubkey,
     nft_metadata_info: &Pubkey,
     spl_token_info: &Pubkey,
     nft_creators: Vec<Pubkey>,
@@ -170,11 +186,9 @@ pub fn buy(
         AccountMeta::new(*auction_info, false),
         AccountMeta::new(*authority_info, false),
         AccountMeta::new(*bid_info, false),
-        AccountMeta::new(*bid_store_info, false),
         AccountMeta::new(*auction_creator_info, false),
         AccountMeta::new(*nft_store_info, false),
         AccountMeta::new(*nft_return_info, false),
-        AccountMeta::new(*last_bidder_info, false),
         AccountMeta::new(*nft_metadata_info, false),
         AccountMeta::new_readonly(*spl_token_info, false),
         AccountMeta::new_readonly(rent::id(), false),

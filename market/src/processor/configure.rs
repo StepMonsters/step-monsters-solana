@@ -9,7 +9,11 @@ use solana_program::{
 
 use crate::{ferror, state::*, utils::*, PREFIX};
 
-pub fn process_configure(program_id: &Pubkey, accounts: &[AccountInfo], args: ConfigureArgs) -> ProgramResult {
+pub fn process_configure(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    args: ConfigureArgs,
+) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
@@ -27,7 +31,12 @@ pub fn process_configure(program_id: &Pubkey, accounts: &[AccountInfo], args: Co
             system_info,
             signer_info,
             ConfigureData::LEN,
-            &[PREFIX.as_bytes(), program_id.as_ref(), "configure".as_bytes(), &[bump]],
+            &[
+                PREFIX.as_bytes(),
+                program_id.as_ref(),
+                "configure".as_bytes(),
+                &[bump],
+            ],
         )?;
         is_created = false;
     }
@@ -45,10 +54,6 @@ pub fn process_configure(program_id: &Pubkey, accounts: &[AccountInfo], args: Co
     config_data.authority = args.authority;
     config_data.charge_rate = args.charge_rate;
     config_data.charge_addr = args.charge_addr;
-    config_data.total_trade = 0;
-    
-    
-
     config_data.serialize(&mut &mut config_info.data.borrow_mut()[..])?;
 
     Ok(())
