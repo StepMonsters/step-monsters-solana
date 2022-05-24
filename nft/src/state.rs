@@ -10,13 +10,16 @@ use solana_program::{
 use crate::utils::try_from_slice_checked;
 
 pub const SEED_MONSTER: &str = "monster";
+pub const SEED_WHITELIST: &str = "whitelist";
 pub const MAX_MONSTER_LENGTH: usize = 1 * 4 + 4 * 5;
+pub const MAX_WHITE_LIST_LENGTH: usize = 1;
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
 pub enum Key {
     Uninitialized,
     Monster,
+    WhiteList,
 }
 
 #[repr(C)]
@@ -38,11 +41,25 @@ pub struct Monster {
     pub luck: u32,
 }
 
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
+pub struct WhiteList {
+    pub name: u8,
+}
+
 impl Monster {
     pub fn from_account_info(a: &AccountInfo) -> Result<Monster, ProgramError> {
         let monster: Monster =
             try_from_slice_checked(&a.data.borrow_mut(), Key::Monster, MAX_MONSTER_LENGTH)?;
         Ok(monster)
+    }
+}
+
+impl WhiteList {
+    pub fn from_account_info(a: &AccountInfo) -> Result<WhiteList, ProgramError> {
+        let whitelist: WhiteList =
+            try_from_slice_checked(&a.data.borrow_mut(), Key::WhiteList, MAX_WHITE_LIST_LENGTH)?;
+        Ok(whitelist)
     }
 }
 

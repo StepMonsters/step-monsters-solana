@@ -17,6 +17,10 @@ pub enum GameInstruction {
     CreateNft(),
     CreateNftData(),
     Upgrade(),
+    Merge(),
+    Burn(),
+    BurnMerge(),
+    SetWhiteList(),
 }
 
 pub fn init(

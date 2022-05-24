@@ -7,6 +7,10 @@ pub use mint_nft::*;
 pub use mint_nft_create::*;
 pub use mint_nft_create_data::*;
 pub use upgrade::*;
+pub use merge::*;
+pub use burn::*;
+pub use burn_merge::*;
+pub use set_white_list::*;
 
 use crate::instruction::*;
 
@@ -16,6 +20,10 @@ pub mod mint_nft;
 pub mod mint_nft_create;
 pub mod mint_nft_create_data;
 pub mod upgrade;
+pub mod merge;
+pub mod burn;
+pub mod burn_merge;
+pub mod set_white_list;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -41,6 +49,18 @@ pub fn process_instruction(
         }
         GameInstruction::Upgrade() => {
             process_upgrade(program_id, accounts)
+        }
+        GameInstruction::Merge() => {
+            process_merge(program_id, accounts)
+        }
+        GameInstruction::Burn() => {
+            process_burn(program_id, accounts)
+        }
+        GameInstruction::BurnMerge() => {
+            process_burn_merge(program_id, accounts)
+        }
+        GameInstruction::SetWhiteList() => {
+            process_set_white_list(program_id, accounts)
         }
     }
 }
