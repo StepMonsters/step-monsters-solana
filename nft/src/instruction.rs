@@ -16,11 +16,14 @@ pub enum GameInstruction {
     MintNft(),
     CreateNft(),
     CreateNftData(),
+
     Upgrade(),
     Merge(),
     Burn(),
     BurnMerge(),
     SetWhiteList(),
+
+    Purchase(),
 }
 
 pub fn init(
@@ -69,7 +72,7 @@ pub fn mint(
     })
 }
 
-pub fn mintNft(
+pub fn mint_nft(
     program_id: &Pubkey,
     authority: &Pubkey,
     signer: &Pubkey,
@@ -92,7 +95,7 @@ pub fn mintNft(
     })
 }
 
-pub fn createNft(
+pub fn create_nft(
     program_id: &Pubkey,
     authority: &Pubkey,
     signer: &Pubkey,

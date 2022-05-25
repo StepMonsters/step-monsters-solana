@@ -11,6 +11,7 @@ pub use merge::*;
 pub use burn::*;
 pub use burn_merge::*;
 pub use set_white_list::*;
+pub use purchase::*;
 
 use crate::instruction::*;
 
@@ -24,6 +25,7 @@ pub mod merge;
 pub mod burn;
 pub mod burn_merge;
 pub mod set_white_list;
+pub mod purchase;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -61,6 +63,9 @@ pub fn process_instruction(
         }
         GameInstruction::SetWhiteList() => {
             process_set_white_list(program_id, accounts)
+        }
+        GameInstruction::Purchase() => {
+            process_purchase(program_id, accounts)
         }
     }
 }

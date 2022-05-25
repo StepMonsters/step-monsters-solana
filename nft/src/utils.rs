@@ -233,23 +233,3 @@ pub fn spl_token_create_account<'a>(
 
     Ok(())
 }
-
-pub fn try_from_slice_checked<T: BorshDeserialize>(
-    data: &[u8],
-    data_type: Key,
-    data_size: usize,
-) -> Result<T, ProgramError> {
-    if (data[0] != data_type as u8 && data[0] != Key::Uninitialized as u8)
-        || data.len() != data_size
-    {
-        return Err(MetadataError::DataTypeMismatch.into());
-    }
-    let result: T = try_from_slice_unchecked(data)?;
-    Ok(result)
-}
-
-pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, Error> {
-    let mut data_mut = data;
-    let result = T::deserialize(&mut data_mut)?;
-    Ok(result)
-}

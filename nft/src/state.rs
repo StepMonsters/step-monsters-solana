@@ -7,8 +7,6 @@ use solana_program::{
     pubkey::Pubkey,
 };
 
-use crate::utils::try_from_slice_checked;
-
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_WHITELIST: &str = "whitelist";
 pub const MAX_MONSTER_LENGTH: usize = 1 * 4 + 4 * 5;
@@ -49,16 +47,22 @@ pub struct WhiteList {
 
 impl Monster {
     pub fn from_account_info(a: &AccountInfo) -> Result<Monster, ProgramError> {
+        if a.data_len() != MAX_MONSTER_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
         let monster: Monster =
-            try_from_slice_checked(&a.data.borrow_mut(), Key::Monster, MAX_MONSTER_LENGTH)?;
+            try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(monster)
     }
 }
 
 impl WhiteList {
     pub fn from_account_info(a: &AccountInfo) -> Result<WhiteList, ProgramError> {
+        if a.data_len() != MAX_WHITE_LIST_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
         let whitelist: WhiteList =
-            try_from_slice_checked(&a.data.borrow_mut(), Key::WhiteList, MAX_WHITE_LIST_LENGTH)?;
+            try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(whitelist)
     }
 }

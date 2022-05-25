@@ -45,17 +45,24 @@ pub struct Battle {
 
 impl Monster {
     pub fn from_account_info(a: &AccountInfo) -> Result<Monster, ProgramError> {
+        if a.data_len() != MAX_MONSTER_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
         let monster: Monster =
-            try_from_slice_checked(&a.data.borrow_mut(), Key::Monster, MAX_MONSTER_LENGTH)?;
+            try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(monster)
     }
 }
 
 impl Battle {
     pub fn from_account_info(a: &AccountInfo) -> Result<Battle, ProgramError> {
+        if a.data_len() != MAX_BATTLE_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
         let battle: Battle =
-            try_from_slice_checked(&a.data.borrow_mut(), Key::Battle, MAX_BATTLE_LENGTH)?;
+            try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(battle)
     }
 }
+
 
