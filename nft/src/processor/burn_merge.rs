@@ -14,7 +14,6 @@ use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{burn, initialize_mint, mint_to};
 
 use crate::{ferror, state::*, utils::*};
-use crate::instruction::mint;
 
 pub fn process_burn_merge(
     program_id: &Pubkey,

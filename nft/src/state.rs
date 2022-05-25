@@ -9,8 +9,10 @@ use solana_program::{
 
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_WHITELIST: &str = "whitelist";
+pub const SEED_GAME_CONFIG: &str = "game_config";
 pub const MAX_MONSTER_LENGTH: usize = 1 * 4 + 4 * 5;
 pub const MAX_WHITE_LIST_LENGTH: usize = 1;
+pub const MAX_GAME_CONFIG_LENGTH: usize = 1 * 5;
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
@@ -45,6 +47,12 @@ pub struct WhiteList {
     pub name: u8,
 }
 
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
+pub struct GameConfig {
+    pub array: [u8; 5],
+}
+
 impl Monster {
     pub fn from_account_info(a: &AccountInfo) -> Result<Monster, ProgramError> {
         if a.data_len() != MAX_MONSTER_LENGTH {
@@ -67,3 +75,13 @@ impl WhiteList {
     }
 }
 
+impl GameConfig {
+    pub fn from_account_info(a: &AccountInfo) -> Result<GameConfig, ProgramError> {
+        if a.data_len() != MAX_GAME_CONFIG_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        let game_config: GameConfig =
+            try_from_slice_unchecked(&a.data.borrow_mut())?;
+        Ok(game_config)
+    }
+}

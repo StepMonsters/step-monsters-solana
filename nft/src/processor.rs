@@ -1,17 +1,18 @@
 use borsh::BorshDeserialize;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
+pub use burn::*;
+pub use burn_merge::*;
+pub use game_config::*;
 pub use init::*;
+pub use merge::*;
 pub use mint::*;
 pub use mint_nft::*;
 pub use mint_nft_create::*;
 pub use mint_nft_create_data::*;
-pub use upgrade::*;
-pub use merge::*;
-pub use burn::*;
-pub use burn_merge::*;
-pub use set_white_list::*;
 pub use purchase::*;
+pub use set_white_list::*;
+pub use upgrade::*;
 
 use crate::instruction::*;
 
@@ -26,6 +27,7 @@ pub mod burn;
 pub mod burn_merge;
 pub mod set_white_list;
 pub mod purchase;
+pub mod game_config;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -66,6 +68,12 @@ pub fn process_instruction(
         }
         GameInstruction::Purchase() => {
             process_purchase(program_id, accounts)
+        }
+        GameInstruction::CreateArray() => {
+            process_create_array(program_id, accounts)
+        }
+        GameInstruction::UpdateArray() => {
+            process_update_array(program_id, accounts)
         }
     }
 }
