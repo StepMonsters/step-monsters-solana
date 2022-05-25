@@ -149,6 +149,13 @@ pub struct ChangePriceArgs {
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
+pub struct MakeOfferArgs {
+    /// Price of bid
+    pub price: u64,
+}
+
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
 pub struct BidData {
     pub bidder: Pubkey,
     pub amount: u64,
@@ -168,21 +175,22 @@ impl BidData {
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
-pub struct UserInfo {
-    /// begin with 0
-    pub total_trade: u64,
-
+pub struct OfferData {
+    pub offer: Pubkey,
+    pub nft: Pubkey,
+    pub nft_return: Pubkey,
+    pub price: u64,
+    pub is_canceled: bool,
+    pub is_done: bool,
 }
 
-impl UserInfo {
-    pub const LEN: usize = 8 * 5;
+impl OfferData {
+    pub const LEN: usize = 32 + 32 + 32 + 8 + 1 + 1;
 
-    pub fn from_account_info(a: &AccountInfo) -> Result<UserInfo, ProgramError> {
+    pub fn from_account_info(a: &AccountInfo) -> Result<OfferData, ProgramError> {
         if a.data_len() != Self::LEN {
             return Err(ProgramError::InvalidAccountData);
         }
         try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
     }
-
 }
-

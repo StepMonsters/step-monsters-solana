@@ -1,6 +1,6 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use crate::state::{ConfigureArgs, CreateArgs, PlaceBidArgs, SetCreatorWhitelistArgs, ChangePriceArgs};
+use crate::state::*;
 
 use solana_program::{
     instruction::{AccountMeta, Instruction},
@@ -29,6 +29,12 @@ pub enum AppInstruction {
 
     /// Cancel fixed price sale or english auction
     Cancel,
+
+    ///make offer
+    MakeOffer(MakeOfferArgs),
+
+    ///cancel offer
+    CancelOffer
 }
 
 pub fn configure(

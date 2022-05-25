@@ -21,6 +21,12 @@ pub use cancel::*;
 pub mod change_price;
 pub use change_price::*;
 
+pub mod make_offer;
+pub use make_offer::*;
+
+pub mod cancel_offer;
+pub use cancel_offer::*;
+
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -50,6 +56,14 @@ pub fn process_instruction(
         AppInstruction::Cancel => {
             msg!("Instruction: Cancel");
             process_cancel(program_id, accounts)
+        }
+        AppInstruction::MakeOffer(args) => {
+            msg!("Instruction: MakeOffer");
+            process_make_offer(program_id, accounts, args)
+        }
+        AppInstruction::CancelOffer => {
+            msg!("Instruction: CancelOffer");
+            process_cancel_offer(program_id, accounts)
         }
     }
 }

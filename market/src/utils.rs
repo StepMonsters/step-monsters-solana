@@ -67,13 +67,13 @@ pub fn assert_nft_store(
 
 pub fn assert_bid_store(
     program_id: &Pubkey,
-    auction_info: &AccountInfo,
+    offer_info: &AccountInfo,
     bid_store_info: &AccountInfo,
 ) -> Result<u8, ProgramError> {
     let path = &[
         crate::PREFIX.as_bytes(),
         program_id.as_ref(),
-        auction_info.key.as_ref(),
+        offer_info.key.as_ref(),
         "bid_store".as_bytes(),
     ];
     assert_derivation(&program_id, &bid_store_info, path)

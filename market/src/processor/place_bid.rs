@@ -4,7 +4,7 @@ use metaplex_token_metadata::state::Metadata;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
-    log, msg,
+    msg,
     program::invoke,
     program_error::ProgramError,
     pubkey::Pubkey,
@@ -21,9 +21,6 @@ pub fn process_place_bid(
     // add config_info charge_addr_info
     let charge_addr_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
-    // add user_info
-    let user_info = next_account_info(account_info_iter)?;
-    let auction_creator_user_info = next_account_info(account_info_iter)?;
     let auction_info = next_account_info(account_info_iter)?;
     let authority_info = next_account_info(account_info_iter)?;
     let bid_info = next_account_info(account_info_iter)?;
@@ -50,37 +47,9 @@ pub fn process_place_bid(
         return ferror!("invalid auction bid");
     }
 
-    assert_user_info(
-        &program_id,
-        &auction_creator_info,
-        &auction_creator_user_info,
-    )?;
-
-    let user_bump = assert_user_info(&program_id, &signer_info, &user_info)?;
     let bid_bump = assert_bid_data(&program_id, &auction_info, &signer_info, &bid_info)?;
-
     let bid_price: u64;
 
-    //create user_info
-    if user_info.data_is_empty() {
-        create_or_allocate_account_raw(
-            *program_id,
-            user_info,
-            rent_info,
-            system_info,
-            signer_info,
-            UserInfo::LEN,
-            &[
-                program_id.as_ref(),
-                signer_info.key.as_ref(),
-                "user_info".as_bytes(),
-                &[user_bump],
-            ],
-        )?;
-    }
-
-    let mut user_data = UserInfo::from_account_info(user_info)?;
-    let mut auction_user_data = UserInfo::from_account_info(auction_creator_user_info)?;
     //create bid_info
     if bid_info.data_is_empty() {
         create_or_allocate_account_raw(
@@ -195,17 +164,10 @@ pub fn process_place_bid(
     bid_data.is_done = true;
     bid_data.amount = args.price;
     bid_data.bidder = *signer_info.key;
-
-    //deal with config_data
     config_data.total_trade += fixed_price;
-    // deal with user_ info
-    user_data.total_trade += fixed_price;
-    //deal with auction creator info
-    auction_user_data.total_trade += fixed_price;
+
 
     config_data.serialize(&mut &mut config_info.data.borrow_mut()[..])?;
-    auction_user_data.serialize(&mut &mut auction_creator_user_info.data.borrow_mut()[..])?;
-    user_data.serialize(&mut &mut user_info.data.borrow_mut()[..])?;
     bid_data.serialize(&mut &mut bid_info.data.borrow_mut()[..])?;
     auction_data.last_bid = Some(bid_data);
     auction_data.serialize(&mut &mut auction_info.data.borrow_mut()[..])?;

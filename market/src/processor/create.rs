@@ -12,7 +12,7 @@ use solana_program::{
 use spl_token::state::Mint;
 
 use crate::{ferror, state::*, utils::*};
-//todo user_info low
+
 pub fn process_create(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -21,9 +21,6 @@ pub fn process_create(
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
-
-    //add user_info
-    let user_info = next_account_info(account_info_iter)?;
     let nft_creator_info = next_account_info(account_info_iter)?;
     let nft_creator_data_info = next_account_info(account_info_iter)?;
     let new_auction_info = next_account_info(account_info_iter)?; // save AuctionData, create but not init
@@ -37,7 +34,6 @@ pub fn process_create(
     let system_info = next_account_info(account_info_iter)?;
 
     // check assert
-    let user_bump = assert_user_info(&program_id, &signer_info, &user_info)?;
     assert_signer(&signer_info)?;
     assert_config(&program_id, &config_info)?;
     assert_creator_data(&program_id, &nft_creator_info, &nft_creator_data_info)?;
@@ -151,26 +147,7 @@ pub fn process_create(
         1,
     )?;
 
-    //create user_info
-    if user_info.data_is_empty() {
-        create_or_allocate_account_raw(
-            *program_id,
-            user_info,
-            rent_info,
-            system_info,
-            signer_info,
-            UserInfo::LEN,
-            &[
-                program_id.as_ref(),
-                signer_info.key.as_ref(),
-                "user_info".as_bytes(),
-                &[user_bump],
-            ],
-        )?;
-    }
 
-    let user_data = UserInfo::from_account_info(user_info)?;
-    user_data.serialize(&mut &mut user_info.data.borrow_mut()[..])?;
     auction_data.serialize(&mut &mut new_auction_info.data.borrow_mut()[..])?;
 
     Ok(())
