@@ -1,38 +1,26 @@
-use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::create_master_edition;
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program::{invoke, invoke_signed},
-    program_error::ProgramError,
+    program::invoke,
     pubkey::Pubkey,
-    system_instruction,
-    sysvar::{clock::Clock, rent::Rent, Sysvar},
 };
-use spl_associated_token_account::instruction::create_associated_token_account;
-use spl_token::instruction::{burn, initialize_mint, mint_to};
+use spl_token::instruction::burn;
 
-use crate::{ferror, state::*, utils::*};
+use crate::{utils::*};
 
 pub fn process_burn(
-    program_id: &Pubkey,
+    _: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
-    let authority_info = next_account_info(account_info_iter)?;
     let signer_info = next_account_info(account_info_iter)?;
     let mint_info = next_account_info(account_info_iter)?;
     let ata_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
-    let ass_token_program_info = next_account_info(account_info_iter)?;
-    let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
-    let size = 82;
-    let rent = &Rent::from_account_info(&rent_info)?;
-    let required_lamports = rent.minimum_balance(size);
 
     msg!("Burn");
     invoke(

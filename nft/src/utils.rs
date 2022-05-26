@@ -1,6 +1,3 @@
-use std::io::Error;
-use borsh::BorshDeserialize;
-use mpl_token_metadata::error::MetadataError;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
@@ -14,7 +11,6 @@ use solana_program::{
 };
 
 use crate::error::AppError;
-use crate::state::Key;
 
 pub fn now_timestamp() -> u64 {
     Clock::get().unwrap().unix_timestamp as u64

@@ -7,8 +7,6 @@ use solana_program::{
     sysvar::rent,
 };
 
-use crate::state::*;
-
 #[repr(C)]
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize, PartialEq)]
 pub enum GameInstruction {

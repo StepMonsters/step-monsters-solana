@@ -1,5 +1,5 @@
 use borsh::BorshDeserialize;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
+use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey};
 
 pub use burn::*;
 pub use burn_merge::*;
@@ -70,10 +70,10 @@ pub fn process_instruction(
             process_purchase(program_id, accounts)
         }
         GameInstruction::CreateArray() => {
-            process_create_array(program_id, accounts)
+            process_create_game_config(program_id, accounts)
         }
         GameInstruction::UpdateArray() => {
-            process_update_array(program_id, accounts)
+            process_update_game_config(program_id, accounts)
         }
     }
 }

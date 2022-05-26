@@ -1,22 +1,19 @@
 use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::{create_master_edition, create_master_edition_v3, create_metadata_accounts_v2};
-use mpl_token_metadata::state::Edition;
-use mpl_token_metadata::state::Key::EditionV1;
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program::{invoke, invoke_signed},
-    program_error::ProgramError,
+    program::invoke,
     pubkey::Pubkey,
     system_instruction,
-    sysvar::{clock::Clock, rent::Rent, Sysvar},
+    sysvar::{rent::Rent, Sysvar},
 };
 use solana_program::system_instruction::transfer;
 use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
 
-use crate::{ferror, state::*, utils::*};
+use crate::{state::*, utils::*};
 
 pub fn process_purchase(
     program_id: &Pubkey,
@@ -50,7 +47,7 @@ pub fn process_purchase(
                   1e9 as u64,
         ),
         &[signer_info.clone(), seller_info.clone()],
-    );
+    )?;
 
     msg!("Create Account");
     invoke(

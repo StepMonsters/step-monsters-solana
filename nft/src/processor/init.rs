@@ -1,21 +1,19 @@
-use borsh::BorshSerialize;
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program::{invoke, invoke_signed},
-    program_error::ProgramError,
+    program::invoke,
     pubkey::Pubkey,
     system_instruction,
-    sysvar::{clock::Clock, rent::Rent, Sysvar},
+    sysvar::{rent::Rent, Sysvar},
 };
 use spl_associated_token_account::instruction::create_associated_token_account;
-use spl_token::instruction::{initialize_mint, mint_to};
+use spl_token::instruction::initialize_mint;
 
-use crate::{ferror, state::*, utils::*};
+use crate::{utils::*};
 
 pub fn process_init(
-    program_id: &Pubkey,
+    _: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
