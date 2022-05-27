@@ -1,19 +1,20 @@
-use crate::{
-    error::AppError,
-};
-
+use std::io::Error;
+use borsh::BorshDeserialize;
+use mpl_token_metadata::error::MetadataError;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
     msg,
     program::{invoke, invoke_signed},
     program_error::ProgramError,
-
-    program_pack::{ Pack},
+    program_pack::Pack,
     pubkey::Pubkey,
     system_instruction,
-    sysvar::{clock::Clock,rent::Rent, Sysvar},
+    sysvar::{clock::Clock, rent::Rent, Sysvar},
 };
+
+use crate::error::AppError;
+use crate::state::Key;
 
 pub fn now_timestamp() -> u64 {
     Clock::get().unwrap().unix_timestamp as u64
@@ -231,4 +232,24 @@ pub fn spl_token_create_account<'a>(
     msg!("spl_token_create_account success");
 
     Ok(())
+}
+
+pub fn try_from_slice_checked<T: BorshDeserialize>(
+    data: &[u8],
+    data_type: Key,
+    data_size: usize,
+) -> Result<T, ProgramError> {
+    if (data[0] != data_type as u8 && data[0] != Key::Uninitialized as u8)
+        || data.len() != data_size
+    {
+        return Err(MetadataError::DataTypeMismatch.into());
+    }
+    let result: T = try_from_slice_unchecked(data)?;
+    Ok(result)
+}
+
+pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, Error> {
+    let mut data_mut = data;
+    let result = T::deserialize(&mut data_mut)?;
+    Ok(result)
 }
