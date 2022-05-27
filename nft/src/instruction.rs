@@ -10,24 +10,15 @@ use solana_program::{
 #[repr(C)]
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize, PartialEq)]
 pub enum GameInstruction {
-    Init(),
     Mint(),
-    MintNft(),
-    CreateNft(),
-    CreateNftData(),
-
+    Breed(),
     Upgrade(),
-    Merge(),
-    Burn(),
-    BurnMerge(),
-    SetWhiteList(),
-
-    Purchase(),
-    CreateArray(),
-    UpdateArray(),
+    Synthesis(),
+    CreateGameConfig(),
+    UpdateGameConfig(),
 }
 
-pub fn init(
+pub fn mint(
     program_id: &Pubkey,
     authority: &Pubkey,
     signer: &Pubkey,
@@ -46,6 +37,6 @@ pub fn init(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: GameInstruction::Init().try_to_vec().unwrap(),
+        data: GameInstruction::Mint().try_to_vec().unwrap(),
     })
 }

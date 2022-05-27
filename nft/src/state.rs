@@ -6,23 +6,9 @@ use solana_program::{
 };
 
 pub const SEED_MONSTER: &str = "monster";
-pub const SEED_WHITELIST: &str = "whitelist";
 pub const SEED_GAME_CONFIG: &str = "game_config";
 pub const MAX_MONSTER_LENGTH: usize = 1 * 5 + 4 * 6;
-pub const MAX_WHITE_LIST_LENGTH: usize = 1;
 pub const MAX_GAME_CONFIG_LENGTH: usize = 4 * 5 * 10 + 4 * 5 * 10;
-
-#[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
-pub enum Key {
-    Uninitialized,
-    Monster,
-    WhiteList,
-}
-
-#[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
-pub struct InitArgs {}
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
@@ -43,12 +29,6 @@ pub struct Monster {
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
-pub struct WhiteList {
-    pub name: u8,
-}
-
-#[repr(C)]
-#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
 pub struct GameConfig {
     pub monster_male: [[u32; 5]; 10],
     pub monster_female: [[u32; 5]; 10],
@@ -62,17 +42,6 @@ impl Monster {
         let monster: Monster =
             try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(monster)
-    }
-}
-
-impl WhiteList {
-    pub fn from_account_info(a: &AccountInfo) -> Result<WhiteList, ProgramError> {
-        if a.data_len() != MAX_WHITE_LIST_LENGTH {
-            return Err(ProgramError::InvalidAccountData);
-        }
-        let whitelist: WhiteList =
-            try_from_slice_unchecked(&a.data.borrow_mut())?;
-        Ok(whitelist)
     }
 }
 

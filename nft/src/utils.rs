@@ -1,3 +1,6 @@
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hasher;
+
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
@@ -228,4 +231,20 @@ pub fn spl_token_create_account<'a>(
     msg!("spl_token_create_account success");
 
     Ok(())
+}
+
+pub fn get_random(seed: u8) -> Result<u64, ProgramError> {
+    let clock = Clock::get()?;
+    let mut hasher = DefaultHasher::new();
+    hasher.write_u8(seed);
+    hasher.write_u64(clock.slot);
+    hasher.write_i64(clock.unix_timestamp);
+    let mut random_value: [u8; 8] = [0u8; 8];
+    random_value.copy_from_slice(&hasher.finish().to_le_bytes()[..8]);
+    Ok(u64::from_le_bytes(random_value))
+}
+
+pub fn get_random_u8(seed: u8, divisor: u64) -> Result<u8, ProgramError> {
+    let random = get_random(seed)?;
+    Ok((random % divisor) as u8)
 }
