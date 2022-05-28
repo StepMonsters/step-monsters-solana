@@ -1,23 +1,20 @@
 use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::{create_master_edition, create_master_edition_v3, create_metadata_accounts_v2};
-use mpl_token_metadata::state::Edition;
-use mpl_token_metadata::state::Key::EditionV1;
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program::{invoke, invoke_signed},
-    program_error::ProgramError,
+    program::invoke,
     pubkey::Pubkey,
     system_instruction,
-    sysvar::{clock::Clock, rent::Rent, Sysvar},
+    sysvar::{rent::Rent, Sysvar},
 };
 use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
 
-use crate::{ferror, state::*, utils::*};
+use crate::{state::*, utils::*};
 
-pub fn process_mint_nft_create_data(
+pub fn process_breed(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
@@ -36,11 +33,16 @@ pub fn process_mint_nft_create_data(
     let edition_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
 
+    let father_info = next_account_info(account_info_iter)?;
+    let mother_info = next_account_info(account_info_iter)?;
+
     assert_signer(&signer_info)?;
     let size = 82;
     let rent = &Rent::from_account_info(&rent_info)?;
     let required_lamports = rent.minimum_balance(size);
 
+    let father = Monster::from_account_info(father_info)?;
+    let mother = Monster::from_account_info(mother_info)?;
 
     msg!("Create Account");
     invoke(
@@ -199,7 +201,7 @@ pub fn process_mint_nft_create_data(
     monster.breed = 1;
 
     monster.hp = 100;
-    monster.attack = 100;
+    monster.attack = father.attack + mother.attack;
     monster.defense = 100;
     monster.agility = 100;
     monster.luck = 100;
