@@ -50,7 +50,7 @@ pub fn process_make_offer(
 
     let mut offer_data = OfferData::from_account_info(&new_offer_info)?;
 
-    offer_data.offer = *signer_info.key;
+    offer_data.offerer = *signer_info.key;
     offer_data.nft = *nft_info.key;
     offer_data.nft_return = *nft_return_info.key;
     offer_data.price = args.price;

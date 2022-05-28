@@ -27,7 +27,7 @@ pub fn process_cancel_offer(
     assert_signer(&signer_info)?;
 
     let mut offer_data = OfferData::from_account_info(&new_offer_info)?;
-    assert_eq_pubkey(&signer_info, &offer_data.offer)?;
+    assert_eq_pubkey(&signer_info, &offer_data.offerer)?;
     assert_eq_pubkey(&nft_info, &offer_data.nft)?;
 
     if offer_data.is_done || offer_data.is_canceled {

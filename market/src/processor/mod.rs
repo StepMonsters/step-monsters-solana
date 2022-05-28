@@ -27,6 +27,9 @@ pub use make_offer::*;
 pub mod cancel_offer;
 pub use cancel_offer::*;
 
+pub mod accept_offer;
+pub use accept_offer::*;
+
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -64,6 +67,10 @@ pub fn process_instruction(
         AppInstruction::CancelOffer => {
             msg!("Instruction: CancelOffer");
             process_cancel_offer(program_id, accounts)
+        }
+        AppInstruction::AcceptOffer => {
+            msg!("Instruction: AcceptOffer");
+            process_accept_offer(program_id, accounts)
         }
     }
 }

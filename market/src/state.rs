@@ -176,7 +176,7 @@ impl BidData {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
 pub struct OfferData {
-    pub offer: Pubkey,
+    pub offerer: Pubkey,
     pub nft: Pubkey,
     pub nft_return: Pubkey,
     pub price: u64,

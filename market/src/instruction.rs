@@ -14,27 +14,23 @@ use solana_program::{
 pub enum AppInstruction {
     /// Setting auction global configuration
     Configure(ConfigureArgs),
-
     /// Set whitelist of nft creator, then those can call `Create`
     SetCreatorWhitelist(SetCreatorWhitelistArgs),
-
     /// Create fixed price sale or english auction
     Create(CreateArgs),
-
     /// Bid fixed price sale or english auction
     PlaceBid(PlaceBidArgs),
-
     ///change price
     ChangePrice(ChangePriceArgs),
-
     /// Cancel fixed price sale or english auction
     Cancel,
-
     ///make offer
     MakeOffer(MakeOfferArgs),
-
     ///cancel offer
-    CancelOffer
+    CancelOffer,
+    ///accept offer
+    AcceptOffer
+
 }
 
 pub fn configure(
