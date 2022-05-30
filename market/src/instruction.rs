@@ -30,7 +30,6 @@ pub enum AppInstruction {
     CancelOffer,
     ///accept offer
     AcceptOffer
-
 }
 
 pub fn configure(
@@ -83,7 +82,6 @@ pub fn create(
     program_id: &Pubkey,
     siger: &Pubkey,
     config_info: &Pubkey,
-    user_info: &Pubkey,
     creator_info: &Pubkey,
     creator_data_info: &Pubkey,
     new_auction_info: &Pubkey,
@@ -98,7 +96,6 @@ pub fn create(
     let accounts = vec![
         AccountMeta::new(*siger, true),
         AccountMeta::new(*config_info, false),
-        AccountMeta::new(*user_info, false),
         AccountMeta::new(*creator_info, false),
         AccountMeta::new(*creator_data_info, false),
         AccountMeta::new(*new_auction_info, true),
@@ -119,10 +116,11 @@ pub fn create(
     })
 }
 
-pub fn change_price(
+pub fn create_change_price(
     program_id: &Pubkey,
     siger: &Pubkey,
     auction_info: &Pubkey,
+    args: ChangePriceArgs,
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
         AccountMeta::new(*siger, true),
@@ -132,7 +130,7 @@ pub fn change_price(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: AppInstruction::Cancel.try_to_vec().unwrap(),
+        data: AppInstruction::ChangePrice(args).try_to_vec().unwrap(),
     })
 }
 
@@ -166,8 +164,6 @@ pub fn buy(
     siger: &Pubkey,
     charge_addr_info: &Pubkey,
     config_info: &Pubkey,
-    user_info: &Pubkey,
-    auction_creator_user_info: &Pubkey,
     auction_info: &Pubkey,
     authority_info: &Pubkey,
     bid_info: &Pubkey,
@@ -183,8 +179,6 @@ pub fn buy(
         AccountMeta::new(*siger, true),
         AccountMeta::new(*charge_addr_info, false),
         AccountMeta::new(*config_info, false),
-        AccountMeta::new(*user_info, false),
-        AccountMeta::new(*auction_creator_user_info, false),
         AccountMeta::new(*auction_info, false),
         AccountMeta::new(*authority_info, false),
         AccountMeta::new(*bid_info, false),
@@ -204,5 +198,96 @@ pub fn buy(
         program_id: *program_id,
         accounts,
         data: AppInstruction::PlaceBid(args).try_to_vec().unwrap(),
+    })
+}
+
+pub fn create_make_offer(
+    program_id: &Pubkey,
+    siger: &Pubkey,
+    nft_info: &Pubkey,
+    nft_return_info: &Pubkey,
+    new_offer_info: &Pubkey,
+    bid_store_info: &Pubkey,
+    args: MakeOfferArgs,
+) -> Result<Instruction, ProgramError> {
+    let accounts = vec![
+        AccountMeta::new(*siger, true),
+        AccountMeta::new(*nft_info, false),
+        AccountMeta::new(*nft_return_info, false),
+        AccountMeta::new(*new_offer_info, false),
+        AccountMeta::new(*bid_store_info, false),
+        AccountMeta::new_readonly(rent::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data: AppInstruction::MakeOffer(args).try_to_vec().unwrap(),
+    })
+}
+
+pub fn create_cancel_offer(
+    program_id: &Pubkey,
+    siger: &Pubkey,
+    nft_info: &Pubkey,
+    nft_return_info: &Pubkey,
+    offer_info: &Pubkey,
+    bid_store_info: &Pubkey,
+) -> Result<Instruction, ProgramError> {
+    let accounts = vec![
+        AccountMeta::new(*siger, true),
+        AccountMeta::new(*nft_info, false),
+        AccountMeta::new(*nft_return_info, false),
+        AccountMeta::new(*offer_info, false),
+        AccountMeta::new(*bid_store_info, false),
+        AccountMeta::new_readonly(rent::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data: AppInstruction::CancelOffer.try_to_vec().unwrap(),
+    })
+}
+
+pub fn create_accept_offer(
+    program_id: &Pubkey,
+    siger: &Pubkey,
+    config_info: &Pubkey,
+    charge_addr_info: &Pubkey,
+    nft_account_info: &Pubkey,
+    nft_return_info: &Pubkey,
+    nft_metadata_info: &Pubkey,
+    offerer_info: &Pubkey,
+    new_offer_info: &Pubkey,
+    bid_store_info: &Pubkey,
+    spl_token_info: &Pubkey,
+    nft_creators: Vec<Pubkey>,
+) -> Result<Instruction, ProgramError> {
+    let mut accounts = vec![
+        AccountMeta::new(*siger, true),
+        AccountMeta::new(*config_info, false),
+        AccountMeta::new(*charge_addr_info, false),
+        AccountMeta::new(*nft_account_info, false),
+        AccountMeta::new(*nft_return_info, false),
+        AccountMeta::new(*nft_metadata_info, false),
+        AccountMeta::new(*offerer_info, false),
+        AccountMeta::new(*new_offer_info, false),
+        AccountMeta::new(*bid_store_info, false),
+        AccountMeta::new_readonly(*spl_token_info, false),
+        AccountMeta::new_readonly(rent::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    for creator in nft_creators.iter() {
+        accounts.push(AccountMeta::new(*creator, false))
+    }
+
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data: AppInstruction::AcceptOffer.try_to_vec().unwrap(),
     })
 }

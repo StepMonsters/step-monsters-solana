@@ -8,18 +8,22 @@ program_id:
 pub enum AppInstruction {
     /// Setting auction global configuration
     Configure(ConfigureArgs),
-
     /// Set whitelist of nft creator, then those can call `Create`
     SetCreatorWhitelist(SetCreatorWhitelistArgs),
-
     /// Create fixed price sale or english auction
     Create(CreateArgs),
-
     /// Bid fixed price sale or english auction
     PlaceBid(PlaceBidArgs),
-
+    ///change price
+    ChangePrice(ChangePriceArgs),
     /// Cancel fixed price sale or english auction
     Cancel,
+    ///make offer
+    MakeOffer(MakeOfferArgs),
+    ///cancel offer
+    CancelOffer,
+    ///accept offer
+    AcceptOffer
 }
 ```
 ### Create
@@ -29,8 +33,7 @@ pub enum AppInstruction {
 | AccountInfo      | is_signer | is_writable |                                                           |
 | ---------------- | --------- | ----------- | --------------------------------------------------------- |
 | signer           | **true**  | false       | 交易发起者，即钱包地址                                    |
-| config           | false     | false       | ['market', program_id, 'configure']       
-| user_info        | false     | **true**    | [program_id, user, 'user_info']              
+| config           | false     | false       | ['market', program_id, 'configure']                  
 | nft_creator      | false     | false       | nft creator，通常是钱包地址                               |
 | nft_creator_data | false     | false       | ['market', program_id, nft_creator,'creator_whitelist'] |
 | auction          | **true**  | **true**    | 新建地址                                                  |
@@ -62,9 +65,7 @@ pub struct CreateArgs {
 | ------------ | --------- | ----------- | ------------------------------------------------------------ |
 | signer       | **true**  | false       | 同上                                                         |
 | charge_addr  | false     | **true**    | 同上                                                         |
-| config_info  | false     | **true**    |['market', program_id, 'configure']
-| user_info    | false     | **true**        | [program_id, signer 'user_info']         
-| auction_creator_user_info    | false     | **true**        | [program_id, auction_creator 'user_info']         
+| config_info  | false     | **true**    |['market', program_id, 'configure']              
 | auction      | false     | **true**    | 同上                                                         |
 | authority    | false     | false       | 同上                                                         |
 | bid_info     | false     | **true**    | ['market', program_id, auction,signer,'bid']               |
@@ -97,6 +98,11 @@ pub struct PlaceBidArgs {
 
 ```
 指令下标：4
+
+指令参数：
+pub struct ChangePriceArgs {
+    pub price: u64,             -- 参拍价格，单位：lamports
+}
 ```
 
 ### Cancel
@@ -115,19 +121,89 @@ pub struct PlaceBidArgs {
 ```
 指令下标：5
 ```
+
+### MakeOffer
+
+竞价
+
+| AccountInfo  | is_signer | is_writable |                                                              |
+| ------------ | --------- | ----------- | ------------------------------------------------------------ |
+| signer       | **true**  | false       | 同上                                                         |
+| nft      | false     | false    | 同上                                                         |
+| nft_return   | false     | **true**    | 用于接收返回nft的地址；owner为signer |
+| offer   | false     | **true**    | 新的offer  keypair new |
+| bid_store   | false     | **true**    | ['market', program_id, offer,'bid_store'] |
+| spl_token_id | false     | false       | 同上                                                         |
+
+```
+指令下标：6
+
+指令参数：
+pub struct MakeOfferArgs {
+    /// Price of offer
+    pub price: u64,
+}
+
+```
+
+
+### CancelOffer
+
+取消竞价
+
+| AccountInfo  | is_signer | is_writable |                                                              |
+| ------------ | --------- | ----------- | ------------------------------------------------------------ |
+| signer       | **true**  | false       | 同上                                                         |
+| nft      | false     | false    | 同上                                                         |
+| nft_return   | false     | **true**    | 用于接收返回nft的地址；owner为signer |
+| offer   | false     | **true**    | offer  |
+| bid_store   | false     | **true**    | ['market', program_id, offer,'bid_store'] |
+| spl_token_id | false     | false       | 同上                                                         |
+
+```
+指令下标：7
+```
+
+
+### AcceptOffer
+
+接受竞价
+
+| AccountInfo  | is_signer | is_writable |                                                              |
+| ------------ | --------- | ----------- | ------------------------------------------------------------ |
+| signer       | **true**  | false       | 同上                                                         |
+| config_info  | false     | **true**    |['market', program_id, 'configure']     
+| charge_addr  | false     | **true**    | 同上                                                         |
+| nft_account_info      | false     | **true**   | 卖方的nft account                    |
+| nft_return_info    | false     | **true**       | 接买方的nft account                                |
+| nft_metadata | false     | false       | 同上                                                         |
+| offerer    | false     | **true**    | 买方钱包地址                                                   |
+| offer        | false     | **true**    | offer account             |
+| bid_store   | false     | **true**    | ['market', program_id, offer,'bid_store'] |
+| spl_token_id | false     | false       | 同上                                                         |
+| rent         | false     | false       | 同上                                                         |
+| system       | false     | false       | 系统 system                                                  |
+| nft_creators_arr       | false     | false       | nft 的创建者们                                     |
+
+
+```
+指令下标：8
+```
 ## 接口查询
 
 ### 查询全局配置
 
 ```
-数据地址：Create 指令中 config
-
 数据结构：
-pub struct ConfigureArgs {
-    pub is_initialized: bool,    -- false 不允许创建拍卖
-    pub authority: Pubkey,       -- 管理员地址
-    pub charge_rate: u64,        -- 手续费率，放大10000倍
-    pub charge_addr: Pubkey,     -- 收取手续费地址的地址
+pub struct ConfigureData {
+    /// Initialized state.
+    pub is_initialized: bool,
+    /// Contract admin
+    pub authority: Pubkey,
+    /// Charge rate (* 10000) of auction deal
+    pub charge_rate: u64,
+    /// Charge address 
+    pub charge_addr: Pubkey,
 }
 ```
 
@@ -145,22 +221,42 @@ pub struct SetCreatorWhitelistArgs {
 }
 ```
 
+### 查询auction 数据
+
 ```
 数据结构：
-pub struct ConfigureData {
-    /// Initialized state.
-    pub is_initialized: bool,
-    /// Contract admin
-    pub authority: Pubkey,
-    /// Charge rate (* 10000) of auction deal
-    pub charge_rate: u64,
-    /// Charge address 
-    pub charge_addr: Pubkey,
+pub struct AuctionData {
+    pub is_init: bool,
+    /// creator
+    pub creator: Pubkey,
+    /// NFT mint address
+    pub nft_mint: Pubkey,
+    /// NFT store by auction
+    pub nft_store: Pubkey,
+    /// fixed price sale
+    /// Price of sale
+    pub price: Option<u64>,
+    /// Auction begin at unix timestamp
+    pub begin_ts: Option<u64>,
+    /// Auction duration, unix seconds
+    pub duration: Option<u64>,
+    /// fixed price    : be true after creator cancel or claim token
+    pub is_claim: bool,
+    /// Last bid
+    pub last_bid: Option<BidData>,
 }
 ```
+### 查询offer 数据
+
 ```
 数据结构：
-pub struct UserInfo {
-    pub total_trade: u64,     --总交易量
+pub struct OfferData {
+    pub offerer: Pubkey,
+    pub nft: Pubkey,
+    pub nft_return: Pubkey,
+    pub price: u64,
+    pub is_canceled: bool,
+    pub is_done: bool,
 }
+
 ```

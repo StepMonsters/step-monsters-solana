@@ -19,8 +19,6 @@ pub struct ConfigureArgs {
     pub charge_rate: u64,
     /// Charge address with mint of WSOL
     pub charge_addr: Pubkey,
-    /// team address
-    pub team_addr: Pubkey,
 }
 
 // pub type ConfigureData = ConfigureArgs;
@@ -95,7 +93,6 @@ pub struct CreateArgs {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
 pub struct AuctionData {
-
     pub is_init: bool,
     /// creator
     pub creator: Pubkey,
