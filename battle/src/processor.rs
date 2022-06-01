@@ -5,6 +5,15 @@ pub use battle::*;
 
 use crate::instruction::*;
 
+pub mod configure;
+pub use configure::*;
+
+pub mod mint;
+pub use mint::*;
+
+pub mod hatch;
+pub use hatch::*;
+
 pub mod battle;
 
 pub fn process_instruction(
@@ -14,6 +23,16 @@ pub fn process_instruction(
 ) -> ProgramResult {
     let instruction = GameInstruction::try_from_slice(input)?;
     match instruction {
+        GameInstruction::Configure(args) => {
+            msg!("Instruction: Configure");
+            process_configure(program_id, accounts, args)
+        }
+        GameInstruction::Mint => {
+            process_mint(program_id, accounts)
+        }
+        GameInstruction::Hatch => {
+            process_hatch(program_id, accounts)
+        }
         GameInstruction::Battle() => {
             process_battle(program_id, accounts)
         }
