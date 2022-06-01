@@ -226,6 +226,7 @@ pub struct SetCreatorWhitelistArgs {
 ```
 数据结构：
 pub struct AuctionData {
+    pub timestamp: u64,
     pub is_init: bool,
     /// creator
     pub creator: Pubkey,
@@ -251,6 +252,7 @@ pub struct AuctionData {
 ```
 数据结构：
 pub struct OfferData {
+    pub timestamp: u64,
     pub offerer: Pubkey,
     pub nft: Pubkey,
     pub nft_return: Pubkey,

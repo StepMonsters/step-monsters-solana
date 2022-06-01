@@ -49,7 +49,9 @@ pub fn process_make_offer(
     )?;
 
     let mut offer_data = OfferData::from_account_info(&new_offer_info)?;
-
+    let now_ts = now_timestamp();
+    let index = now_ts / 86400;
+    offer_data.timestamp = index * 86400; //easy to get daily offer_data
     offer_data.offerer = *signer_info.key;
     offer_data.nft = *nft_info.key;
     offer_data.nft_return = *nft_return_info.key;

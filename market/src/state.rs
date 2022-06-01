@@ -93,6 +93,7 @@ pub struct CreateArgs {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
 pub struct AuctionData {
+    pub timestamp: u64,
     pub is_init: bool,
     /// creator
     pub creator: Pubkey,
@@ -114,7 +115,7 @@ pub struct AuctionData {
 }
 
 impl AuctionData {
-    pub const LEN: usize = 1 + 32 * 3 + 9 * 3 + 1 + (BidData::LEN + 1);
+    pub const LEN: usize = 8 + 1 + 32 * 3 + 9 * 3 + 1 + (BidData::LEN + 1);
 
     pub fn from_account_info(a: &AccountInfo) -> Result<AuctionData, ProgramError> {
         if a.data_len() != Self::LEN {
@@ -173,6 +174,7 @@ impl BidData {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
 pub struct OfferData {
+    pub timestamp: u64,
     pub offerer: Pubkey,
     pub nft: Pubkey,
     pub nft_return: Pubkey,
@@ -182,7 +184,7 @@ pub struct OfferData {
 }
 
 impl OfferData {
-    pub const LEN: usize = 32 + 32 + 32 + 8 + 1 + 1;
+    pub const LEN: usize = 8 + 32 + 32 + 32 + 8 + 1 + 1;
 
     pub fn from_account_info(a: &AccountInfo) -> Result<OfferData, ProgramError> {
         if a.data_len() != Self::LEN {
