@@ -1,9 +1,11 @@
 use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::{create_master_edition, create_master_edition_v3, create_metadata_accounts_v2};
+use mpl_token_metadata::instruction::{
+    create_master_edition, create_master_edition_v3, create_metadata_accounts_v2,
+};
 use mpl_token_metadata::state::Edition;
 use mpl_token_metadata::state::Key::EditionV1;
 use solana_program::{
-    account_info::{AccountInfo, next_account_info},
+    account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     msg,
     program::{invoke, invoke_signed},
@@ -12,22 +14,27 @@ use solana_program::{
     system_instruction,
     sysvar::{clock::Clock, rent::Rent, Sysvar},
 };
-use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
+use step_monster_nft::{
+    state::*,
+    instruction::mint
+};
 
 use crate::{ferror, state::*, utils::*};
 
 pub fn process_battle(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
+    args: BattleArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let authority_info = next_account_info(account_info_iter)?;
     let signer_info = next_account_info(account_info_iter)?;
+    let admin_info = next_account_info(account_info_iter)?; //admin signer
     let mint_info = next_account_info(account_info_iter)?;
     let ata_info = next_account_info(account_info_iter)?;
+    let nft_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
-    let ass_token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
@@ -39,25 +46,16 @@ pub fn process_battle(
     let monster_info_defender = next_account_info(account_info_iter)?;
     let battle_info = next_account_info(account_info_iter)?;
 
+    assert_signer(&admin_info)?;
     assert_signer(&signer_info)?;
-    let size = 82;
-    let rent = &Rent::from_account_info(&rent_info)?;
-    let required_lamports = rent.minimum_balance(size);
 
     msg!("Create Battle Info");
     let bump_seed = assert_derivation(
         program_id,
         battle_info,
-        &[
-            SEED_BATTLE.as_bytes(),
-            program_id.as_ref(),
-        ],
+        &[SEED_BATTLE.as_bytes(), program_id.as_ref()],
     )?;
-    let monster_seeds = &[
-        SEED_BATTLE.as_bytes(),
-        program_id.as_ref(),
-        &[bump_seed],
-    ];
+    let monster_seeds = &[SEED_BATTLE.as_bytes(), program_id.as_ref(), &[bump_seed]];
     create_or_allocate_account_raw(
         *program_id,
         battle_info,
@@ -68,8 +66,8 @@ pub fn process_battle(
         monster_seeds,
     )?;
 
-    let mut attacker = Monster::from_account_info(monster_info_attacker)?;
-    let mut defender = Monster::from_account_info(monster_info_defender)?;
+    let attacker = Monster::from_account_info(monster_info_attacker)?;
+    let defender = Monster::from_account_info(monster_info_defender)?;
 
     let mut battle = Battle::from_account_info(battle_info)?;
     if attacker.attack == defender.defense {
@@ -79,6 +77,27 @@ pub fn process_battle(
     } else {
         battle.winner = 2;
     }
+    //after battle logic do invoke mint_nft
+    invoke(
+        &mint(
+            &nft_program_info.key,
+            &signer_info.key,
+            &signer_info.key,
+            &mint_info.key,
+            &token_program_info.key,
+        )?,
+        &[
+            authority_info.clone(),
+            mint_info.clone(),
+            rent_info.clone(),
+            nft_program_info.clone(),
+            token_program_info.clone(),
+            ata_info.clone(),
+        ],
+    )?;
+
+    //if need hatch then invoke hatch
+
     battle.serialize(&mut *battle_info.try_borrow_mut_data()?)?;
 
     Ok(())

@@ -20,35 +20,17 @@ pub enum Key {
 }
 
 #[repr(C)]
-#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
-pub struct Monster {
-    pub level: u8,
-    pub gender: u8,
-    pub race: u8,
-    pub breed: u8,
-
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct BattleArgs {
     pub hp: u32,
-    pub attack: u32,
     pub defense: u32,
-    pub agility: u32,
-    pub luck: u32,
+    pub attact: u32,
 }
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
 pub struct Battle {
     pub winner: u8,
-}
-
-impl Monster {
-    pub fn from_account_info(a: &AccountInfo) -> Result<Monster, ProgramError> {
-        if a.data_len() != MAX_MONSTER_LENGTH {
-            return Err(ProgramError::InvalidAccountData);
-        }
-        let monster: Monster =
-            try_from_slice_unchecked(&a.data.borrow_mut())?;
-        Ok(monster)
-    }
 }
 
 impl Battle {
