@@ -133,6 +133,7 @@ pub fn process_create(
 
     let index = now_ts / 86400;
     auction_data.timestamp = index * 86400; //easy to get daily auction_data
+    auction_data.is_init = true;
     auction_data.creator = *signer_info.key;
     auction_data.nft_mint = *nft_mint_info.key;
     auction_data.nft_store = *nft_store_info.key;
