@@ -17,13 +17,15 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
     let creator_info = next_account_info(account_info_iter)?; // nft creator: wallet
     let mint_info = next_account_info(account_info_iter)?;
+    let metadata_info = next_account_info(account_info_iter)?;
+    let edition_info = next_account_info(account_info_iter)?;
+    
+    let metadata_program_info = next_account_info(account_info_iter)?;    
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
-    let metadata_program_info = next_account_info(account_info_iter)?;
-    let metadata_info = next_account_info(account_info_iter)?;
-    let edition_info = next_account_info(account_info_iter)?;
+    
 
     assert_signer(&signer_info)?;
     assert_config(&program_id, &config_info)?;
