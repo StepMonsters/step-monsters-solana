@@ -76,7 +76,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
             *mint_info.key,
             *signer_info.key,
             *signer_info.key,
-            *signer_info.key,
+            *pda_creator_info.key, //pda must be signer
             config_data.name,
             config_data.symbol,
             config_data.uri,
@@ -106,7 +106,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
             *metadata_program_info.key,
             *edition_info.key,
             *mint_info.key,
-            *signer_info.key,
+            *pda_creator_info.key,
             *signer_info.key,
             *metadata_info.key,
             *signer_info.key,
