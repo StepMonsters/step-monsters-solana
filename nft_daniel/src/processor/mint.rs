@@ -95,6 +95,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
             token_program_info.clone(),
             system_info.clone(),
             rent_info.clone(),
+            pda_creator_info.clone(),
         ],
         &[&pda_seed],
     )?;
@@ -120,6 +121,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
             token_program_info.clone(),
             system_info.clone(),
             rent_info.clone(),
+            pda_creator_info.clone(),
         ],
         &[&pda_seed],
     )?;
