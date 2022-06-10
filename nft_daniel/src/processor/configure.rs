@@ -54,6 +54,7 @@ pub fn process_configure(
     config_data.is_initialized = args.is_initialized;
     config_data.authority = args.authority;
     config_data.creator = args.creator;
+    config_data.fee_recevier = args.fee_recevier;
     config_data.price = args.price;
     config_data.fee = args.fee;
     config_data.name = args.name;

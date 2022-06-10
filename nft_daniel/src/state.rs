@@ -71,6 +71,8 @@ pub struct ConfigureArgs {
     pub authority: Pubkey,
     /// creator
     pub creator: Pubkey,
+    /// fee_recevier
+    pub fee_recevier: Pubkey,
     /// nft price
     pub price: u64,
     /// seller fee
@@ -86,7 +88,7 @@ pub struct ConfigureArgs {
 pub type ConfigureData = ConfigureArgs;
 
 impl ConfigureData {
-    pub const LEN: usize = 1 + 32 + 32 + 8 + 4 + 32 + 10 + 200;
+    pub const LEN: usize = 1 + 32 + 32 + 32 + 8 + 4 + 32 + 10 + 200;
 
     pub fn from_account_info(a: &AccountInfo) -> Result<ConfigureData, ProgramError> {
         if a.data_len() != Self::LEN {
