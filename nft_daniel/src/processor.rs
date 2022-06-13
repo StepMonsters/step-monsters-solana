@@ -33,7 +33,7 @@ pub fn process_instruction(
             process_hatch(program_id, accounts)
         }
         GameInstruction::Battle => {
-            process_hatch(program_id, accounts)
+            process_battle(program_id, accounts)
         }
     }
 }
