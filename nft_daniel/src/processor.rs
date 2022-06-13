@@ -12,6 +12,9 @@ pub use mint::*;
 pub mod hatch;
 pub use hatch::*;
 
+pub mod battle;
+pub use battle::*;
+
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -27,6 +30,9 @@ pub fn process_instruction(
             process_mint(program_id, accounts)
         }
         GameInstruction::Hatch => {
+            process_hatch(program_id, accounts)
+        }
+        GameInstruction::Battle => {
             process_hatch(program_id, accounts)
         }
     }
