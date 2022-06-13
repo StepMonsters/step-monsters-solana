@@ -3,13 +3,14 @@ use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     msg,
+    program_error::ProgramError,
     program::{invoke, invoke_signed},
     pubkey::Pubkey,
     system_instruction,
     sysvar,
 };
 
-use crate::{state::*, utils::*};
+use crate::{state::*, utils::*, ferror};
 
 pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
@@ -26,7 +27,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
-    
+    assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
     assert_eq_pubkey(&token_program_info, &spl_token::id())?;
     assert_eq_pubkey(&rent_info, &sysvar::rent::id())?;
     assert_eq_pubkey(&system_info, &solana_program::system_program::id())?;
@@ -41,20 +42,12 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
         &[pda_bump],
     ];
     
-    // if pda_creator_info.data_is_empty() {
-    //     create_or_allocate_account_raw(
-    //         *program_id,
-    //         pda_creator_info,
-    //         rent_info,
-    //         system_info,
-    //         signer_info,
-    //         ConfigureData::LEN,
-    //         &pda_seed,
-    //     )?;
-    // }
-
     let config_data = ConfigureData::from_account_info(config_info)?;
     assert_eq_pubkey(&fee_recevier_info, &config_data.fee_recevier)?;
+
+    if !config_data.is_initialized {
+        return ferror!("invalid mint state");
+    }
 
     // mint fee
     if config_data.price > 0 {
