@@ -13,9 +13,9 @@ pub fn process_instruction(
 ) -> ProgramResult {
     let instruction = GameInstruction::try_from_slice(input)?;
     match instruction {
-        GameInstruction::Battle(args) => {
+        GameInstruction::Battle => {
             msg!("Instruction: Battle");
-            process_battle(program_id, accounts, args)
+            process_battle(program_id, accounts)
         }
     }
 }

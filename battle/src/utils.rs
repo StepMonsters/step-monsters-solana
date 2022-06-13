@@ -50,10 +50,6 @@ pub fn assert_derivation(
     Ok(bump)
 }
 
-pub fn assert_config(program_id: &Pubkey, account: &AccountInfo) -> Result<u8, ProgramError> {
-    let path = &[SEED_BATTLE.as_bytes(), program_id.as_ref(), "configure".as_bytes()];
-    assert_derivation(&program_id, &account, path)
-}
 
 
 pub fn assert_signer(account_info: &AccountInfo) -> ProgramResult {
@@ -80,17 +76,6 @@ pub fn get_random_u8(seed: u8, divisor: u64) -> Result<u8, ProgramError> {
     Ok((random % divisor) as u8)
 }
 
-pub fn assert_pda_creator(
-    program_id: &Pubkey,
-    pda_creator_info: &AccountInfo,
-) -> Result<u8, ProgramError> {
-    let path = &[
-        SEED_BATTLE.as_bytes(),
-        program_id.as_ref(),
-        "pda_creator".as_bytes(),
-    ];
-    assert_derivation(&program_id, &pda_creator_info, path)
-}
 
 pub struct TokenTransferParams<'a: 'b, 'b> {
     /// source
@@ -222,19 +207,7 @@ pub fn spl_token_create_account<'a>(
     Ok(())
 }
 
-pub fn try_from_slice_checked<T: BorshDeserialize>(
-    data: &[u8],
-    data_type: Key,
-    data_size: usize,
-) -> Result<T, ProgramError> {
-    if (data[0] != data_type as u8 && data[0] != Key::Uninitialized as u8)
-        || data.len() != data_size
-    {
-        return Err(MetadataError::DataTypeMismatch.into());
-    }
-    let result: T = try_from_slice_unchecked(data)?;
-    Ok(result)
-}
+
 
 pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, Error> {
     let mut data_mut = data;

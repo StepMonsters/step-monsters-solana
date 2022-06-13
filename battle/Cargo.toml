@@ -13,13 +13,13 @@ test-bpf = []
 [dependencies]
 num-derive = "0.3"
 arrayref = "0.3.6"
-solana-program = "1.10.17"
+solana-program = "1.10.24"
 spl-token = { version = "3.3.0", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "1.0.5", features = ["no-entrypoint"] }
 thiserror = "~1.0"
 borsh = "~0.9.2"
 mpl-token-metadata = { version = "1.2.5", features = ["no-entrypoint"] }
-step_monster_nft = { path = "../nft", features = [ "no-entrypoint" ], version="0.1.0"  }
+nft_daniel = { path = "../nft_daniel", features = [ "no-entrypoint" ], version="0.1.0"  }
 
 [lib]
 crate-type = ["cdylib", "lib"]
