@@ -104,3 +104,27 @@ impl ConfigureData {
 }
 
 
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct AddNPCArgs {
+    pub npc_id: u32,
+    pub hp: u32,
+    pub attack: u32,
+    pub defense: u32,
+}
+
+pub type NPCMonsterData = AddNPCArgs;
+
+impl NPCMonsterData {
+    pub const LEN: usize = 4 + 4 + 4 + 4;
+
+    pub fn from_account_info(a: &AccountInfo) -> Result<NPCMonsterData, ProgramError> {
+        if a.data_len() != Self::LEN {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
+    }
+
+}
+
+

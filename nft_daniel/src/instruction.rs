@@ -13,6 +13,7 @@ use crate::state::*;
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize, PartialEq)]
 pub enum GameInstruction {
     Configure(ConfigureArgs),
+    AddNpc(AddNPCArgs),
     Mint,
     Hatch,
     Battle,

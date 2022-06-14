@@ -15,6 +15,9 @@ pub use hatch::*;
 pub mod battle;
 pub use battle::*;
 
+pub mod add_npc;
+pub use add_npc::*;
+
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -34,6 +37,9 @@ pub fn process_instruction(
         }
         GameInstruction::Battle => {
             process_battle(program_id, accounts)
+        }
+        GameInstruction::AddNpc(args) => {
+            process_add_npc(program_id, accounts, args)
         }
     }
 }
