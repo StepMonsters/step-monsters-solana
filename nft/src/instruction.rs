@@ -18,7 +18,7 @@ pub enum GameInstruction {
     Breed,
     Synthesis,
     Upgrade,
-    Battle,
+    Battle(BattleArgs),
 }
 
 
@@ -86,6 +86,7 @@ pub fn battle(
     edition: &Pubkey,
     metadata_program: &Pubkey,
     token_program: &Pubkey,
+    args: BattleArgs
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
         AccountMeta::new(*signer, true),
@@ -104,6 +105,6 @@ pub fn battle(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: GameInstruction::Battle.try_to_vec().unwrap(),
+        data: GameInstruction::Battle(args).try_to_vec().unwrap(),
     })
 }

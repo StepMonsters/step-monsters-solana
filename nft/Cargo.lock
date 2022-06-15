@@ -598,7 +598,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "nft_daniel"
+name = "nft"
 version = "0.1.0"
 dependencies = [
  "arrayref",

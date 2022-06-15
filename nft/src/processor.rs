@@ -50,8 +50,8 @@ pub fn process_instruction(
         GameInstruction::Synthesis => {
             process_synthesis(program_id, accounts)
         }
-        GameInstruction::Battle => {
-            process_battle(program_id, accounts)
+        GameInstruction::Battle(args) => {
+            process_battle(program_id, accounts, args)
         }
     }
 }

@@ -2,16 +2,20 @@ use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     msg,
-    program::{ invoke_signed },
+    program::invoke_signed,
     program_error::ProgramError,
     pubkey::Pubkey,
     sysvar,
 };
 
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 use crate::{ferror, state::*, utils::*};
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 
-pub fn process_battle(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
+pub fn process_battle(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    args: BattleArgs,
+) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
