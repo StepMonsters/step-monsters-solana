@@ -1,6 +1,8 @@
+use std::io::Error;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
-
+use borsh::BorshDeserialize;
+use mpl_token_metadata::error::MetadataError;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
@@ -14,6 +16,7 @@ use solana_program::{
 };
 
 use crate::error::AppError;
+use crate::state::*;
 
 pub fn now_timestamp() -> u64 {
     Clock::get().unwrap().unix_timestamp as u64
@@ -47,53 +50,11 @@ pub fn assert_derivation(
     Ok(bump)
 }
 
-pub fn assert_pool_info(
-    program_id: &Pubkey,
-    pool_info: &AccountInfo,
-) -> Result<u8, ProgramError> {
-    let path = &[
-        program_id.as_ref(),
-        "pool_info".as_bytes(),
-    ];
-    assert_derivation(&program_id, &pool_info, path)
+pub fn assert_config(program_id: &Pubkey, account: &AccountInfo) -> Result<u8, ProgramError> {
+    let path = &[SEED_BATTLE.as_bytes(), program_id.as_ref(), "configure".as_bytes()];
+    assert_derivation(&program_id, &account, path)
 }
 
-pub fn assert_pool_token_info(
-    program_id: &Pubkey,
-    pool_token_info: &AccountInfo,
-) -> Result<u8, ProgramError> {
-    let path = &[
-        program_id.as_ref(),
-        "pool_token_info".as_bytes(),
-    ];
-    assert_derivation(&program_id, &pool_token_info, path)
-}
-
-pub fn assert_pool_authority(
-    program_id: &Pubkey,
-    pool_info: &AccountInfo,
-    pool_authority: &AccountInfo,
-) -> Result<u8, ProgramError> {
-    let path = &[
-        program_id.as_ref(),
-        pool_info.key.as_ref(),
-        "pool_authority".as_bytes(),
-    ];
-    assert_derivation(&program_id, &pool_authority, path)
-}
-
-pub fn assert_user_info(
-    program_id: &Pubkey,
-    user: &AccountInfo,
-    user_info: &AccountInfo,
-) -> Result<u8, ProgramError> {
-    let path = &[
-        program_id.as_ref(),
-        user.key.as_ref(),
-        "user_info".as_bytes(),
-    ];
-    assert_derivation(&program_id, &user_info, path)
-}
 
 pub fn assert_signer(account_info: &AccountInfo) -> ProgramResult {
     if !account_info.is_signer {
@@ -101,6 +62,34 @@ pub fn assert_signer(account_info: &AccountInfo) -> ProgramResult {
     } else {
         Ok(())
     }
+}
+
+pub fn get_random(seed: u8) -> Result<u64, ProgramError> {
+    let clock = Clock::get()?;
+    let mut hasher = DefaultHasher::new();
+    hasher.write_u8(seed);
+    hasher.write_u64(clock.slot);
+    hasher.write_i64(clock.unix_timestamp);
+    let mut random_value: [u8; 8] = [0u8; 8];
+    random_value.copy_from_slice(&hasher.finish().to_le_bytes()[..8]);
+    Ok(u64::from_le_bytes(random_value))
+}
+
+pub fn get_random_u8(seed: u8, divisor: u64) -> Result<u8, ProgramError> {
+    let random = get_random(seed)?;
+    Ok((random % divisor) as u8)
+}
+
+pub fn assert_pda_creator(
+    program_id: &Pubkey,
+    pda_creator_info: &AccountInfo,
+) -> Result<u8, ProgramError> {
+    let path = &[
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        "pda_creator".as_bytes(),
+    ];
+    assert_derivation(&program_id, &pda_creator_info, path)
 }
 
 pub struct TokenTransferParams<'a: 'b, 'b> {
@@ -233,18 +222,22 @@ pub fn spl_token_create_account<'a>(
     Ok(())
 }
 
-pub fn get_random(seed: u8) -> Result<u64, ProgramError> {
-    let clock = Clock::get()?;
-    let mut hasher = DefaultHasher::new();
-    hasher.write_u8(seed);
-    hasher.write_u64(clock.slot);
-    hasher.write_i64(clock.unix_timestamp);
-    let mut random_value: [u8; 8] = [0u8; 8];
-    random_value.copy_from_slice(&hasher.finish().to_le_bytes()[..8]);
-    Ok(u64::from_le_bytes(random_value))
+pub fn try_from_slice_checked<T: BorshDeserialize>(
+    data: &[u8],
+    data_type: Key,
+    data_size: usize,
+) -> Result<T, ProgramError> {
+    if (data[0] != data_type as u8 && data[0] != Key::Uninitialized as u8)
+        || data.len() != data_size
+    {
+        return Err(MetadataError::DataTypeMismatch.into());
+    }
+    let result: T = try_from_slice_unchecked(data)?;
+    Ok(result)
 }
 
-pub fn get_random_u8(seed: u8, divisor: u64) -> Result<u8, ProgramError> {
-    let random = get_random(seed)?;
-    Ok((random % divisor) as u8)
+pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, Error> {
+    let mut data_mut = data;
+    let result = T::deserialize(&mut data_mut)?;
+    Ok(result)
 }

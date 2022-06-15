@@ -598,6 +598,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "nft_daniel"
+version = "0.1.0"
+dependencies = [
+ "arrayref",
+ "borsh",
+ "mpl-token-metadata",
+ "num-derive",
+ "solana-program",
+ "spl-associated-token-account",
+ "spl-token",
+ "thiserror",
+]
+
+[[package]]
 name = "num-derive"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -662,9 +676,9 @@ checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
 name = "parking_lot"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87f5ec2493a61ac0506c0f4199f99070cbe83857b0337006a30f3e6719b8ef58"
+checksum = "3742b2c103b9f06bc9fff0a37ff4912935851bee6d36f3c02bcc755bcfec228f"
 dependencies = [
  "lock_api",
  "parking_lot_core",
@@ -923,9 +937,9 @@ checksum = "f2dd574626839106c320a323308629dcb1acfc96e32a8cba364ddc61ac23ee83"
 
 [[package]]
 name = "solana-frozen-abi"
-version = "1.10.17"
+version = "1.10.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be6cabe7c4a9daa4f66c841f95334a9e9bebabc92cab81726702e9ef10fa7341"
+checksum = "d8c51fd0d3baa2666b21b75ae7abcd645a0f8763b1840db6bd784245b833c81a"
 dependencies = [
  "bs58",
  "bv",
@@ -945,9 +959,9 @@ dependencies = [
 
 [[package]]
 name = "solana-frozen-abi-macro"
-version = "1.10.17"
+version = "1.10.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b583fcfb0336680016aa2c8a04078eba53d290fba56c00df483f97df967b8b6"
+checksum = "9044039efc5aa56ad8c6f41f8f69cebaa4ccb15b053dd5385bb871edecd14f73"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -957,9 +971,9 @@ dependencies = [
 
 [[package]]
 name = "solana-program"
-version = "1.10.17"
+version = "1.10.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1de171aad74cc5dc8b17b72bffe07c1daf27c18a7614ccfb7cbea8fbc64f562b"
+checksum = "10c4041160366bd6e24cbe586456e6e70f3a509c78eb8fb9aa1abf03c6155c69"
 dependencies = [
  "base64 0.13.0",
  "bincode",
@@ -999,9 +1013,9 @@ dependencies = [
 
 [[package]]
 name = "solana-sdk-macro"
-version = "1.10.17"
+version = "1.10.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dde2f2b735059d320dd316cf85dc6a765d7300f68ea2d596872a46412ef1e16"
+checksum = "9d09f1de03531fc9a864b10361953cb0d2347312e1a547d7835807d95bc501d7"
 dependencies = [
  "bs58",
  "proc-macro2",
@@ -1032,20 +1046,6 @@ dependencies = [
  "num-traits",
  "num_enum",
  "solana-program",
- "thiserror",
-]
-
-[[package]]
-name = "step_monster_nft"
-version = "0.1.0"
-dependencies = [
- "arrayref",
- "borsh",
- "mpl-token-metadata",
- "num-derive",
- "solana-program",
- "spl-associated-token-account",
- "spl-token",
  "thiserror",
 ]
 

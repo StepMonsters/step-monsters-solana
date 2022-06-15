@@ -1,129 +1,97 @@
-use borsh::BorshSerialize;
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 use solana_program::{
-    account_info::{AccountInfo, next_account_info},
+    account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     msg,
-    program::invoke,
+    program_error::ProgramError,
+    program::{invoke, invoke_signed},
     pubkey::Pubkey,
     system_instruction,
-    sysvar::{rent::Rent, Sysvar},
+    sysvar,
 };
-use spl_associated_token_account::instruction::create_associated_token_account;
-use spl_token::instruction::{initialize_mint, mint_to};
 
-use crate::{state::*, utils::*};
+use crate::{state::*, utils::*, ferror};
 
-pub fn process_mint(
-    program_id: &Pubkey,
-    accounts: &[AccountInfo],
-) -> ProgramResult {
+pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
-    let authority_info = next_account_info(account_info_iter)?;
     let signer_info = next_account_info(account_info_iter)?;
+    let config_info = next_account_info(account_info_iter)?;
+    let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
+    let fee_recevier_info = next_account_info(account_info_iter)?; // fee_recevier: wallet
     let mint_info = next_account_info(account_info_iter)?;
-    let ata_info = next_account_info(account_info_iter)?;
+    let metadata_info = next_account_info(account_info_iter)?;
+    let edition_info = next_account_info(account_info_iter)?;
+    
+    let metadata_program_info = next_account_info(account_info_iter)?;    
     let token_program_info = next_account_info(account_info_iter)?;
-    let ass_token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
-    let metadata_program_info = next_account_info(account_info_iter)?;
-    let metadata_info = next_account_info(account_info_iter)?;
-    let edition_info = next_account_info(account_info_iter)?;
-    let monster_info = next_account_info(account_info_iter)?;
-
+    assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
+    assert_eq_pubkey(&token_program_info, &spl_token::id())?;
+    assert_eq_pubkey(&rent_info, &sysvar::rent::id())?;
+    assert_eq_pubkey(&system_info, &solana_program::system_program::id())?;
     assert_signer(&signer_info)?;
-    let size = 82;
-    let rent = &Rent::from_account_info(&rent_info)?;
-    let required_lamports = rent.minimum_balance(size);
 
-    msg!("Create Account");
-    invoke(
-        &system_instruction::create_account(
-            signer_info.key,
-            mint_info.key,
-            required_lamports,
-            size as u64,
-            token_program_info.key,
-        ),
-        &[signer_info.clone(), mint_info.clone()],
-    )?;
+    let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
 
-    msg!("Initialize Mint");
-    invoke(
-        &initialize_mint(
-            token_program_info.key,
-            mint_info.key,
-            authority_info.key,
-            Some(authority_info.key),
-            0,
-        )?,
-        &[authority_info.clone(), mint_info.clone(), rent_info.clone(), token_program_info.clone(), ],
-    )?;
+    let pda_seed = [
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        "pda_creator".as_bytes(),
+        &[pda_bump],
+    ];
+    
+    let config_data = ConfigureData::from_account_info(config_info)?;
+    assert_eq_pubkey(&fee_recevier_info, &config_data.fee_recevier)?;
 
-    msg!("Create Associated Token Account");
-    invoke(
-        &create_associated_token_account(
-            signer_info.key,
-            signer_info.key,
-            mint_info.key,
-        ),
-        &[
-            signer_info.clone(),
-            ata_info.clone(),
-            ass_token_program_info.clone(),
-            mint_info.clone(),
-            token_program_info.clone(),
-            system_info.clone()
-        ],
-    )?;
+    if !config_data.is_initialized {
+        return ferror!("invalid mint state");
+    }
 
-    msg!("Mint To");
-    invoke(
-        &mint_to(
-            token_program_info.key,
-            mint_info.key,
-            ata_info.key,
-            signer_info.key,
-            &[signer_info.key],
-            1,
-        )?,
-        &[
-            signer_info.clone(),
-            ata_info.clone(),
-            mint_info.clone(),
-            token_program_info.clone(),
-            system_info.clone()
-        ],
-    )?;
+    // mint fee
+    if config_data.price > 0 {
+        invoke(
+            &system_instruction::transfer(&signer_info.key, &config_data.fee_recevier, config_data.price),
+            &[
+                signer_info.clone(),
+                fee_recevier_info.clone(),
+                system_info.clone(),
+            ],
+        )?;
+    }
 
-    msg!("Create Metadata Account");
-    let creator = vec![
+    let creators = vec![
         mpl_token_metadata::state::Creator {
-            address: *signer_info.key,
+            address: *pda_creator_info.key,
+            verified: true,
+            share: 0,
+        },
+        mpl_token_metadata::state::Creator {
+            address: config_data.creator,
             verified: false,
             share: 100,
         },
     ];
-    let title = String::from("my_title");
-    let symbol = String::from("my_symbol");
-    let uri = String::from("https://arweave.net/y5e5DJsiwH0s_ayfMwYk-SnrZtVZzHLQDSTZ5dNRUHA");
-    invoke(
+
+
+
+    msg!("Create metadata");
+    invoke_signed(
         &create_metadata_accounts_v2(
             *metadata_program_info.key,
             *metadata_info.key,
             *mint_info.key,
             *signer_info.key,
             *signer_info.key,
-            *signer_info.key,
-            title,
-            symbol,
-            uri,
-            Some(creator),
-            1,
+            *pda_creator_info.key, //pda must be signer
+            config_data.name,
+            config_data.symbol,
+            config_data.uri,
+            Some(creators),
+            config_data.fee,
             true,
-            false,
+            true,
             None,
             None,
         ),
@@ -135,20 +103,22 @@ pub fn process_mint(
             token_program_info.clone(),
             system_info.clone(),
             rent_info.clone(),
+            pda_creator_info.clone(),
         ],
+        &[&pda_seed],
     )?;
 
     msg!("Create Master Edition");
-    invoke(
+    invoke_signed(
         &create_master_edition_v3(
             *metadata_program_info.key,
             *edition_info.key,
             *mint_info.key,
-            *signer_info.key,
+            *pda_creator_info.key,
             *signer_info.key,
             *metadata_info.key,
             *signer_info.key,
-            Some(0),
+            Some(1),
         ),
         &[
             edition_info.clone(),
@@ -159,47 +129,10 @@ pub fn process_mint(
             token_program_info.clone(),
             system_info.clone(),
             rent_info.clone(),
+            pda_creator_info.clone(),
         ],
+        &[&pda_seed],
     )?;
-
-    msg!("Create Monster Info");
-    let bump_seed = assert_derivation(
-        program_id,
-        monster_info,
-        &[
-            SEED_MONSTER.as_bytes(),
-            program_id.as_ref(),
-            &mint_info.key.as_ref(),
-        ],
-    )?;
-    let monster_seeds = &[
-        SEED_MONSTER.as_bytes(),
-        program_id.as_ref(),
-        &mint_info.key.as_ref(),
-        &[bump_seed],
-    ];
-    create_or_allocate_account_raw(
-        *program_id,
-        monster_info,
-        rent_info,
-        system_info,
-        signer_info,
-        MAX_MONSTER_LENGTH,
-        monster_seeds,
-    )?;
-
-    let mut monster = Monster::from_account_info(monster_info)?;
-    monster.level = 1;
-    monster.gender = get_random_u8(0, 2)?;
-    monster.race = 1;
-    monster.breed = 1;
-
-    monster.hp = 100;
-    monster.attack = 100;
-    monster.defense = 100;
-    monster.agility = 100;
-    monster.luck = 100;
-    monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     Ok(())
 }
