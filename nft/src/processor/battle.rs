@@ -3,18 +3,17 @@ use solana_program::{
     entrypoint::ProgramResult,
     msg,
     program::invoke_signed,
-    program_error::ProgramError,
     pubkey::Pubkey,
     sysvar,
 };
 
-use crate::{ferror, state::*, utils::*};
+use crate::{state::*, utils::*};
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 
 pub fn process_battle(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    args: BattleArgs,
+    _args: BattleArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
@@ -51,7 +50,7 @@ pub fn process_battle(
         &[pda_bump],
     ];
 
-    let mut state = true;
+    let state = true;
     // todo battle logic
     // let attacker = Monster::from_account_info(monster_info_attacker)?;
     // let defender = Monster::from_account_info(monster_info_defender)?;
