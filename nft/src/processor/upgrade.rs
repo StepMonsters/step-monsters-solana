@@ -27,10 +27,6 @@ pub fn process_upgrade(
 
     let multi: u32 = (106 as u32).pow(monster.level as u32) / 100;
     monster.hp = basic[0] * multi;
-    monster.attack = basic[1] * multi;
-    monster.defense = basic[2] * multi;
-    monster.agility = basic[3] * multi;
-    monster.luck = basic[4] * multi;
     monster.level += 1;
 
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;

@@ -40,6 +40,9 @@ pub enum AppError {
 
     #[error("Checked calculate failed")]
     CheckedCalculateFailed = 0xfa0a,
+
+    #[error("Invalid hatch time")]
+    InvalidHatchTime = 0xfa0b,
 }
 
 impl From<AppError> for ProgramError {

@@ -202,9 +202,6 @@ pub fn process_breed(
 
     monster.hp = 100;
     monster.attack = father.attack + mother.attack;
-    monster.defense = 100;
-    monster.agility = 100;
-    monster.luck = 100;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     Ok(())

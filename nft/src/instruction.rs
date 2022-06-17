@@ -19,6 +19,9 @@ pub enum GameInstruction {
     Synthesis,
     Upgrade,
     Battle(BattleArgs),
+    CreateGameConfig(),
+    UpdateGameConfig(),
+    CreateMonsterFeatureConfig(),
 }
 
 

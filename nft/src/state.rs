@@ -9,9 +9,14 @@ use solana_program::{
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config";
-pub const MAX_MONSTER_LENGTH: usize = 1 * 4 + 4 * 5;
+pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config";
 pub const MAX_BATTLE_LENGTH: usize = 1;
-pub const MAX_GAME_CONFIG_LENGTH: usize = 4 * 5 * 10 + 4 * 5 * 10;
+pub const NUM_MONSTER_VALUE: usize = 6;
+pub const NUM_MONSTER_ATTR: usize = 6;
+pub const NUM_MONSTER_RACE: usize = 10;
+pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + 8 + 1 * 20;
+pub const MAX_GAME_CONFIG_LENGTH: usize = 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE + 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE;
+pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = 2 * 7 * 64 * 5;
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
@@ -21,23 +26,6 @@ pub enum Key {
     Battle,
 }
 
-#[repr(C)]
-#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
-pub struct GameConfig {
-    pub monster_male: [[u32; 5]; 10],
-    pub monster_female: [[u32; 5]; 10],
-}
-
-impl GameConfig {
-    pub fn from_account_info(a: &AccountInfo) -> Result<GameConfig, ProgramError> {
-        if a.data_len() != MAX_GAME_CONFIG_LENGTH {
-            return Err(ProgramError::InvalidAccountData);
-        }
-        let game_config: GameConfig =
-            try_from_slice_unchecked(&a.data.borrow_mut())?;
-        Ok(game_config)
-    }
-}
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
@@ -46,19 +34,41 @@ pub struct Monster {
     pub gender: u8,
     pub race: u8,
     pub breed: u8,
+    pub generation: u8,
+    pub fatigue: u8,
 
     pub hp: u32,
     pub attack: u32,
     pub defense: u32,
-    pub agility: u32,
-    pub luck: u32,
     pub speed: u32,
+    pub agility: u32,
+    pub efficiency: u32,
+
+    pub hatch_time: u64,
+    pub monster_feature: [u8; 20],
 }
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
 pub struct Battle {
     pub winner: u8,
+}
+
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
+pub struct GameConfig {
+    pub monster_male: [[u32; NUM_MONSTER_ATTR]; NUM_MONSTER_RACE],
+    pub monster_female: [[u32; NUM_MONSTER_ATTR]; NUM_MONSTER_RACE],
+}
+
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
+pub struct MonsterFeatureConfig {
+    pub monster_0: [[u8; 7]; 64],
+    pub monster_1: [[u8; 7]; 64],
+    pub monster_2: [[u8; 7]; 64],
+    pub monster_3: [[u8; 7]; 64],
+    pub monster_4: [[u8; 7]; 64],
 }
 
 impl Monster {
@@ -80,6 +90,28 @@ impl Battle {
         let battle: Battle =
             try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(battle)
+    }
+}
+
+impl GameConfig {
+    pub fn from_account_info(a: &AccountInfo) -> Result<GameConfig, ProgramError> {
+        if a.data_len() != MAX_GAME_CONFIG_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        let game_config: GameConfig =
+            try_from_slice_unchecked(&a.data.borrow_mut())?;
+        Ok(game_config)
+    }
+}
+
+impl MonsterFeatureConfig {
+    pub fn from_account_info(a: &AccountInfo) -> Result<MonsterFeatureConfig, ProgramError> {
+        if a.data_len() != MAX_MONSTER_FEATURE_CONFIG_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        let monster_feature_config: MonsterFeatureConfig =
+            try_from_slice_unchecked(&a.data.borrow_mut())?;
+        Ok(monster_feature_config)
     }
 }
 

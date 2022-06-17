@@ -44,11 +44,6 @@ pub fn process_synthesis(
     msg!("Upgrade Monster");
     let mut monster = Monster::from_account_info(monster_info_01)?;
     monster.hp += 200;
-    monster.attack += 200;
-    monster.defense += 200;
-    monster.agility += 200;
-    monster.luck += 200;
-    monster.speed += 200;
     monster.serialize(&mut *monster_info_01.try_borrow_mut_data()?)?;
 
     Ok(())

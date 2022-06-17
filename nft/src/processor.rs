@@ -24,6 +24,12 @@ pub use synthesis::*;
 pub mod upgrade;
 pub use upgrade::*;
 
+pub mod game_config;
+pub use game_config::*;
+
+pub mod config_monster_feature;
+pub use config_monster_feature::*;
+
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -52,6 +58,15 @@ pub fn process_instruction(
         }
         GameInstruction::Battle(args) => {
             process_battle(program_id, accounts, args)
+        }
+        GameInstruction::CreateGameConfig() => {
+            process_create_game_config(program_id, accounts)
+        }
+        GameInstruction::UpdateGameConfig() => {
+            process_update_game_config(program_id, accounts)
+        }
+        GameInstruction::CreateMonsterFeatureConfig() => {
+            process_create_monster_feature_config(program_id, accounts)
         }
     }
 }
