@@ -4,7 +4,9 @@ use solana_program::{
     borsh::try_from_slice_unchecked,
     program_error::ProgramError,
     pubkey::Pubkey,
+    sysvar::{clock::Clock, Sysvar},
 };
+
 
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
@@ -14,7 +16,7 @@ pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
 pub const NUM_MONSTER_RACE: usize = 10;
-pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + 8 + 1 * 20;
+pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + 8 + 8 + 1 * 20;
 pub const MAX_GAME_CONFIG_LENGTH: usize = 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE + 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = 2 * 7 * 64 * 5;
 
@@ -26,9 +28,8 @@ pub enum Key {
     Battle,
 }
 
-
 #[repr(C)]
-#[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
 pub struct Monster {
     pub level: u8,
     pub gender: u8,
@@ -43,9 +44,35 @@ pub struct Monster {
     pub speed: u32,
     pub agility: u32,
     pub efficiency: u32,
+    pub last_battle_time: u64,
 
     pub hatch_time: u64,
     pub monster_feature: [u8; 20],
+}
+
+impl Monster {
+    pub fn from_account_info(a: &AccountInfo) -> Result<Monster, ProgramError> {
+        if a.data_len() != MAX_MONSTER_LENGTH {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
+    }
+
+    pub fn calculate_fatigue(&self) -> u8 {
+        //assume 10 fatigue per hour
+        let fatigue_per_hour = 10;
+        if self.fatigue > 0 {
+            let now_ts  = now_timestamp();
+            let round = (now_ts - self.last_battle_time) / 3600;
+            if round * fatigue_per_hour > self.fatigue as u64{
+                return 0
+            } else {
+                return (self.fatigue as u64 - round * fatigue_per_hour) as u8
+            }
+        } else {
+            return 0
+        }
+    }
 }
 
 #[repr(C)]
@@ -71,16 +98,6 @@ pub struct MonsterFeatureConfig {
     pub monster_4: [[u8; 7]; 64],
 }
 
-impl Monster {
-    pub fn from_account_info(a: &AccountInfo) -> Result<Monster, ProgramError> {
-        if a.data_len() != MAX_MONSTER_LENGTH {
-            return Err(ProgramError::InvalidAccountData);
-        }
-        let monster: Monster =
-            try_from_slice_unchecked(&a.data.borrow_mut())?;
-        Ok(monster)
-    }
-}
 
 impl Battle {
     pub fn from_account_info(a: &AccountInfo) -> Result<Battle, ProgramError> {
@@ -161,4 +178,8 @@ pub struct BattleArgs {
     pub hp: u32,
     pub attack: u32,
     pub defense: u32,
+}
+
+pub fn now_timestamp() -> u64 {
+    Clock::get().unwrap().unix_timestamp as u64
 }
