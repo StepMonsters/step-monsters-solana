@@ -380,11 +380,11 @@ pub fn process_create_monster_feature_config(
     ];
 
     let mut feature_config = MonsterFeatureConfig::from_account_info(feature_config_info)?;
-    feature_config.monster_0 = monster_0;
-    feature_config.monster_1 = monster_1;
-    feature_config.monster_2 = monster_2;
-    feature_config.monster_3 = monster_3;
-    feature_config.monster_4 = monster_4;
+    feature_config.monster_0 = Vec::from(monster_0);
+    feature_config.monster_1 = Vec::from(monster_1);
+    feature_config.monster_2 = Vec::from(monster_2);
+    feature_config.monster_3 = Vec::from(monster_3);
+    feature_config.monster_4 = Vec::from(monster_4);
     feature_config.serialize(&mut *feature_config_info.try_borrow_mut_data()?)?;
 
     Ok(())

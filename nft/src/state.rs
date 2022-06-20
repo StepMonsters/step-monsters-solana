@@ -64,11 +64,11 @@ pub struct GameConfig {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
 pub struct MonsterFeatureConfig {
-    pub monster_0: [[u8; 7]; 64],
-    pub monster_1: [[u8; 7]; 64],
-    pub monster_2: [[u8; 7]; 64],
-    pub monster_3: [[u8; 7]; 64],
-    pub monster_4: [[u8; 7]; 64],
+    pub monster_0: Vec<[u8; 7]>,
+    pub monster_1: Vec<[u8; 7]>,
+    pub monster_2: Vec<[u8; 7]>,
+    pub monster_3: Vec<[u8; 7]>,
+    pub monster_4: Vec<[u8; 7]>,
 }
 
 impl Monster {
@@ -151,7 +151,7 @@ impl ConfigureData {
     }
 
     pub fn is_initialized(&self) -> bool {
-        return self.is_initialized
+        return self.is_initialized;
     }
 }
 

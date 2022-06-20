@@ -1,6 +1,7 @@
-use std::io::Error;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
+use std::io::Error;
+
 use borsh::BorshDeserialize;
 use mpl_token_metadata::error::MetadataError;
 use solana_program::{
@@ -242,14 +243,14 @@ pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, E
     Ok(result)
 }
 
-pub fn handle_monster_feature_config(config: [[u8; 7]; 64]) -> Vec<Vec<[u8; 7]>> {
+pub fn handle_monster_feature_config(config: Vec<[u8; 7]>) -> Vec<Vec<[u8;7]>> {
     let mut sum = 0;
     let mut features = Vec::new();
     let mut temp = Vec::new();
     for i in 0..config.len() {
         sum += config[i][0];
         if sum < 100 {
-            temp.push(config[i]);
+            temp.push(config[i].clone());
         } else if sum == 100 {
             features.push(temp.clone());
             temp = Vec::new();
