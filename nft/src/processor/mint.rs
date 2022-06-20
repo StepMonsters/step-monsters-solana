@@ -17,7 +17,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
-    let fee_recevier_info = next_account_info(account_info_iter)?; // fee_recevier: wallet
+    let fee_receiver_info = next_account_info(account_info_iter)?; // fee_receiver: wallet
     let mint_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
@@ -43,7 +43,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     ];
     
     let config_data = ConfigureData::from_account_info(config_info)?;
-    assert_eq_pubkey(&fee_recevier_info, &config_data.fee_recevier)?;
+    assert_eq_pubkey(&fee_receiver_info, &config_data.fee_receiver)?;
 
     if !config_data.is_initialized {
         return ferror!("invalid mint state");
@@ -52,10 +52,10 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     // mint fee
     if config_data.price > 0 {
         invoke(
-            &system_instruction::transfer(&signer_info.key, &config_data.fee_recevier, config_data.price),
+            &system_instruction::transfer(&signer_info.key, &config_data.fee_receiver, config_data.price),
             &[
                 signer_info.clone(),
-                fee_recevier_info.clone(),
+                fee_receiver_info.clone(),
                 system_info.clone(),
             ],
         )?;
