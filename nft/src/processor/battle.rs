@@ -55,10 +55,14 @@ pub fn process_battle(
     let mut state = false;
     // todo battle logic
     let mut monster = Monster::from_account_info(monster_info_attacker)?;
-    // max monster fatigue 100, need 10 per battle
-    monster.fatigue = monster.calculate_fatigue();
-    if monster.calculate_fatigue() >= 90 {
+    // max monster fatigue 100, need 2 per battle
+    if monster.fatigue > 98 {
         return ferror!("not enough fatigue");
+    }
+    monster.energy = monster.calculate_energy();
+    //require at least 1 energy to battle
+    if monster.energy < 1 {
+        return ferror!("not enough energy");
     }
     if monster.attack < args.defense {
         //lose 
@@ -162,7 +166,8 @@ pub fn process_battle(
     }
 
     //if need hatch then do hatch
-    monster.fatigue += 10;
+    monster.fatigue += 2;
+    monster.energy -= 1;
     monster.last_battle_time = now_timestamp();
     monster.serialize(&mut *monster_info_attacker.try_borrow_mut_data()?)?;
 

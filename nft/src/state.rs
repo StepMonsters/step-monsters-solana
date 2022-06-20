@@ -7,7 +7,6 @@ use solana_program::{
     sysvar::{clock::Clock, Sysvar},
 };
 
-
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config";
@@ -17,7 +16,8 @@ pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
 pub const NUM_MONSTER_RACE: usize = 10;
 pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + 8 + 8 + 1 * 20;
-pub const MAX_GAME_CONFIG_LENGTH: usize = 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE + 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE;
+pub const MAX_GAME_CONFIG_LENGTH: usize =
+    4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE + 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = 2 * 7 * 64 * 5;
 
 #[repr(C)]
@@ -43,6 +43,7 @@ pub struct Monster {
     pub defense: u32,
     pub speed: u32,
     pub agility: u32,
+    pub energy: u32,
     pub efficiency: u32,
     pub last_battle_time: u64,
 
@@ -58,19 +59,24 @@ impl Monster {
         try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
     }
 
-    pub fn calculate_fatigue(&self) -> u8 {
-        //assume 10 fatigue per hour
-        let fatigue_per_hour = 10;
-        if self.fatigue > 0 {
-            let now_ts  = now_timestamp();
+    pub fn calculate_energy(&self) -> u32 {
+        //assume 2 energy per hour  max 100
+        let energy_per_hour = 2 * self.efficiency;
+        let now_ts = now_timestamp();
+        if self.last_battle_time > 0 {
             let round = (now_ts - self.last_battle_time) / 3600;
-            if round * fatigue_per_hour > self.fatigue as u64{
-                return 0
+            if round as u32 * energy_per_hour + self.energy > 100 {
+                return 100
             } else {
-                return (self.fatigue as u64 - round * fatigue_per_hour) as u8
+                return round as u32 * energy_per_hour + self.energy
             }
         } else {
-            return 0
+            let round = (now_ts - self.hatch_time) / 3600;
+            if round as u32 * energy_per_hour + self.energy > 100 {
+                return 100
+            } else {
+                return round as u32 * energy_per_hour + self.energy
+            }
         }
     }
 }
@@ -98,14 +104,12 @@ pub struct MonsterFeatureConfig {
     pub monster_4: [[u8; 7]; 64],
 }
 
-
 impl Battle {
     pub fn from_account_info(a: &AccountInfo) -> Result<Battle, ProgramError> {
         if a.data_len() != MAX_BATTLE_LENGTH {
             return Err(ProgramError::InvalidAccountData);
         }
-        let battle: Battle =
-            try_from_slice_unchecked(&a.data.borrow_mut())?;
+        let battle: Battle = try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(battle)
     }
 }
@@ -115,8 +119,7 @@ impl GameConfig {
         if a.data_len() != MAX_GAME_CONFIG_LENGTH {
             return Err(ProgramError::InvalidAccountData);
         }
-        let game_config: GameConfig =
-            try_from_slice_unchecked(&a.data.borrow_mut())?;
+        let game_config: GameConfig = try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(game_config)
     }
 }
@@ -168,7 +171,7 @@ impl ConfigureData {
     }
 
     pub fn is_initialized(&self) -> bool {
-        return self.is_initialized
+        return self.is_initialized;
     }
 }
 
