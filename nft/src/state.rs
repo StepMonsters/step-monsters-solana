@@ -124,8 +124,8 @@ pub struct ConfigureArgs {
     pub authority: Pubkey,
     /// creator
     pub creator: Pubkey,
-    /// fee_recevier
-    pub fee_recevier: Pubkey,
+    /// fee_receiver
+    pub fee_receiver: Pubkey,
     /// nft price
     pub price: u64,
     /// seller fee
