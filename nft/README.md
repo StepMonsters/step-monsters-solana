@@ -20,7 +20,7 @@ pub enum GameInstruction {
 ```
 ### Config
 
-（固定拍）创建拍卖，需要提前将nft_creator加入白名单
+配置设置
 
 | AccountInfo      | is_signer | is_writable |                                                           |
 | ---------------- | --------- | ----------- | --------------------------------------------------------- |
