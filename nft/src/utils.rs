@@ -19,10 +19,6 @@ use solana_program::{
 use crate::error::AppError;
 use crate::state::*;
 
-pub fn now_timestamp() -> u64 {
-    Clock::get().unwrap().unix_timestamp as u64
-}
-
 pub fn assert_eq_pubkey(account_info: &AccountInfo, account: &Pubkey) -> ProgramResult {
     if account_info.key != account {
         Err(AppError::InvalidEqPubkey.into())
@@ -56,6 +52,19 @@ pub fn assert_config(program_id: &Pubkey, account: &AccountInfo) -> Result<u8, P
     assert_derivation(&program_id, &account, path)
 }
 
+
+pub fn assert_monster(
+    program_id: &Pubkey,
+    mint_info: &AccountInfo,
+    monster_info: &AccountInfo,
+) -> Result<u8, ProgramError> {
+    let path = &[
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        mint_info.key.as_ref(),
+    ];
+    assert_derivation(&program_id, &monster_info, path)
+}
 
 pub fn assert_signer(account_info: &AccountInfo) -> ProgramResult {
     if !account_info.is_signer {

@@ -1,25 +1,29 @@
+use borsh::BorshSerialize;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
+    program_error::ProgramError,
     msg,
     program::invoke_signed,
     pubkey::Pubkey,
     sysvar,
 };
 
-use crate::{state::*, utils::*};
+use crate::{state::*, ferror, utils::*};
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 
 pub fn process_battle(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    _args: BattleArgs,
+    args: BattleArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
     let admin_info = next_account_info(account_info_iter)?; //admin signer
+    let monster_mint_info = next_account_info(account_info_iter)?;
+    let monster_info_attacker = next_account_info(account_info_iter)?;
     let mint_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
@@ -28,10 +32,8 @@ pub fn process_battle(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
-    // let monster_info_attacker = next_account_info(account_info_iter)?;
-    // let monster_info_defender = next_account_info(account_info_iter)?;
-    // let battle_info = next_account_info(account_info_iter)?;
 
+    assert_monster(&program_id, &monster_mint_info, &monster_info_attacker)?;
     assert_signer(&admin_info)?;
     assert_signer(&signer_info)?;
 
@@ -50,21 +52,47 @@ pub fn process_battle(
         &[pda_bump],
     ];
 
-    let state = true;
+    let mut state = false;
     // todo battle logic
-    // let attacker = Monster::from_account_info(monster_info_attacker)?;
-    // let defender = Monster::from_account_info(monster_info_defender)?;
+    let mut monster = Monster::from_account_info(monster_info_attacker)?;
+    // max monster fatigue 100, need 2 per battle
+    if monster.fatigue > 98 {
+        return ferror!("not enough fatigue");
+    }
+    monster.energy = monster.calculate_energy();
+    //require at least 1 energy to battle
+    if monster.energy < 1 {
+        return ferror!("not enough energy");
+    }
+    if monster.attack < args.defense {
+        //lose 
+    }
+    
+    if monster.attack == args.defense {
+        if args.attack > monster.defense{
+            //lose
+        } else {
+            // no winner
+        }
+    }
 
-    // let mut battle = crate::state::Battle::from_account_info(battle_info)?;
-    // if attacker.attack == defender.defense {
-    //     battle.winner = 0;
-    // } else if attacker.attack > defender.defense {
-    //     battle.winner = 1;
-    // } else {
-    //     battle.winner = 2;
-    // }
+    //default monster attack first
+    if monster.attack > args.defense {
+        let arg_hp_lose = monster.attack - args.defense;
+        let monster_hp_lose = args.attack - monster.defense;
+        let monster_round = monster.hp / monster_hp_lose;
+        let args_round = args.hp / arg_hp_lose;
+        if monster_round >= args_round {
+            //win 
+            state = true;
+        } else {
+            //lose
+        }
+    }
+
 
     //after battle logic do  mint_nft
+    //monster add fatigue
     if state {
         let config_data = ConfigureData::from_account_info(config_info)?;
         let creators = vec![
@@ -138,8 +166,10 @@ pub fn process_battle(
     }
 
     //if need hatch then do hatch
-
-    // battle.serialize(&mut *battle_info.try_borrow_mut_data()?)?;
+    monster.fatigue += 2;
+    monster.energy -= 1;
+    monster.last_battle_time = now_timestamp();
+    monster.serialize(&mut *monster_info_attacker.try_borrow_mut_data()?)?;
 
     Ok(())
 }
