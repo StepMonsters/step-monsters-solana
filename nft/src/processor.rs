@@ -30,6 +30,9 @@ pub use game_config::*;
 pub mod config_monster_feature;
 pub use config_monster_feature::*;
 
+pub mod config_temp;
+pub use config_temp::*;
+
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -37,6 +40,10 @@ pub fn process_instruction(
 ) -> ProgramResult {
     let instruction = GameInstruction::try_from_slice(input)?;
     match instruction {
+        GameInstruction::ConfigureTemp(args) => {
+            msg!("Instruction: Configure");
+            process_configure_temp(program_id, accounts,args)
+        }
         GameInstruction::Configure(args) => {
             msg!("Instruction: Configure");
             process_configure(program_id, accounts, args)

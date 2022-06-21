@@ -12,6 +12,7 @@ use crate::state::*;
 #[repr(C)]
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize, PartialEq)]
 pub enum GameInstruction {
+    ConfigureTemp(ConfigTempArgs),
     Configure(ConfigureArgs),
     Mint,
     Hatch,

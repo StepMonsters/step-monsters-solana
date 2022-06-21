@@ -117,6 +117,31 @@ impl MonsterFeatureConfig {
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct ConfigTempArgs {
+    /// nft name
+    pub name: String,
+    /// nft symbol
+    pub symbol: String,
+    /// default uri
+    pub uri: String,
+}
+
+pub type ConfigTempData = ConfigTempArgs;
+
+impl ConfigTempData {
+    pub const LEN: usize = 1 + 32 + 32 + 32 + 8 + 4 + 32 + 10 + 200;
+
+    pub fn from_account_info(a: &AccountInfo) -> Result<ConfigTempData, ProgramError> {
+        if a.data_len() != Self::LEN {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
+    }
+
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
 pub struct ConfigureArgs {
     /// Initialized state.
     pub is_initialized: bool,
