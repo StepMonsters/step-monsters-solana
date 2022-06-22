@@ -45,10 +45,10 @@ pub struct Monster {
     pub agility: u32,
     pub energy: u32,
     pub efficiency: u32,
-    pub last_battle_time: u64,
 
+    pub last_battle_time: u64,
     pub hatch_time: u64,
-    pub monster_feature: [u8; 20],
+    pub monster_feature: Vec<u8>,
 }
 
 impl Monster {
