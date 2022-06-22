@@ -65,6 +65,34 @@ pub fn assert_monster(
     assert_derivation(&program_id, &monster_info, path)
 }
 
+pub fn assert_nft_store(
+    program_id: &Pubkey,
+    mint_info: &AccountInfo,
+    nft_store_info: &AccountInfo,
+) -> Result<u8, ProgramError> {
+    let path = &[
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        mint_info.key.as_ref(),
+        "nft_store".as_bytes(),
+    ];
+    assert_derivation(&program_id, &nft_store_info, path)
+}
+
+pub fn assert_monster_authority(
+    program_id: &Pubkey,
+    mint_info: &AccountInfo,
+    authority_info: &AccountInfo,
+) -> Result<u8, ProgramError> {
+    let path = &[
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        mint_info.key.as_ref(),
+        "authority".as_bytes(),
+    ];
+    assert_derivation(&program_id, &authority_info, path)
+}
+
 pub fn assert_signer(account_info: &AccountInfo) -> ProgramResult {
     if !account_info.is_signer {
         Err(ProgramError::MissingRequiredSignature)
@@ -136,6 +164,27 @@ pub fn spl_token_transfer<'a>(
         )?,
         &[source, destination, authority, token_program],
         &[&signer_seeds],
+    )
+}
+
+#[inline(always)]
+pub fn spl_token_transfer_invoke<'a>(
+    token_program: AccountInfo<'a>,
+    source: AccountInfo<'a>,
+    destination: AccountInfo<'a>,
+    authority: AccountInfo<'a>,
+    amount: u64,
+) -> Result<(), ProgramError> {
+    invoke(
+        &spl_token::instruction::transfer(
+            token_program.key,
+            source.key,
+            destination.key,
+            authority.key,
+            &[],
+            amount,
+        )?,
+        &[source, destination, authority, token_program],
     )
 }
 

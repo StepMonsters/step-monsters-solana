@@ -15,6 +15,7 @@ pub enum GameInstruction {
     Configure(ConfigureArgs),
     Mint,
     Hatch,
+    ClaimMonster,
     Breed,
     Synthesis,
     Upgrade,

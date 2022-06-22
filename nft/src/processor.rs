@@ -12,6 +12,9 @@ pub use mint::*;
 pub mod hatch;
 pub use hatch::*;
 
+pub mod claim_monster;
+pub use claim_monster::*;
+
 pub mod battle;
 pub use battle::*;
 
@@ -46,6 +49,9 @@ pub fn process_instruction(
         }
         GameInstruction::Hatch => {
             process_hatch(program_id, accounts)
+        }
+        GameInstruction::ClaimMonster => {
+            process_claim_monster(program_id, accounts)
         }
         GameInstruction::Breed => {
             process_breed(program_id, accounts)
