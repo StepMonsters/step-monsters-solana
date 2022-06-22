@@ -43,10 +43,11 @@ pub struct Monster {
     pub defense: u32,
     pub speed: u32,
     pub agility: u32,
-    pub energy: u32,
     pub efficiency: u32,
 
+    pub energy: u32,
     pub last_battle_time: u64,
+
     pub hatch_time: u64,
     pub monster_feature: Vec<u8>,
 }
