@@ -15,7 +15,7 @@ pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
 pub const NUM_MONSTER_RACE: usize = 10;
-pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + 8 + 8 + 1 * 20;
+pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10);
 pub const MAX_GAME_CONFIG_LENGTH: usize =
     4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE + 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = 2 * 7 * 64 * 5;
@@ -67,16 +67,16 @@ impl Monster {
         if self.last_battle_time > 0 {
             let round = (now_ts - self.last_battle_time) / 3600;
             if round as u32 * energy_per_hour + self.energy > 100 {
-                return 100
+                return 100;
             } else {
-                return round as u32 * energy_per_hour + self.energy
+                return round as u32 * energy_per_hour + self.energy;
             }
         } else {
             let round = (now_ts - self.hatch_time) / 3600;
             if round as u32 * energy_per_hour + self.energy > 100 {
-                return 100
+                return 100;
             } else {
-                return round as u32 * energy_per_hour + self.energy
+                return round as u32 * energy_per_hour + self.energy;
             }
         }
     }

@@ -162,6 +162,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     let mut monster = Monster::from_account_info(monster_info)?;
     monster.race = 1;
     monster.hatch_time = now_timestamp() + 10;
+    monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     Ok(())
