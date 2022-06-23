@@ -114,3 +114,37 @@ pub fn battle(
         data: GameInstruction::Battle(args).try_to_vec().unwrap(),
     })
 }
+
+
+pub fn hatch(
+    program_id: &Pubkey,
+    signer: &Pubkey,
+    monster: &Pubkey,
+    game_config: &Pubkey,
+    monster_feature_config: &Pubkey,
+    nft_mint: &Pubkey,
+    nft_account_info: &Pubkey,
+    nft_store_info: &Pubkey,
+    authority_info: &Pubkey,
+    token_program: &Pubkey,
+) -> Result<Instruction, ProgramError> {
+    let accounts = vec![
+        AccountMeta::new(*signer, true),
+        AccountMeta::new(*monster, false),
+        AccountMeta::new(*game_config, false),
+        AccountMeta::new(*monster_feature_config, false),
+        AccountMeta::new(*nft_mint, false),
+        AccountMeta::new(*nft_account_info, false),
+        AccountMeta::new(*nft_store_info, false),
+        AccountMeta::new(*authority_info, false),
+        AccountMeta::new_readonly(*token_program, false),
+        AccountMeta::new_readonly(rent::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data: GameInstruction::Hatch.try_to_vec().unwrap(),
+    })
+}

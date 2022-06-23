@@ -16,10 +16,7 @@ pub fn process_hatch(
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
-    let _system_info = next_account_info(account_info_iter)?;
 
-    let _metadata_program_info = next_account_info(account_info_iter)?;
-    let _metadata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
     let _monster_feature_config_info = next_account_info(account_info_iter)?;
