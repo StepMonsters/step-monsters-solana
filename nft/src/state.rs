@@ -9,15 +9,14 @@ use solana_program::{
 
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
-pub const SEED_GAME_CONFIG: &str = "game_config";
+pub const SEED_GAME_CONFIG: &str = "game_config_1701";
 pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config";
 pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
 pub const NUM_MONSTER_RACE: usize = 10;
 pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10);
-pub const MAX_GAME_CONFIG_LENGTH: usize =
-    4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE + 4 * NUM_MONSTER_ATTR * NUM_MONSTER_RACE;
+pub const MAX_GAME_CONFIG_LENGTH: usize = (4 + (4 + 4 * 6) * 10) * 2;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = 2 * 7 * 64 * 5;
 
 #[repr(C)]
@@ -91,8 +90,8 @@ pub struct Battle {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
 pub struct GameConfig {
-    pub monster_male: [[u32; NUM_MONSTER_ATTR]; NUM_MONSTER_RACE],
-    pub monster_female: [[u32; NUM_MONSTER_ATTR]; NUM_MONSTER_RACE],
+    pub monster_male: Vec<Vec<u32>>,
+    pub monster_female: Vec<Vec<u32>>,
 }
 
 #[repr(C)]
@@ -120,8 +119,7 @@ impl GameConfig {
         if a.data_len() != MAX_GAME_CONFIG_LENGTH {
             return Err(ProgramError::InvalidAccountData);
         }
-        let game_config: GameConfig = try_from_slice_unchecked(&a.data.borrow_mut())?;
-        Ok(game_config)
+        try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
     }
 }
 

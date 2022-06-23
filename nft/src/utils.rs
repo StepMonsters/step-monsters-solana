@@ -301,6 +301,14 @@ pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, E
     Ok(result)
 }
 
+pub fn handle_game_config(data:[[u32; 6]; 10])->Vec<Vec<u32>>{
+    let mut config = Vec::new();
+    for item in data{
+        config.push(Vec::from(item));
+    }
+    return config;
+}
+
 pub fn handle_monster_feature_config(config: Vec<[u8; 7]>) -> Vec<Vec<[u8;7]>> {
     let mut sum = 0;
     let mut features = Vec::new();

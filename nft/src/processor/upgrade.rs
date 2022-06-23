@@ -18,11 +18,14 @@ pub fn process_upgrade(
 
     msg!("Upgrade Monster");
     let mut monster = Monster::from_account_info(monster_info)?;
-
     let game_config = GameConfig::from_account_info(game_config_info)?;
-    let mut basic = game_config.monster_male.clone()[monster.race as usize];
+
+    let male = game_config.monster_male.clone();
+    let female = game_config.monster_female.clone();
+
+    let mut basic: Vec<u32> = male[monster.race as usize].clone();
     if monster.gender != 1 {
-        basic = game_config.monster_female.clone()[monster.race as usize];
+        basic = female[monster.race as usize].clone();
     }
 
     let multi: u32 = (106 as u32).pow(monster.level as u32) / 100;
