@@ -12,6 +12,9 @@ pub use mint_init::*;
 pub mod mint;
 pub use mint::*;
 
+pub mod hatch_quick;
+pub use hatch_quick::*;
+
 pub mod hatch;
 pub use hatch::*;
 
@@ -52,6 +55,9 @@ pub fn process_instruction(
         }
         GameInstruction::Mint => {
             process_mint(program_id, accounts)
+        }
+        GameInstruction::QuickHatch => {
+            process_hatch_quick(program_id, accounts)
         }
         GameInstruction::Hatch => {
             process_hatch(program_id, accounts)
