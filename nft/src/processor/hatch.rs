@@ -22,7 +22,7 @@ pub fn process_hatch(
     let _metadata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
-    let monster_feature_config_info = next_account_info(account_info_iter)?;
+    let _monster_feature_config_info = next_account_info(account_info_iter)?;
 
     let nft_mint_info = next_account_info(account_info_iter)?; // NFT mint address
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
@@ -66,25 +66,25 @@ pub fn process_hatch(
     monster.agility = basic[4];
     monster.efficiency = basic[5];
 
-    msg!("Init Battle Attributes By Features");
-    let monster_feature_config = MonsterFeatureConfig::from_account_info(monster_feature_config_info)?;
-    let mut config = monster_feature_config.monster_0.clone();
-    if monster.race == 0 {
-        config = monster_feature_config.monster_0.clone();
-    }
-    let all_features = handle_monster_feature_config(config);
-    for i in 0..all_features.len() {
-        let features = &all_features[i];
-        let index = monster.monster_feature[i];
-        let feature = features[index as usize];
-
-        monster.hp = monster.hp * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
-        monster.attack = monster.attack * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
-        monster.defense = monster.defense * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
-        monster.speed = monster.speed * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
-        monster.agility = monster.agility * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
-        monster.efficiency = monster.efficiency * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
-    }
+    // msg!("Init Battle Attributes By Features");
+    // let monster_feature_config = MonsterFeatureConfig::from_account_info(monster_feature_config_info)?;
+    // let mut config = monster_feature_config.monster_0.clone();
+    // if monster.race == 0 {
+    //     config = monster_feature_config.monster_0.clone();
+    // }
+    // let all_features = handle_monster_feature_config(config);
+    // for i in 0..all_features.len() {
+    //     let features = &all_features[i];
+    //     let index = monster.monster_feature[i];
+    //     let feature = features[index as usize];
+    //
+    //     monster.hp = monster.hp * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
+    //     monster.attack = monster.attack * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
+    //     monster.defense = monster.defense * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
+    //     monster.speed = monster.speed * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
+    //     monster.agility = monster.agility * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
+    //     monster.efficiency = monster.efficiency * (u32::from(feature[1]) + 1000 as u32) / 1000 as u32;
+    // }
 
     msg!("Monster Serialize");
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
