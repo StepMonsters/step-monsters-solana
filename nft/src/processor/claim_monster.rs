@@ -1,12 +1,12 @@
 use borsh::BorshSerialize;
 use mpl_token_metadata::instruction::update_metadata_accounts_v2;
-use mpl_token_metadata::state::DataV2;
+use mpl_token_metadata::state::{ DataV2, Metadata};
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     program_error::ProgramError,
     msg,
-    program::invoke,
+    program::{ invoke_signed },
     pubkey::Pubkey,
 };
 
@@ -15,6 +15,7 @@ use crate::{state::*, ferror, utils::*};
 pub fn process_claim_monster(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
+    args: ClaimMonsterArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
@@ -24,6 +25,7 @@ pub fn process_claim_monster(
     let metadata_program_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
+    let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
 
     let nft_mint_info = next_account_info(account_info_iter)?; // NFT mint address
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
@@ -32,7 +34,7 @@ pub fn process_claim_monster(
 
 
     assert_signer(&signer_info)?;
-
+    
     msg!("Update Monster Info");
     let mut monster = Monster::from_account_info(monster_info)?;
 
@@ -65,43 +67,43 @@ pub fn process_claim_monster(
     )?;
     
     msg!("Update Metadata Account");
-    let creator = vec![
-        mpl_token_metadata::state::Creator {
-            address: *signer_info.key,
-            verified: false,
-            share: 100,
-        },
-    ];
-    let name = String::from("my_name");
-    let symbol = String::from("my_symbol");
-    let uri = String::from("https://arweave.net/y5e5DJsiwH0s_ayfMwYk-SnrZtVZzHLQDSTZ5dNRUHA");
-    let data = DataV2 {
-        name,
-        symbol,
-        uri,
-        seller_fee_basis_points: 1,
-        creators: Some(creator),
+
+    let metadata = Metadata::from_account_info(metadata_info)?;
+    let data = metadata.data;
+    let datav2 = DataV2 {
+        name: data.name,
+        symbol: data.symbol,
+        uri: args.uri,
+        seller_fee_basis_points: data.seller_fee_basis_points,
+        creators: data.creators,
         collection: None,
         uses: None,
     };
+    let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
 
-    invoke(
+    let pda_seed = [
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        "pda_creator".as_bytes(),
+        &[pda_bump],
+    ];
+    invoke_signed(
         &update_metadata_accounts_v2(
             *metadata_program_info.key,
             *metadata_info.key,
-            *signer_info.key,
-            Some(*signer_info.key),
-            Some(data),
-            Some(false),
-            Some(false),
+            *pda_creator_info.key,
+            Some(*pda_creator_info.key),
+            Some(datav2),
+            Some(true),
+            Some(true),
         ),
         &[
             metadata_info.clone(),
             signer_info.clone(),
             metadata_program_info.clone(),
-            token_program_info.clone(),
-            system_info.clone(),
+            pda_creator_info.clone(),
         ],
+        &[&pda_seed],
     )?;
 
     Ok(())

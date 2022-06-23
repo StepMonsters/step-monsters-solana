@@ -62,8 +62,8 @@ pub fn process_instruction(
         GameInstruction::Hatch => {
             process_hatch(program_id, accounts)
         }
-        GameInstruction::ClaimMonster => {
-            process_claim_monster(program_id, accounts)
+        GameInstruction::ClaimMonster(args) => {
+            process_claim_monster(program_id, accounts, args)
         }
         GameInstruction::Breed => {
             process_breed(program_id, accounts)

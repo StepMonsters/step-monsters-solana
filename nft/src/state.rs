@@ -88,6 +88,12 @@ pub struct Battle {
 }
 
 #[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, Debug, PartialEq)]
+pub struct ClaimMonsterArgs {
+    pub uri: String,
+}
+
+#[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Debug)]
 pub struct GameConfig {
     pub monster_male: Vec<Vec<u32>>,
@@ -145,6 +151,7 @@ pub struct ConfigureArgs {
     pub creator: Pubkey,
     /// fee_receiver
     pub fee_receiver: Pubkey,
+    pub current_id: u16,
     /// nft price
     pub price: u64,
     /// seller fee
@@ -160,7 +167,7 @@ pub struct ConfigureArgs {
 pub type ConfigureData = ConfigureArgs;
 
 impl ConfigureData {
-    pub const LEN: usize = 1 + 32 + 32 + 32 + 8 + 4 + 32 + 10 + 200;
+    pub const LEN: usize = 1 + 32 + 32 + 32 + 2 + 8 + 4 + 32 + 10 + 200;
 
     pub fn from_account_info(a: &AccountInfo) -> Result<ConfigureData, ProgramError> {
         if a.data_len() != Self::LEN {

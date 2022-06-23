@@ -34,6 +34,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     assert_eq_pubkey(&rent_info, &sysvar::rent::id())?;
     assert_eq_pubkey(&system_info, &solana_program::system_program::id())?;
     assert_signer(&signer_info)?;
+    assert_config(&program_id, &config_info)?;
 
     let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
 
@@ -44,7 +45,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
         &[pda_bump],
     ];
 
-    let config_data = ConfigureData::from_account_info(config_info)?;
+    let mut config_data = ConfigureData::from_account_info(config_info)?;
     assert_eq_pubkey(&fee_receiver_info, &config_data.fee_receiver)?;
 
     if !config_data.is_initialized {
@@ -76,6 +77,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
         },
     ];
 
+    let name_ = config_data.current_id;
     msg!("Create metadata");
     invoke_signed(
         &create_metadata_accounts_v2(
@@ -85,9 +87,9 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
             *signer_info.key,
             *signer_info.key,
             *pda_creator_info.key, //pda must be signer
-            config_data.name,
-            config_data.symbol,
-            config_data.uri,
+            config_data.name.clone() + &name_.to_string(),
+            config_data.symbol.clone(),
+            config_data.uri.clone(),
             Some(creators),
             config_data.fee,
             true,
@@ -165,5 +167,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
+    config_data.current_id += 1;
+    config_data.serialize(&mut *config_info.try_borrow_mut_data()?)?;
     Ok(())
 }

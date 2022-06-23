@@ -17,7 +17,7 @@ pub enum GameInstruction {
     Mint,
     QuickHatch,
     Hatch,
-    ClaimMonster,
+    ClaimMonster(ClaimMonsterArgs),
     Breed,
     Synthesis,
     Upgrade,
