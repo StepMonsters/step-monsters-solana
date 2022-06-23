@@ -1,11 +1,8 @@
 use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::update_metadata_accounts_v2;
-use mpl_token_metadata::state::DataV2;
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program::invoke,
     pubkey::Pubkey,
 };
 
@@ -19,10 +16,10 @@ pub fn process_hatch(
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
-    let system_info = next_account_info(account_info_iter)?;
+    let _system_info = next_account_info(account_info_iter)?;
 
-    let metadata_program_info = next_account_info(account_info_iter)?;
-    let metadata_info = next_account_info(account_info_iter)?;
+    let _metadata_program_info = next_account_info(account_info_iter)?;
+    let _metadata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
     let monster_feature_config_info = next_account_info(account_info_iter)?;
@@ -53,10 +50,15 @@ pub fn process_hatch(
 
     msg!("Init Battle Attributes");
     let game_config = GameConfig::from_account_info(game_config_info)?;
-    let mut basic = game_config.monster_male.clone()[monster.race as usize];
+
+    let male = game_config.monster_male.clone();
+    let female = game_config.monster_female.clone();
+
+    let mut basic: Vec<u32> = male[monster.race as usize].clone();
     if monster.gender != 1 {
-        basic = game_config.monster_female.clone()[monster.race as usize];
+        basic = female[monster.race as usize].clone();
     }
+
     monster.hp = basic[0];
     monster.attack = basic[1];
     monster.defense = basic[2];
