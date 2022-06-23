@@ -1,28 +1,30 @@
+use borsh::BorshSerialize;
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
 use solana_program::{
-    account_info::{next_account_info, AccountInfo},
+    account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program_error::ProgramError,
     program::{invoke, invoke_signed},
+    program_error::ProgramError,
     pubkey::Pubkey,
     system_instruction,
     sysvar,
 };
 
-use crate::{state::*, utils::*, ferror};
+use crate::{ferror, state::*, utils::*};
 
 pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
-    let fee_recevier_info = next_account_info(account_info_iter)?; // fee_recevier: wallet
+    let fee_receiver_info = next_account_info(account_info_iter)?; // fee_receiver: wallet
     let mint_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
-    
-    let metadata_program_info = next_account_info(account_info_iter)?;    
+    let monster_info = next_account_info(account_info_iter)?;
+
+    let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
@@ -41,9 +43,9 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
         "pda_creator".as_bytes(),
         &[pda_bump],
     ];
-    
+
     let config_data = ConfigureData::from_account_info(config_info)?;
-    assert_eq_pubkey(&fee_recevier_info, &config_data.fee_recevier)?;
+    assert_eq_pubkey(&fee_receiver_info, &config_data.fee_receiver)?;
 
     if !config_data.is_initialized {
         return ferror!("invalid mint state");
@@ -52,10 +54,10 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     // mint fee
     if config_data.price > 0 {
         invoke(
-            &system_instruction::transfer(&signer_info.key, &config_data.fee_recevier, config_data.price),
+            &system_instruction::transfer(&signer_info.key, &config_data.fee_receiver, config_data.price),
             &[
                 signer_info.clone(),
-                fee_recevier_info.clone(),
+                fee_receiver_info.clone(),
                 system_info.clone(),
             ],
         )?;
@@ -73,8 +75,6 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
             share: 100,
         },
     ];
-
-
 
     msg!("Create metadata");
     invoke_signed(
@@ -133,6 +133,37 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
         ],
         &[&pda_seed],
     )?;
+
+    msg!("Create Monster Info");
+    let bump_seed = assert_derivation(
+        program_id,
+        monster_info,
+        &[
+            SEED_MONSTER.as_bytes(),
+            program_id.as_ref(),
+            &mint_info.key.as_ref(),
+        ],
+    )?;
+    let monster_seeds = &[
+        SEED_MONSTER.as_bytes(),
+        program_id.as_ref(),
+        &mint_info.key.as_ref(),
+        &[bump_seed],
+    ];
+    create_or_allocate_account_raw(
+        *program_id,
+        monster_info,
+        rent_info,
+        system_info,
+        signer_info,
+        MAX_MONSTER_LENGTH,
+        monster_seeds,
+    )?;
+    let mut monster = Monster::from_account_info(monster_info)?;
+    monster.race = 1;
+    monster.hatch_time = now_timestamp() + 10;
+    monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     Ok(())
 }

@@ -6,6 +6,9 @@ use crate::instruction::*;
 pub mod configure;
 pub use configure::*;
 
+pub mod mint_init;
+pub use mint_init::*;
+
 pub mod mint;
 pub use mint::*;
 
@@ -43,6 +46,9 @@ pub fn process_instruction(
         GameInstruction::Configure(args) => {
             msg!("Instruction: Configure");
             process_configure(program_id, accounts, args)
+        }
+        GameInstruction::InitMint => {
+            process_mint_init(program_id, accounts)
         }
         GameInstruction::Mint => {
             process_mint(program_id, accounts)
