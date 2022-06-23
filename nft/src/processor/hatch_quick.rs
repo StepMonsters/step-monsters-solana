@@ -21,7 +21,7 @@ pub fn process_hatch_quick(
     // let metadata_program_info = next_account_info(account_info_iter)?;
     // let metadata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
-    // let game_config_info = next_account_info(account_info_iter)?;
+    let game_config_info = next_account_info(account_info_iter)?;
     // let monster_feature_config_info = next_account_info(account_info_iter)?;
     //
     // let nft_mint_info = next_account_info(account_info_iter)?; // NFT mint address
@@ -50,18 +50,21 @@ pub fn process_hatch_quick(
 
     monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-    // msg!("Init Battle Attributes");
-    // let game_config = GameConfig::from_account_info(game_config_info)?;
-    // let mut basic = game_config.monster_male.clone()[monster.race as usize];
-    // if monster.gender != 1 {
-    //     basic = game_config.monster_female.clone()[monster.race as usize];
-    // }
-    // monster.hp = basic[0];
-    // monster.attack = basic[1];
-    // monster.defense = basic[2];
-    // monster.speed = basic[3];
-    // monster.agility = basic[4];
-    // monster.efficiency = basic[5];
+    msg!("Init Battle Attributes");
+    let game_config = GameConfig::from_account_info(game_config_info)?;
+    let male = game_config.monster_male.clone();
+    let female = game_config.monster_female.clone();
+    let mut basic: Vec<u32> = male[monster.race as usize].clone();
+    if monster.gender != 1 {
+        basic = female[monster.race as usize].clone();
+    }
+    monster.hp = basic[0];
+    monster.attack = basic[1];
+    monster.defense = basic[2];
+    monster.speed = basic[3];
+    monster.agility = basic[4];
+    monster.efficiency = basic[5];
+
     //
     // msg!("Init Battle Attributes By Features");
     // let monster_feature_config = MonsterFeatureConfig::from_account_info(monster_feature_config_info)?;
