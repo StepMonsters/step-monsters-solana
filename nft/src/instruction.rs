@@ -57,6 +57,7 @@ pub fn mint(
     mint: &Pubkey,
     metadata: &Pubkey,
     edition: &Pubkey,
+    monster: &Pubkey,
     metadata_program: &Pubkey,
     token_program: &Pubkey,
 ) -> Result<Instruction, ProgramError> {
@@ -68,6 +69,7 @@ pub fn mint(
         AccountMeta::new(*mint, true),
         AccountMeta::new(*metadata, false),
         AccountMeta::new(*edition, false),
+        AccountMeta::new(*monster, false),
         AccountMeta::new_readonly(*metadata_program, false),
         AccountMeta::new_readonly(*token_program, false),
         AccountMeta::new_readonly(rent::id(), false),
