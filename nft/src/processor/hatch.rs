@@ -15,8 +15,7 @@ pub fn process_hatch(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let token_program_info = next_account_info(account_info_iter)?;
-
+    
     let monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
     let _monster_feature_config_info = next_account_info(account_info_iter)?;
@@ -25,7 +24,9 @@ pub fn process_hatch(
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
     let nft_store_info = next_account_info(account_info_iter)?; // owned by authority_info to keep NFT
     let authority_info = next_account_info(account_info_iter)?;
+    let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
+    let _system_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
 
