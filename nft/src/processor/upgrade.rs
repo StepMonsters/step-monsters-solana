@@ -6,32 +6,27 @@ use solana_program::{
     pubkey::Pubkey,
 };
 
-use crate::{state::*};
+use crate::{state::*, utils::*};
 
 pub fn process_upgrade(
-    _: &Pubkey,
+    _program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
+    let signer_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
-    let game_config_info = next_account_info(account_info_iter)?;
+
+    assert_signer(&signer_info)?;
 
     msg!("Upgrade Monster");
     let mut monster = Monster::from_account_info(monster_info)?;
-    let game_config = GameConfig::from_account_info(game_config_info)?;
-
-    let male = game_config.monster_male.clone();
-    let female = game_config.monster_female.clone();
-
-    let mut basic: Vec<u32> = male[monster.race as usize].clone();
-    if monster.gender != 1 {
-        basic = female[monster.race as usize].clone();
-    }
-
-    let multi: u32 = (106 as u32).pow(monster.level as u32) / 100;
-    monster.hp = basic[0] * multi;
     monster.level += 1;
-
+    monster.hp = monster.hp * 106 / 100;
+    monster.attack = monster.attack * 106 / 100;
+    monster.defense = monster.defense * 106 / 100;
+    monster.speed = monster.speed * 106 / 100;
+    monster.agility = monster.agility * 106 / 100;
+    monster.efficiency = monster.efficiency * 106 / 100;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     Ok(())
