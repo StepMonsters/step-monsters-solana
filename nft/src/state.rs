@@ -151,6 +151,7 @@ pub struct ConfigureArgs {
     pub creator: Pubkey,
     /// fee_receiver
     pub fee_receiver: Pubkey,
+    /// current id
     pub current_id: u16,
     /// nft price
     pub price: u64,

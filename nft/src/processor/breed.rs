@@ -21,6 +21,7 @@ pub fn process_breed(
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
+    let program_info = next_account_info(account_info_iter)?;
 
     let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
@@ -61,6 +62,7 @@ pub fn process_breed(
             metadata_info.clone(),
             edition_info.clone(),
             monster_info.clone(),
+            program_info.clone(),
             metadata_program_info.clone(),
             token_program_info.clone(),
             rent_info.clone(),

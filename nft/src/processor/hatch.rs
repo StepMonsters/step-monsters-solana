@@ -26,7 +26,6 @@ pub fn process_hatch(
     let authority_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
-    let _system_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
 
@@ -48,15 +47,12 @@ pub fn process_hatch(
 
     msg!("Init Battle Attributes");
     let game_config = GameConfig::from_account_info(game_config_info)?;
-
     let male = game_config.monster_male.clone();
     let female = game_config.monster_female.clone();
-
     let mut basic: Vec<u32> = male[monster.race as usize].clone();
     if monster.gender != 1 {
         basic = female[monster.race as usize].clone();
     }
-
     monster.hp = basic[0];
     monster.attack = basic[1];
     monster.defense = basic[2];

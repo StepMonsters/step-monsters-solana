@@ -55,8 +55,11 @@ pub fn process_configure(
     config_data.authority = args.authority;
     config_data.creator = args.creator;
     config_data.fee_receiver = args.fee_receiver;
+
+    config_data.current_id = args.current_id;
     config_data.price = args.price;
     config_data.fee = args.fee;
+
     config_data.name = args.name;
     config_data.symbol = args.symbol;
     config_data.uri = args.uri;

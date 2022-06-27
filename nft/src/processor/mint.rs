@@ -77,7 +77,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
         },
     ];
 
-    let name_ = config_data.current_id;
+    let name_id = String::from(" #") + &config_data.current_id.to_string();
     msg!("Create metadata");
     invoke_signed(
         &create_metadata_accounts_v2(
@@ -87,7 +87,7 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
             *signer_info.key,
             *signer_info.key,
             *pda_creator_info.key, //pda must be signer
-            config_data.name.clone() + &name_.to_string(),
+            config_data.name.clone() + &name_id,
             config_data.symbol.clone(),
             config_data.uri.clone(),
             Some(creators),

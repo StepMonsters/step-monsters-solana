@@ -48,8 +48,6 @@ pub fn process_hatch_quick(
     monster.generation = 1;
     monster.fatigue = 0;
 
-    monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-
     msg!("Init Battle Attributes");
     let game_config = GameConfig::from_account_info(game_config_info)?;
     let male = game_config.monster_male.clone();

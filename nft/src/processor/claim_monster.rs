@@ -20,7 +20,6 @@ pub fn process_claim_monster(
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
-    let system_info = next_account_info(account_info_iter)?;
 
     let metadata_program_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
