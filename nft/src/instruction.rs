@@ -166,6 +166,7 @@ pub fn claim_monster(
     authority_info: &Pubkey,
     token_program: &Pubkey,
     metadata_program: &Pubkey,
+    args: ClaimMonsterArgs,
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
         AccountMeta::new(*signer, true),
@@ -184,6 +185,6 @@ pub fn claim_monster(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: GameInstruction::Hatch.try_to_vec().unwrap(),
+        data: GameInstruction::ClaimMonster(args).try_to_vec().unwrap(),
     })
 }
