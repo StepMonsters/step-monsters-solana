@@ -19,6 +19,7 @@ pub fn process_hatch(
     let monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
     let _monster_feature_config_info = next_account_info(account_info_iter)?;
+    let incubator_info = next_account_info(account_info_iter)?;
 
     let nft_mint_info = next_account_info(account_info_iter)?; // NFT mint address
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
@@ -26,6 +27,7 @@ pub fn process_hatch(
     let authority_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
+    let system_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
 
@@ -118,5 +120,31 @@ pub fn process_hatch(
         1,
     )?;
 
+    msg!("Create incubator Info");
+    let bump_seed = assert_incubator(&program_id, &nft_mint_info, &incubator_info)?;
+    let incubator_seeds = &[
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        &nft_mint_info.key.as_ref(),
+        &[bump_seed],
+    ];
+    create_or_allocate_account_raw(
+        *program_id,
+        incubator_info,
+        rent_info,
+        system_info,
+        signer_info,
+        Incubator::LEN,
+        incubator_seeds,
+    )?;
+    let mut incubator = Incubator::from_account_info(incubator_info)?;
+    incubator.nft = nft_mint_info.key.clone();
+    incubator.nft_return = nft_account_info.key.clone();
+    incubator.nft_store = nft_store_info.key.clone();
+    incubator.user = signer_info.key.clone();
+    let now_ts = now_timestamp();
+    let index = now_ts / 86400;
+    incubator.timestamp = index * 86400; 
+    incubator.serialize(&mut *incubator_info.try_borrow_mut_data()?)?;
     Ok(())
 }

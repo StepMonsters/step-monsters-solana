@@ -182,6 +182,29 @@ impl ConfigureData {
     }
 }
 
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct Incubator {
+    pub timestamp: u64,
+    pub user: Pubkey,
+    pub nft: Pubkey,
+    pub nft_return: Pubkey,
+    pub nft_store: Pubkey,
+    pub is_done: bool,
+}
+
+impl Incubator {
+    pub const LEN: usize = 8 + 32 + 32 + 32 + 32 + 1;
+
+    pub fn from_account_info(a: &AccountInfo) -> Result<Incubator, ProgramError> {
+        if a.data_len() != Self::LEN {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
+    }
+
+}
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
 pub struct BattleArgs {

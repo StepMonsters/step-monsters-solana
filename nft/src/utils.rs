@@ -66,6 +66,19 @@ pub fn assert_monster(
     assert_derivation(&program_id, &monster_info, path)
 }
 
+pub fn assert_incubator(
+    program_id: &Pubkey,
+    nft_mint_info: &AccountInfo,
+    incubator_info: &AccountInfo,
+) -> Result<u8, ProgramError> {
+    let path = &[
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        nft_mint_info.key.as_ref(),
+    ];
+    assert_derivation(&program_id, &incubator_info, path)
+}
+
 pub fn assert_nft_store(
     program_id: &Pubkey,
     mint_info: &AccountInfo,

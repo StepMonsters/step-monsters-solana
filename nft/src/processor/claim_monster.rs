@@ -19,24 +19,26 @@ pub fn process_claim_monster(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let token_program_info = next_account_info(account_info_iter)?;
-
-    let metadata_program_info = next_account_info(account_info_iter)?;
-    let metadata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
+    let metadata_info = next_account_info(account_info_iter)?;
+    let incubator_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
 
     let nft_mint_info = next_account_info(account_info_iter)?; // NFT mint address
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
     let nft_store_info = next_account_info(account_info_iter)?; // owned by authority_info to keep NFT
     let authority_info = next_account_info(account_info_iter)?;
-
-
+    let token_program_info = next_account_info(account_info_iter)?;
+    let metadata_program_info = next_account_info(account_info_iter)?;
+    
     assert_signer(&signer_info)?;
     
     msg!("Update Monster Info");
     let mut monster = Monster::from_account_info(monster_info)?;
-
+    assert_incubator(&program_id, &nft_mint_info, &incubator_info)?;
+    let mut incubator = Incubator::from_account_info(incubator_info)?;
+    assert_eq_pubkey(&signer_info, &incubator.user)?;
+    assert_eq_pubkey(&nft_account_info, &incubator.nft_return)?;
     // hatch need one day
     if monster.hatch_time < now_timestamp() - 86400 {
         return ferror!("hatching...")
@@ -105,5 +107,7 @@ pub fn process_claim_monster(
         &[&pda_seed],
     )?;
 
+    incubator.is_done = true;
+    incubator.serialize(&mut *incubator_info.try_borrow_mut_data()?)?;
     Ok(())
 }

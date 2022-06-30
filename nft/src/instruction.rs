@@ -125,6 +125,7 @@ pub fn hatch(
     game_config: &Pubkey,
     monster_feature_config: &Pubkey,
     nft_mint: &Pubkey,
+    incubator_info: &Pubkey,
     nft_account_info: &Pubkey,
     nft_store_info: &Pubkey,
     authority_info: &Pubkey,
@@ -135,6 +136,7 @@ pub fn hatch(
         AccountMeta::new(*monster, false),
         AccountMeta::new(*game_config, false),
         AccountMeta::new(*monster_feature_config, false),
+        AccountMeta::new(*incubator_info, false),
         AccountMeta::new(*nft_mint, false),
         AccountMeta::new(*nft_account_info, false),
         AccountMeta::new(*nft_store_info, false),
@@ -142,6 +144,41 @@ pub fn hatch(
         AccountMeta::new_readonly(*token_program, false),
         AccountMeta::new_readonly(rent::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data: GameInstruction::Hatch.try_to_vec().unwrap(),
+    })
+}
+
+pub fn claim_monster(
+    program_id: &Pubkey,
+    signer: &Pubkey,
+    monster: &Pubkey,
+    metadata: &Pubkey,
+    incubator: &Pubkey,
+    pda_creator: &Pubkey,
+    nft_mint: &Pubkey,
+    nft_account_info: &Pubkey,
+    nft_store_info: &Pubkey,
+    authority_info: &Pubkey,
+    token_program: &Pubkey,
+    metadata_program: &Pubkey,
+) -> Result<Instruction, ProgramError> {
+    let accounts = vec![
+        AccountMeta::new(*signer, true),
+        AccountMeta::new(*monster, false),
+        AccountMeta::new(*metadata, false),
+        AccountMeta::new(*incubator, false),
+        AccountMeta::new(*pda_creator, false),
+        AccountMeta::new(*nft_mint, false),
+        AccountMeta::new(*nft_account_info, false),
+        AccountMeta::new(*nft_store_info, false),
+        AccountMeta::new(*authority_info, false),
+        AccountMeta::new_readonly(*token_program, false),
+        AccountMeta::new_readonly(*metadata_program, false),
     ];
 
     Ok(Instruction {
