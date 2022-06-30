@@ -8,7 +8,7 @@ use solana_program::{
 
 use crate::{state::*, utils::*};
 
-pub fn process_create_monster_feature_config(
+pub fn process_create_monster_feature_config_01(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
@@ -245,6 +245,27 @@ pub fn process_create_monster_feature_config(
         [0, 0, 0, 0, 0, 0, 0],
     ];
 
+    let mut feature_config = MonsterFeatureConfig::from_account_info(feature_config_info)?;
+    feature_config.monster_0 = handle_monster_feature_config_vector(monster_0);
+    feature_config.monster_1 = handle_monster_feature_config_vector(monster_1);
+    feature_config.monster_2 = handle_monster_feature_config_vector(monster_2);
+    feature_config.serialize(&mut *feature_config_info.try_borrow_mut_data()?)?;
+
+    Ok(())
+}
+
+pub fn process_create_monster_feature_config_02(
+    _program_id: &Pubkey,
+    accounts: &[AccountInfo],
+) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let signer_info = next_account_info(account_info_iter)?;
+    let _rent_info = next_account_info(account_info_iter)?;
+    let _system_info = next_account_info(account_info_iter)?;
+    let feature_config_info = next_account_info(account_info_iter)?;
+
+    assert_signer(&signer_info)?;
+
     let monster_3: [[u16; 7]; 64] = [
         [400, 0, 0, 0, 0, 0, 0],
         [200, 80, 0, 0, 0, 0, 0],
@@ -379,13 +400,108 @@ pub fn process_create_monster_feature_config(
         [0, 0, 0, 0, 0, 0, 0],
     ];
 
+    let monster_5 = empty_config().clone();
+
     let mut feature_config = MonsterFeatureConfig::from_account_info(feature_config_info)?;
-    feature_config.monster_0 = handle_monster_feature_config_vector(monster_0);
-    feature_config.monster_1 = handle_monster_feature_config_vector(monster_1);
-    feature_config.monster_2 = handle_monster_feature_config_vector(monster_2);
     feature_config.monster_3 = handle_monster_feature_config_vector(monster_3);
     feature_config.monster_4 = handle_monster_feature_config_vector(monster_4);
+    feature_config.monster_5 = handle_monster_feature_config_vector(monster_5);
     feature_config.serialize(&mut *feature_config_info.try_borrow_mut_data()?)?;
 
     Ok(())
+}
+
+pub fn process_create_monster_feature_config_03(
+    _program_id: &Pubkey,
+    accounts: &[AccountInfo],
+) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let signer_info = next_account_info(account_info_iter)?;
+    let _rent_info = next_account_info(account_info_iter)?;
+    let _system_info = next_account_info(account_info_iter)?;
+    let feature_config_info = next_account_info(account_info_iter)?;
+
+    assert_signer(&signer_info)?;
+
+    let monster_6 = empty_config().clone();
+    let monster_7 = empty_config().clone();
+    let monster_8 = empty_config().clone();
+
+    let mut feature_config = MonsterFeatureConfig::from_account_info(feature_config_info)?;
+    feature_config.monster_6 = handle_monster_feature_config_vector(monster_6);
+    feature_config.monster_7 = handle_monster_feature_config_vector(monster_7);
+    feature_config.monster_8 = handle_monster_feature_config_vector(monster_8);
+    feature_config.serialize(&mut *feature_config_info.try_borrow_mut_data()?)?;
+
+    Ok(())
+}
+
+pub fn empty_config() -> [[u16; 7]; 64] {
+    let empty: [[u16; 7]; 64] = [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ];
+    return empty;
 }

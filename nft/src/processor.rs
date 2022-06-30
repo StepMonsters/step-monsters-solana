@@ -83,8 +83,14 @@ pub fn process_instruction(
         GameInstruction::UpdateGameConfig() => {
             process_update_game_config(program_id, accounts)
         }
-        GameInstruction::CreateMonsterFeatureConfig() => {
-            process_create_monster_feature_config(program_id, accounts)
+        GameInstruction::CreateMonsterFeatureConfig01() => {
+            process_create_monster_feature_config_01(program_id, accounts)
+        }
+        GameInstruction::CreateMonsterFeatureConfig02() => {
+            process_create_monster_feature_config_02(program_id, accounts)
+        }
+        GameInstruction::CreateMonsterFeatureConfig03() => {
+            process_create_monster_feature_config_03(program_id, accounts)
         }
     }
 }
