@@ -59,7 +59,7 @@ pub fn assert_monster(
     monster_info: &AccountInfo,
 ) -> Result<u8, ProgramError> {
     let path = &[
-        SEED_BATTLE.as_bytes(),
+        SEED_MONSTER.as_bytes(),
         program_id.as_ref(),
         mint_info.key.as_ref(),
     ];
