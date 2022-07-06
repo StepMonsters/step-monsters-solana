@@ -4,13 +4,12 @@ use solana_program::{
     entrypoint::ProgramResult,
     program_error::ProgramError,
     msg,
-    program::invoke_signed,
     pubkey::Pubkey,
     sysvar,
 };
 
 use crate::{state::*, ferror, utils::*};
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
+use crate::utils_mint::create_metadata_edition;
 
 pub fn process_battle(
     program_id: &Pubkey,
@@ -43,14 +42,6 @@ pub fn process_battle(
     assert_eq_pubkey(&system_info, &solana_program::system_program::id())?;
     assert_signer(&signer_info)?;
 
-    let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
-
-    let pda_seed = [
-        SEED_BATTLE.as_bytes(),
-        program_id.as_ref(),
-        "pda_creator".as_bytes(),
-        &[pda_bump],
-    ];
 
     let mut state = false;
     // todo battle logic
@@ -94,75 +85,23 @@ pub fn process_battle(
     //after battle logic do  mint_nft
     //monster add fatigue
     if state {
-        let config_data = ConfigureData::from_account_info(config_info)?;
-        let creators = vec![
-            mpl_token_metadata::state::Creator {
-                address: *pda_creator_info.key,
-                verified: true,
-                share: 0,
-            },
-            mpl_token_metadata::state::Creator {
-                address: config_data.creator,
-                verified: false,
-                share: 100,
-            },
-        ];
-        msg!("Create metadata");
-        invoke_signed(
-            &create_metadata_accounts_v2(
-                *metadata_program_info.key,
-                *metadata_info.key,
-                *mint_info.key,
-                *signer_info.key,
-                *signer_info.key,
-                *pda_creator_info.key, //pda must be signer
-                config_data.name,
-                config_data.symbol,
-                config_data.uri,
-                Some(creators),
-                config_data.fee,
-                true,
-                true,
-                None,
-                None,
-            ),
-            &[
-                metadata_info.clone(),
-                mint_info.clone(),
-                signer_info.clone(),
-                metadata_program_info.clone(),
-                token_program_info.clone(),
-                system_info.clone(),
-                rent_info.clone(),
-                pda_creator_info.clone(),
-            ],
-            &[&pda_seed],
+        let mut config_data = ConfigureData::from_account_info(config_info)?;
+        msg!("Create Metadata Edition");
+        create_metadata_edition(
+            &program_id,
+            &pda_creator_info,
+            config_data.clone(),
+            &signer_info,
+            &mint_info,
+            &metadata_info,
+            &edition_info,
+            &metadata_program_info,
+            &token_program_info,
+            &system_info,
+            &rent_info,
         )?;
-        msg!("Create Master Edition");
-        invoke_signed(
-            &create_master_edition_v3(
-                *metadata_program_info.key,
-                *edition_info.key,
-                *mint_info.key,
-                *pda_creator_info.key,
-                *signer_info.key,
-                *metadata_info.key,
-                *signer_info.key,
-                Some(1),
-            ),
-            &[
-                edition_info.clone(),
-                mint_info.clone(),
-                signer_info.clone(),
-                metadata_info.clone(),
-                metadata_program_info.clone(),
-                token_program_info.clone(),
-                system_info.clone(),
-                rent_info.clone(),
-                pda_creator_info.clone(),
-            ],
-            &[&pda_seed],
-        )?;
+        config_data.current_id += 1;
+        config_data.serialize(&mut *config_info.try_borrow_mut_data()?)?;
     }
 
     //if need hatch then do hatch
