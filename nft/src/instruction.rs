@@ -24,7 +24,9 @@ pub enum GameInstruction {
     Battle(BattleArgs),
     CreateGameConfig(),
     UpdateGameConfig(),
-    CreateMonsterFeatureConfig(),
+    CreateMonsterFeatureConfig01(),
+    CreateMonsterFeatureConfig02(),
+    CreateMonsterFeatureConfig03(),
 }
 
 
