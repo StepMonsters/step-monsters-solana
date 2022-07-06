@@ -33,8 +33,8 @@ pub use synthesis::*;
 pub mod upgrade;
 pub use upgrade::*;
 
-pub mod game_config;
-pub use game_config::*;
+pub mod config_game;
+pub use config_game::*;
 
 pub mod config_monster_feature;
 pub use config_monster_feature::*;
