@@ -12,6 +12,7 @@ use solana_program::{
 };
 
 use crate::{ferror, state::*, utils::*};
+use crate::utils_mint::create_monster_info;
 
 pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
@@ -137,29 +138,13 @@ pub fn process_mint(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramRes
     )?;
 
     msg!("Create Monster Info");
-    let bump_seed = assert_derivation(
-        program_id,
-        monster_info,
-        &[
-            SEED_MONSTER.as_bytes(),
-            program_id.as_ref(),
-            &mint_info.key.as_ref(),
-        ],
-    )?;
-    let monster_seeds = &[
-        SEED_MONSTER.as_bytes(),
-        program_id.as_ref(),
-        &mint_info.key.as_ref(),
-        &[bump_seed],
-    ];
-    create_or_allocate_account_raw(
-        *program_id,
-        monster_info,
-        rent_info,
-        system_info,
-        signer_info,
-        MAX_MONSTER_LENGTH,
-        monster_seeds,
+    create_monster_info(
+        &program_id,
+        &monster_info,
+        &mint_info,
+        &rent_info,
+        &system_info,
+        &signer_info,
     )?;
     let mut monster = Monster::from_account_info(monster_info)?;
     monster.race = 1;
