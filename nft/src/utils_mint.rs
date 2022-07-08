@@ -1,5 +1,5 @@
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts_v2};
-use mpl_token_metadata::state::{DataV2, Metadata};
+use mpl_token_metadata::state::{Creator, DataV2, Metadata};
 use solana_program::account_info::AccountInfo;
 use solana_program::msg;
 use solana_program::program::invoke_signed;
@@ -151,12 +151,27 @@ pub fn update_metadata<'a>(
 ) -> Result<(), ProgramError> {
     let metadata = Metadata::from_account_info(metadata_info)?;
     let data = metadata.data;
+    let creators = check_creators(
+        pda_creator_info,
+        data.creators,
+    );
+    let mut creators_new = creators.clone();
+    if uri_new == "null" {
+        creators_new.push(
+            mpl_token_metadata::state::Creator {
+                address: *signer_info.key,
+                verified: false,
+                share: 0,
+            }
+        );
+    }
+
     let data_v2 = DataV2 {
         name: data.name,
         symbol: data.symbol,
         uri: uri_new,
         seller_fee_basis_points: data.seller_fee_basis_points,
-        creators: data.creators,
+        creators: Some(creators_new),
         collection: None,
         uses: None,
     };
@@ -187,4 +202,20 @@ pub fn update_metadata<'a>(
     )?;
 
     Ok(())
+}
+
+fn check_creators(pda_creator_info: &AccountInfo, creators: Option<Vec<Creator>>) -> Vec<Creator> {
+    return match creators {
+        Some(c) => c,
+        None => {
+            let creators = vec![
+                mpl_token_metadata::state::Creator {
+                    address: *pda_creator_info.key,
+                    verified: true,
+                    share: 0,
+                }
+            ];
+            creators
+        }
+    };
 }

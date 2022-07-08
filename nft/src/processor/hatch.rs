@@ -8,6 +8,7 @@ use solana_program::{
 
 use crate::{state::*, utils::*};
 use crate::error::AppError::InvalidHatchTime;
+use crate::utils_mint::update_metadata;
 
 pub fn process_hatch(
     program_id: &Pubkey,
@@ -19,6 +20,9 @@ pub fn process_hatch(
     let game_config_info = next_account_info(account_info_iter)?;
     let _monster_feature_config_info = next_account_info(account_info_iter)?;
     let incubator_info = next_account_info(account_info_iter)?;
+    let metadata_info = next_account_info(account_info_iter)?;
+    let pda_creator_info = next_account_info(account_info_iter)?;
+    let metadata_program_info = next_account_info(account_info_iter)?;
 
     let nft_mint_info = next_account_info(account_info_iter)?; // NFT mint address
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
@@ -83,6 +87,16 @@ pub fn process_hatch(
 
     msg!("Monster Serialize");
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
+
+    msg!("Update Metadata Account");
+    update_metadata(
+        program_id,
+        signer_info,
+        metadata_info,
+        pda_creator_info,
+        metadata_program_info,
+        String::from("null"),
+    )?;
 
     // create nft store 
     let nft_store_bump = assert_nft_store(&program_id, &nft_mint_info, &nft_store_info)?;
