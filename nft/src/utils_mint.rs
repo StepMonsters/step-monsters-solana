@@ -73,7 +73,7 @@ pub fn create_metadata_edition<'a>(
             share: 0,
         },
         mpl_token_metadata::state::Creator {
-            address: config_data.creator,
+            address: *program_id,
             verified: false,
             share: 100,
         },
