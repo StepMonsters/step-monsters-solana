@@ -1,4 +1,5 @@
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2};
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts_v2};
+use mpl_token_metadata::state::{DataV2, Metadata};
 use solana_program::account_info::AccountInfo;
 use solana_program::msg;
 use solana_program::program::invoke_signed;
@@ -14,7 +15,7 @@ pub fn create_monster_info<'a>(
     mint_info: &AccountInfo<'a>,
     rent_info: &AccountInfo<'a>,
     system_info: &AccountInfo<'a>,
-    signer_info: &AccountInfo<'a>
+    signer_info: &AccountInfo<'a>,
 ) -> Result<(), ProgramError> {
     let bump_seed = assert_derivation(
         program_id,
@@ -55,9 +56,8 @@ pub fn create_metadata_edition<'a>(
     metadata_program_info: &AccountInfo<'a>,
     token_program_info: &AccountInfo<'a>,
     system_info: &AccountInfo<'a>,
-    rent_info: &AccountInfo<'a>
+    rent_info: &AccountInfo<'a>,
 ) -> Result<(), ProgramError> {
-
     let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
     let pda_seed = [
         SEED_BATTLE.as_bytes(),
@@ -134,6 +134,54 @@ pub fn create_metadata_edition<'a>(
             system_info.clone(),
             rent_info.clone(),
             pda_creator_info.clone(),
+        ],
+        &[&pda_seed],
+    )?;
+
+    Ok(())
+}
+
+pub fn update_metadata<'a>(
+    program_id: &Pubkey,
+    signer_info: &AccountInfo<'a>,
+    metadata_info: &AccountInfo<'a>,
+    pda_creator_info: &AccountInfo<'a>,
+    metadata_program_info: &AccountInfo<'a>,
+    uri_new: String,
+) -> Result<(), ProgramError> {
+    let metadata = Metadata::from_account_info(metadata_info)?;
+    let data = metadata.data;
+    let data_v2 = DataV2 {
+        name: data.name,
+        symbol: data.symbol,
+        uri: uri_new,
+        seller_fee_basis_points: data.seller_fee_basis_points,
+        creators: data.creators,
+        collection: None,
+        uses: None,
+    };
+    let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
+    let pda_seed = [
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        "pda_creator".as_bytes(),
+        &[pda_bump],
+    ];
+    invoke_signed(
+        &update_metadata_accounts_v2(
+            *metadata_program_info.key,
+            *metadata_info.key,
+            *pda_creator_info.key,
+            Some(*pda_creator_info.key),
+            Some(data_v2),
+            Some(true),
+            Some(true),
+        ),
+        &[
+            signer_info.clone(),
+            metadata_info.clone(),
+            pda_creator_info.clone(),
+            metadata_program_info.clone(),
         ],
         &[&pda_seed],
     )?;

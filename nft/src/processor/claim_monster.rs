@@ -1,16 +1,14 @@
 use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::update_metadata_accounts_v2;
-use mpl_token_metadata::state::{DataV2, Metadata};
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program::invoke_signed,
     program_error::ProgramError,
     pubkey::Pubkey,
 };
 
 use crate::{ferror, state::*, utils::*};
+use crate::utils_mint::update_metadata;
 
 pub fn process_claim_monster(
     program_id: &Pubkey,
@@ -67,41 +65,13 @@ pub fn process_claim_monster(
     )?;
 
     msg!("Update Metadata Account");
-    let metadata = Metadata::from_account_info(metadata_info)?;
-    let data = metadata.data;
-    let datav2 = DataV2 {
-        name: data.name,
-        symbol: data.symbol,
-        uri: args.uri,
-        seller_fee_basis_points: data.seller_fee_basis_points,
-        creators: data.creators,
-        collection: None,
-        uses: None,
-    };
-    let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
-    let pda_seed = [
-        SEED_BATTLE.as_bytes(),
-        program_id.as_ref(),
-        "pda_creator".as_bytes(),
-        &[pda_bump],
-    ];
-    invoke_signed(
-        &update_metadata_accounts_v2(
-            *metadata_program_info.key,
-            *metadata_info.key,
-            *pda_creator_info.key,
-            Some(*pda_creator_info.key),
-            Some(datav2),
-            Some(true),
-            Some(true),
-        ),
-        &[
-            metadata_info.clone(),
-            signer_info.clone(),
-            metadata_program_info.clone(),
-            pda_creator_info.clone(),
-        ],
-        &[&pda_seed],
+    update_metadata(
+        program_id,
+        signer_info,
+        metadata_info,
+        pda_creator_info,
+        metadata_program_info,
+        args.uri
     )?;
 
     msg!("Update Incubator");
