@@ -15,7 +15,6 @@ pub fn process_hatch(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    
     let monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
     let _monster_feature_config_info = next_account_info(account_info_iter)?;
@@ -87,11 +86,10 @@ pub fn process_hatch(
 
     // create nft store 
     let nft_store_bump = assert_nft_store(&program_id, &nft_mint_info, &nft_store_info)?;
-    let auth_bump = assert_monster_authority(&program_id, &nft_mint_info, &authority_info)?;
+    let auth_bump = assert_monster_authority(&program_id, &authority_info)?;
     let authority_seed = [
         SEED_BATTLE.as_bytes(),
         program_id.as_ref(),
-        nft_mint_info.key.as_ref(),
         "authority".as_bytes(),
         &[auth_bump],
     ];
@@ -144,7 +142,7 @@ pub fn process_hatch(
     incubator.user = signer_info.key.clone();
     let now_ts = now_timestamp();
     let index = now_ts / 86400;
-    incubator.timestamp = index * 86400; 
+    incubator.timestamp = index * 86400;
     incubator.serialize(&mut *incubator_info.try_borrow_mut_data()?)?;
     Ok(())
 }

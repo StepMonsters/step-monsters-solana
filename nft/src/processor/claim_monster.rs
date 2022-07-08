@@ -1,16 +1,16 @@
 use borsh::BorshSerialize;
 use mpl_token_metadata::instruction::update_metadata_accounts_v2;
-use mpl_token_metadata::state::{ DataV2, Metadata};
+use mpl_token_metadata::state::{DataV2, Metadata};
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
-    program_error::ProgramError,
     msg,
-    program::{ invoke_signed },
+    program::invoke_signed,
+    program_error::ProgramError,
     pubkey::Pubkey,
 };
 
-use crate::{state::*, ferror, utils::*};
+use crate::{ferror, state::*, utils::*};
 
 pub fn process_claim_monster(
     program_id: &Pubkey,
@@ -30,9 +30,9 @@ pub fn process_claim_monster(
     let authority_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let metadata_program_info = next_account_info(account_info_iter)?;
-    
+
     assert_signer(&signer_info)?;
-    
+
     msg!("Update Monster Info");
     let mut monster = Monster::from_account_info(monster_info)?;
     assert_incubator(&program_id, &nft_mint_info, &incubator_info)?;
@@ -41,7 +41,7 @@ pub fn process_claim_monster(
     assert_eq_pubkey(&nft_account_info, &incubator.nft_return)?;
     // hatch need one day
     if monster.hatch_time < now_timestamp() - 86400 {
-        return ferror!("hatching...")
+        return ferror!("hatching...");
     }
     monster.hatch_time = now_timestamp();
     msg!("Monster Serialize");
@@ -49,8 +49,8 @@ pub fn process_claim_monster(
 
     // create nft store 
     assert_nft_store(&program_id, &nft_mint_info, &nft_store_info)?;
-    let auth_bump = assert_monster_authority(&program_id, &nft_mint_info, &authority_info)?;
-    
+    let auth_bump = assert_monster_authority(&program_id, &authority_info)?;
+
     //transfer token back
     spl_token_transfer(
         token_program_info.clone(),
@@ -61,14 +61,12 @@ pub fn process_claim_monster(
         &[
             SEED_BATTLE.as_bytes(),
             program_id.as_ref(),
-            nft_mint_info.key.as_ref(),
             "authority".as_bytes(),
             &[auth_bump],
         ],
     )?;
-    
-    msg!("Update Metadata Account");
 
+    msg!("Update Metadata Account");
     let metadata = Metadata::from_account_info(metadata_info)?;
     let data = metadata.data;
     let datav2 = DataV2 {
@@ -81,7 +79,6 @@ pub fn process_claim_monster(
         uses: None,
     };
     let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
-
     let pda_seed = [
         SEED_BATTLE.as_bytes(),
         program_id.as_ref(),
@@ -107,6 +104,7 @@ pub fn process_claim_monster(
         &[&pda_seed],
     )?;
 
+    msg!("Update Incubator");
     incubator.is_done = true;
     incubator.serialize(&mut *incubator_info.try_borrow_mut_data()?)?;
     Ok(())

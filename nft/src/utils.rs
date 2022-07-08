@@ -95,13 +95,11 @@ pub fn assert_nft_store(
 
 pub fn assert_monster_authority(
     program_id: &Pubkey,
-    mint_info: &AccountInfo,
     authority_info: &AccountInfo,
 ) -> Result<u8, ProgramError> {
     let path = &[
         SEED_BATTLE.as_bytes(),
         program_id.as_ref(),
-        mint_info.key.as_ref(),
         "authority".as_bytes(),
     ];
     assert_derivation(&program_id, &authority_info, path)
