@@ -60,24 +60,19 @@ impl Monster {
     }
 
     pub fn calculate_energy(&self) -> u32 {
-        //assume 2 energy per hour  max 100
-        let energy_per_hour = 2 * self.efficiency;
-        let now_ts = now_timestamp();
+        let max_count: u64 = (self.efficiency * 2 * 10000 / 24) as u64;
+        let hour_per_energy = 24 * 10000 * 10000 / max_count;
+        let second_per_energy = hour_per_energy * 60 * 60;
+        let mut time_past = now_timestamp() - self.hatch_time;
         if self.last_battle_time > 0 {
-            let round = (now_ts - self.last_battle_time) / 3600;
-            if round as u32 * energy_per_hour + self.energy > 100 {
-                return 100;
-            } else {
-                return round as u32 * energy_per_hour + self.energy;
-            }
-        } else {
-            let round = (now_ts - self.hatch_time) / 3600;
-            if round as u32 * energy_per_hour + self.energy > 100 {
-                return 100;
-            } else {
-                return round as u32 * energy_per_hour + self.energy;
-            }
+            time_past = now_timestamp() - self.last_battle_time;
         }
+        let energy_recover = time_past * 10000 * 10000 / second_per_energy;
+        let mut now_energy = self.energy + energy_recover as u32;
+        if now_energy > 60000 {
+            now_energy = 60000;
+        }
+        return now_energy;
     }
 }
 
@@ -207,8 +202,8 @@ impl Incubator {
         }
         try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
     }
-
 }
+
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
 pub struct BattleArgs {

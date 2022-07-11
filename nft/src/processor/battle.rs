@@ -52,7 +52,7 @@ pub fn process_battle(
     }
     monster.energy = monster.calculate_energy();
     //require at least 1 energy to battle
-    if monster.energy < 1 {
+    if monster.energy < 10000 {
         return ferror!("not enough energy");
     }
     if monster.attack < args.defense {
@@ -106,7 +106,7 @@ pub fn process_battle(
 
     //if need hatch then do hatch
     monster.fatigue += 2;
-    monster.energy -= 1;
+    monster.energy -= 10000;
     monster.last_battle_time = now_timestamp();
     monster.serialize(&mut *monster_info_attacker.try_borrow_mut_data()?)?;
 
