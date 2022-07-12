@@ -212,6 +212,12 @@ pub struct BattleArgs {
     pub defense: u32,
 }
 
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct CureArgs {
+    pub cure: u8,
+}
+
 pub fn now_timestamp() -> u64 {
     Clock::get().unwrap().unix_timestamp as u64
 }

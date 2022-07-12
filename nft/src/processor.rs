@@ -1,43 +1,35 @@
 use borsh::BorshDeserialize;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
+pub use battle::*;
+pub use breed::*;
+pub use claim_monster::*;
+pub use config_game::*;
+pub use config_monster_feature::*;
+pub use configure::*;
+pub use cure::*;
+pub use hatch::*;
+pub use hatch_quick::*;
+pub use mint::*;
+pub use mint_init::*;
+pub use synthesis::*;
+pub use upgrade::*;
+
 use crate::instruction::*;
 
 pub mod configure;
-pub use configure::*;
-
 pub mod mint_init;
-pub use mint_init::*;
-
 pub mod mint;
-pub use mint::*;
-
 pub mod hatch_quick;
-pub use hatch_quick::*;
-
 pub mod hatch;
-pub use hatch::*;
-
 pub mod claim_monster;
-pub use claim_monster::*;
-
 pub mod battle;
-pub use battle::*;
-
 pub mod breed;
-pub use breed::*;
-
 pub mod synthesis;
-pub use synthesis::*;
-
 pub mod upgrade;
-pub use upgrade::*;
-
 pub mod config_game;
-pub use config_game::*;
-
 pub mod config_monster_feature;
-pub use config_monster_feature::*;
+pub mod cure;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -83,14 +75,8 @@ pub fn process_instruction(
         GameInstruction::UpdateGameConfig() => {
             process_update_game_config(program_id, accounts)
         }
-        GameInstruction::CreateMonsterFeatureConfig01() => {
-            process_create_monster_feature_config_01(program_id, accounts)
-        }
-        GameInstruction::CreateMonsterFeatureConfig02() => {
-            process_create_monster_feature_config_02(program_id, accounts)
-        }
-        GameInstruction::CreateMonsterFeatureConfig03() => {
-            process_create_monster_feature_config_03(program_id, accounts)
+        GameInstruction::Cure(args) => {
+            process_cure(program_id, accounts, args)
         }
     }
 }
