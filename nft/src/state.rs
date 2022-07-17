@@ -7,6 +7,7 @@ use solana_program::{
     sysvar::{clock::Clock, Sysvar},
 };
 
+pub const SEED_STEP_MONSTER: &str = "step_monster";
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config_1701";
@@ -216,6 +217,29 @@ pub struct BattleArgs {
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
 pub struct CureArgs {
     pub cure: u8,
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct TransferSpendingArgs {
+    pub amount: u64,
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct SpendingAccount {
+    pub amount: u64,
+}
+
+impl SpendingAccount {
+    pub const LEN: usize = 8;
+
+    pub fn from_account_info(a: &AccountInfo) -> Result<SpendingAccount, ProgramError> {
+        if a.data_len() != Self::LEN {
+            return Err(ProgramError::InvalidAccountData);
+        }
+        try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
+    }
 }
 
 pub fn now_timestamp() -> u64 {

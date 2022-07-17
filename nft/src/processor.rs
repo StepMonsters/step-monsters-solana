@@ -13,6 +13,7 @@ pub use hatch_quick::*;
 pub use mint::*;
 pub use mint_init::*;
 pub use synthesis::*;
+pub use transfer_spending::*;
 pub use upgrade::*;
 
 use crate::instruction::*;
@@ -30,6 +31,7 @@ pub mod upgrade;
 pub mod config_game;
 pub mod config_monster_feature;
 pub mod cure;
+pub mod transfer_spending;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -77,6 +79,12 @@ pub fn process_instruction(
         }
         GameInstruction::Cure(args) => {
             process_cure(program_id, accounts, args)
+        }
+        GameInstruction::TransferToSpending(args) => {
+            process_transfer_to_spending(program_id, accounts, args)
+        }
+        GameInstruction::TransferFromSpending(args) => {
+            process_transfer_from_spending(program_id, accounts, args)
         }
     }
 }

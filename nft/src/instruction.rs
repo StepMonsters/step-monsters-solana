@@ -25,6 +25,8 @@ pub enum GameInstruction {
     CreateGameConfig(),
     UpdateGameConfig(),
     Cure(CureArgs),
+    TransferToSpending(TransferSpendingArgs),
+    TransferFromSpending(TransferSpendingArgs),
 }
 
 

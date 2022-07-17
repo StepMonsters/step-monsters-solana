@@ -105,6 +105,20 @@ pub fn assert_monster_authority(
     assert_derivation(&program_id, &authority_info, path)
 }
 
+pub fn assert_spending(
+    program_id: &Pubkey,
+    spending_info: &AccountInfo,
+    signer_info: &AccountInfo,
+) -> Result<u8, ProgramError> {
+    let path = &[
+        SEED_STEP_MONSTER.as_bytes(),
+        program_id.as_ref(),
+        "spending".as_bytes(),
+        signer_info.key.as_ref(),
+    ];
+    assert_derivation(&program_id, &spending_info, path)
+}
+
 pub fn assert_signer(account_info: &AccountInfo) -> ProgramResult {
     if !account_info.is_signer {
         Err(ProgramError::MissingRequiredSignature)
