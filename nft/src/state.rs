@@ -7,7 +7,7 @@ use solana_program::{
     sysvar::{clock::Clock, Sysvar},
 };
 
-pub const SEED_STEP_MONSTER: &str = "step_monster";
+pub const SEED_STEP_MONSTER: &str = "step_monster_172336";
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config_1701";

@@ -7,7 +7,7 @@ use solana_program::{
     pubkey::Pubkey,
     system_instruction,
 };
-use solana_program::program::invoke;
+use solana_program::program::{invoke, invoke_signed};
 
 use crate::{ferror, state::*, utils::*};
 
@@ -79,7 +79,7 @@ pub fn process_transfer_to_spending(
 }
 
 pub fn process_transfer_from_spending(
-    _program_id: &Pubkey,
+    program_id: &Pubkey,
     accounts: &[AccountInfo],
     args: TransferSpendingArgs,
 ) -> ProgramResult {
@@ -91,7 +91,15 @@ pub fn process_transfer_from_spending(
     assert_signer(&signer_info)?;
 
     msg!("Transfer To Spending Account");
-    invoke(
+    let bump_seed = assert_spending(&program_id, &spending_info, &signer_info)?;
+    let spending_seeds = [
+        SEED_STEP_MONSTER.as_bytes(),
+        program_id.as_ref(),
+        "spending".as_bytes(),
+        signer_info.key.as_ref(),
+        &[bump_seed],
+    ];
+    invoke_signed(
         &system_instruction::transfer(
             spending_info.key,
             signer_info.key,
@@ -101,6 +109,7 @@ pub fn process_transfer_from_spending(
             spending_info.clone(),
             system_info.clone(),
         ],
+        &[&spending_seeds],
     )?;
 
     msg!("Serialize Spending Account");
