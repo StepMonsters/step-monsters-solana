@@ -12,6 +12,7 @@ pub use hatch::*;
 pub use hatch_quick::*;
 pub use mint::*;
 pub use mint_init::*;
+pub use mint_quick::*;
 pub use synthesis::*;
 pub use transfer_spending::*;
 pub use upgrade::*;
@@ -32,6 +33,7 @@ pub mod config_game;
 pub mod config_monster_feature;
 pub mod cure;
 pub mod transfer_spending;
+pub mod mint_quick;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -47,8 +49,8 @@ pub fn process_instruction(
         GameInstruction::InitMint => {
             process_mint_init(program_id, accounts)
         }
-        GameInstruction::Mint => {
-            process_mint(program_id, accounts)
+        GameInstruction::Mint(args) => {
+            process_mint(program_id, accounts, args)
         }
         GameInstruction::QuickHatch => {
             process_hatch_quick(program_id, accounts)
@@ -85,6 +87,15 @@ pub fn process_instruction(
         }
         GameInstruction::TransferFromSpending(args) => {
             process_transfer_from_spending(program_id, accounts, args)
+        }
+        GameInstruction::TransferFromSpendingTemp(args) => {
+            process_transfer_from_spending_temp(program_id, accounts, args)
+        }
+        GameInstruction::CreateMonsterFeatureConfig => {
+            process_create_monster_feature_config(program_id, accounts)
+        }
+        GameInstruction::QuickMint(args) => {
+            process_mint_quick(program_id, accounts, args)
         }
     }
 }

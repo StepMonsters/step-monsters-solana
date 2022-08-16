@@ -326,7 +326,7 @@ pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, E
     Ok(result)
 }
 
-pub fn handle_game_config_vector(data:[[u32; 6]; 10])->Vec<Vec<u32>>{
+pub fn game_config_to_vector(data:[[u32; 6]; 10])->Vec<Vec<u32>>{
     let mut config = Vec::new();
     for item in data{
         config.push(Vec::from(item));
@@ -334,33 +334,10 @@ pub fn handle_game_config_vector(data:[[u32; 6]; 10])->Vec<Vec<u32>>{
     return config;
 }
 
-pub fn handle_monster_feature_config_vector(data:[[u16; 7]; 64])->Vec<Vec<u16>>{
+pub fn feature_config_to_vector(data:[[u16; 7]; 64])->Vec<Vec<u16>>{
     let mut config = Vec::new();
-    // for i in 0..32 {
-    //     let item = Vec::from(data[i].clone());
-    //     config.push(item);
-    // }
     for item in data{
         config.push(Vec::from(item));
     }
     return config;
-}
-
-pub fn handle_monster_feature_config(config: Vec<[u8; 7]>) -> Vec<Vec<[u8;7]>> {
-    let mut sum = 0;
-    let mut features = Vec::new();
-    let mut temp = Vec::new();
-    for i in 0..config.len() {
-        sum += config[i][0];
-        if sum < 100 {
-            temp.push(config[i].clone());
-        } else if sum == 100 {
-            features.push(temp.clone());
-            temp = Vec::new();
-            sum = 0;
-        } else {
-            panic!("Invalid config.");
-        }
-    }
-    return features;
 }

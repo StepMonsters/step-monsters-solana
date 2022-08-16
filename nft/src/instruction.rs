@@ -14,7 +14,7 @@ use crate::state::*;
 pub enum GameInstruction {
     Configure(ConfigureArgs),
     InitMint,
-    Mint,
+    Mint(MintArgs),
     QuickHatch,
     Hatch,
     ClaimMonster(ClaimMonsterArgs),
@@ -27,6 +27,9 @@ pub enum GameInstruction {
     Cure(CureArgs),
     TransferToSpending(TransferSpendingArgs),
     TransferFromSpending(TransferSpendingArgs),
+    TransferFromSpendingTemp(TransferSpendingArgs),
+    CreateMonsterFeatureConfig,
+    QuickMint(QuickMintArgs),
 }
 
 
@@ -62,6 +65,7 @@ pub fn mint(
     monster: &Pubkey,
     metadata_program: &Pubkey,
     token_program: &Pubkey,
+    args:MintArgs
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
         AccountMeta::new(*signer, true),
@@ -81,7 +85,7 @@ pub fn mint(
     Ok(Instruction {
         program_id: *program_id,
         accounts,
-        data: GameInstruction::Mint.try_to_vec().unwrap(),
+        data: GameInstruction::Mint(args).try_to_vec().unwrap(),
     })
 }
 

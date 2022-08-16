@@ -3,37 +3,35 @@ use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
-    program::invoke,
     program_error::ProgramError,
     pubkey::Pubkey,
-    system_instruction,
     sysvar,
 };
 
 use crate::{ferror, state::*, utils::*};
-use crate::utils_mint::{create_metadata_edition, create_monster_info};
+use crate::utils_mint::{create_metadata_edition, create_monster_info, init_monster_attributes};
 
-pub fn process_mint(
+pub fn process_mint_quick(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    args: MintArgs,
+    args: QuickMintArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
-    let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
-    let fee_receiver_info = next_account_info(account_info_iter)?; // fee_receiver: wallet
+    let pda_creator_info = next_account_info(account_info_iter)?;
+    let fee_receiver_info = next_account_info(account_info_iter)?;
     let mint_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
+    let game_config_info = next_account_info(account_info_iter)?;
 
     let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
-    msg!("Assert Public Key");
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
     assert_eq_pubkey(&token_program_info, &spl_token::id())?;
     assert_eq_pubkey(&rent_info, &sysvar::rent::id())?;
@@ -41,25 +39,11 @@ pub fn process_mint(
     assert_signer(&signer_info)?;
     assert_config(&program_id, &config_info)?;
 
-    msg!("Assert Fee Receiver");
     let mut config_data = ConfigureData::from_account_info(config_info)?;
     assert_eq_pubkey(&fee_receiver_info, &config_data.fee_receiver)?;
 
-    msg!("Check Config Initialized");
     if !config_data.is_initialized {
         return ferror!("invalid mint state");
-    }
-
-    msg!("Transfer Mint Fee");
-    if config_data.price > 0 {
-        invoke(
-            &system_instruction::transfer(&signer_info.key, &config_data.fee_receiver, config_data.price),
-            &[
-                signer_info.clone(),
-                fee_receiver_info.clone(),
-                system_info.clone(),
-            ],
-        )?;
     }
 
     msg!("Create Metadata Edition");
@@ -88,13 +72,15 @@ pub fn process_mint(
         &system_info,
         &signer_info,
     )?;
-    let mut monster = Monster::from_account_info(monster_info)?;
-    monster.race = args.race;
-    monster.generation = args.generation;
-    monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-    monster.father_mint = args.father_mint;
-    monster.mother_mint = args.mother_mint;
-    monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
+
+    msg!("Init Monster Attributes");
+    init_monster_attributes(
+        &monster_info,
+        &game_config_info,
+        true,
+        false,
+        args,
+    )?;
 
     Ok(())
 }

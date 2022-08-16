@@ -11,14 +11,14 @@ pub const SEED_STEP_MONSTER: &str = "step_monster_172336";
 pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config_1701";
-pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config_06301313";
+pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config_07271508";
 pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
 pub const NUM_MONSTER_RACE: usize = 10;
-pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10);
+pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10) + (32 * 2);
 pub const MAX_GAME_CONFIG_LENGTH: usize = (4 + (4 + 4 * 6) * 10) * 2;
-pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = (4 + (4 + 2 * 7) * 64) * 9;
+pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = (4 + (4 + 2 * 7) * 64) * 4;
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
@@ -47,9 +47,11 @@ pub struct Monster {
 
     pub energy: u32,
     pub last_battle_time: u64,
-
     pub hatch_time: u64,
     pub monster_feature: Vec<u8>,
+
+    pub father_mint: Pubkey,
+    pub mother_mint: Pubkey,
 }
 
 impl Monster {
@@ -102,14 +104,7 @@ pub struct MonsterFeatureConfig {
     pub monster_0: Vec<Vec<u16>>,
     pub monster_1: Vec<Vec<u16>>,
     pub monster_2: Vec<Vec<u16>>,
-
     pub monster_3: Vec<Vec<u16>>,
-    pub monster_4: Vec<Vec<u16>>,
-    pub monster_5: Vec<Vec<u16>>,
-
-    pub monster_6: Vec<Vec<u16>>,
-    pub monster_7: Vec<Vec<u16>>,
-    pub monster_8: Vec<Vec<u16>>,
 }
 
 impl Battle {
@@ -168,7 +163,7 @@ pub struct ConfigureArgs {
 pub type ConfigureData = ConfigureArgs;
 
 impl ConfigureData {
-    pub const LEN: usize = 1 + 32 + 32 + 32 + 2 + 8 + 4 + 32 + 10 + 200;
+    pub const LEN: usize = 1 + 32 + 32 + 32 + 2 + 8 + 2 + 32 + 10 + 200;
 
     pub fn from_account_info(a: &AccountInfo) -> Result<ConfigureData, ProgramError> {
         if a.data_len() != Self::LEN {
@@ -211,6 +206,8 @@ pub struct BattleArgs {
     pub hp: u32,
     pub attack: u32,
     pub defense: u32,
+    pub race: u8,
+    pub attrs: Vec<u8>,
 }
 
 #[repr(C)]
@@ -240,6 +237,23 @@ impl SpendingAccount {
         }
         try_from_slice_unchecked(&a.data.borrow_mut()).map_err(|_| ProgramError::InvalidAccountData)
     }
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct MintArgs {
+    pub race: u8,
+    pub attrs: Vec<u8>,
+    pub generation: u8,
+    pub father_mint: Pubkey,
+    pub mother_mint: Pubkey,
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct QuickMintArgs {
+    pub race: u8,
+    pub attrs: Vec<u8>,
 }
 
 pub fn now_timestamp() -> u64 {

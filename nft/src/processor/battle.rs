@@ -1,15 +1,15 @@
 use borsh::BorshSerialize;
 use solana_program::{
-    account_info::{next_account_info, AccountInfo},
+    account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
-    program_error::ProgramError,
     msg,
+    program_error::ProgramError,
     pubkey::Pubkey,
     sysvar,
 };
 
-use crate::{state::*, ferror, utils::*};
-use crate::utils_mint::create_metadata_edition;
+use crate::{ferror, state::*, utils::*};
+use crate::utils_mint::{create_metadata_edition, create_monster_info, init_monster_attributes};
 
 pub fn process_battle(
     program_id: &Pubkey,
@@ -26,6 +26,8 @@ pub fn process_battle(
     let mint_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
+    let battle_mint_monster_info = next_account_info(account_info_iter)?;
+    let game_config_info = next_account_info(account_info_iter)?;
     let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
@@ -58,9 +60,9 @@ pub fn process_battle(
     if monster.attack < args.defense {
         //lose 
     }
-    
+
     if monster.attack == args.defense {
-        if args.attack > monster.defense{
+        if args.attack > monster.defense {
             //lose
         } else {
             // no winner
@@ -102,6 +104,26 @@ pub fn process_battle(
         )?;
         config_data.current_id += 1;
         config_data.serialize(&mut *config_info.try_borrow_mut_data()?)?;
+
+        msg!("Create Monster Info");
+        create_monster_info(
+            &program_id,
+            &battle_mint_monster_info,
+            &mint_info,
+            &rent_info,
+            &system_info,
+            &signer_info,
+        )?;
+
+        msg!("Init Monster Attributes");
+        let mint_args = QuickMintArgs { race: args.race, attrs: args.attrs };
+        init_monster_attributes(
+            &battle_mint_monster_info,
+            &game_config_info,
+            true,
+            true,
+            mint_args,
+        )?;
     }
 
     //if need hatch then do hatch

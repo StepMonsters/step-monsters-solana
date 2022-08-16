@@ -1,12 +1,16 @@
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
+    msg,
     program::invoke,
+    program_error::ProgramError,
     pubkey::Pubkey,
 };
 
-use crate::{utils::*};
+use crate::{ferror, utils::*};
 use crate::instruction::mint;
+use crate::state::{MintArgs, Monster};
+use crate::utils_mint::calculate_breed_attrs;
 
 pub fn process_breed(
     program_id: &Pubkey,
@@ -23,21 +27,41 @@ pub fn process_breed(
     let monster_info = next_account_info(account_info_iter)?;
     let program_info = next_account_info(account_info_iter)?;
 
+    let father_mint_info = next_account_info(account_info_iter)?;
+    let mother_mint_info = next_account_info(account_info_iter)?;
+    let father_info = next_account_info(account_info_iter)?;
+    let mother_info = next_account_info(account_info_iter)?;
+
     let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
-    // let father_info = next_account_info(account_info_iter)?;
-    // let mother_info = next_account_info(account_info_iter)?;
-
     assert_signer(&signer_info)?;
-    // let size = 82;
-    // let rent = &Rent::from_account_info(&rent_info)?;
-    // let required_lamports = rent.minimum_balance(size);
 
-    // let father = Monster::from_account_info(father_info)?;
-    // let mother = Monster::from_account_info(mother_info)?;
+    let father = Monster::from_account_info(father_info)?;
+    let mother = Monster::from_account_info(mother_info)?;
+    if father.race != mother.race {
+        return ferror!("require same race");
+    }
+
+    let breed_attrs = calculate_breed_attrs(
+        father.monster_feature.clone(),
+        mother.monster_feature.clone(),
+    )?;
+
+    let mut breed_generation = father.generation + 1;
+    if father.generation > mother.generation {
+        breed_generation = mother.generation + 1;
+    }
+
+    let mint_args = MintArgs {
+        race: father.race,
+        attrs: breed_attrs,
+        generation: breed_generation,
+        father_mint: *father_mint_info.key,
+        mother_mint: *mother_mint_info.key,
+    };
 
     invoke(
         &mint(
@@ -52,6 +76,7 @@ pub fn process_breed(
             monster_info.key,
             metadata_program_info.key,
             token_program_info.key,
+            mint_args,
         )?,
         &[
             signer_info.clone(),

@@ -31,25 +31,25 @@ pub fn process_claim_monster(
 
     assert_signer(&signer_info)?;
 
-    msg!("Update Monster Info");
+    msg!("Assert Public Key");
     let mut monster = Monster::from_account_info(monster_info)?;
     assert_incubator(&program_id, &nft_mint_info, &incubator_info)?;
     let mut incubator = Incubator::from_account_info(incubator_info)?;
     assert_eq_pubkey(&signer_info, &incubator.user)?;
     assert_eq_pubkey(&nft_account_info, &incubator.nft_return)?;
-    // hatch need one day
-    if monster.hatch_time < now_timestamp() - 86400 {
-        return ferror!("hatching...");
-    }
+
+    msg!("Check Monster Hatch Time");
+    if monster.hatch_time > now_timestamp() {
+        return ferror!("hatching");
+    };
     monster.hatch_time = now_timestamp();
-    msg!("Monster Serialize");
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
-    // create nft store 
+    msg!("Assert Store Authority");
     assert_nft_store(&program_id, &nft_mint_info, &nft_store_info)?;
     let auth_bump = assert_monster_authority(&program_id, &authority_info)?;
 
-    //transfer token back
+    msg!("Claim Token");
     spl_token_transfer(
         token_program_info.clone(),
         nft_store_info.clone(),
@@ -71,7 +71,7 @@ pub fn process_claim_monster(
         metadata_info,
         pda_creator_info,
         metadata_program_info,
-        args.uri
+        args.uri,
     )?;
 
     msg!("Update Incubator");

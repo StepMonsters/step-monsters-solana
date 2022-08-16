@@ -119,3 +119,26 @@ pub fn process_transfer_from_spending(
 
     Ok(())
 }
+
+pub fn process_transfer_from_spending_temp(
+    _program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    args: TransferSpendingArgs,
+) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let signer_info = next_account_info(account_info_iter)?;
+    let spending_info = next_account_info(account_info_iter)?;
+
+    assert_signer(&signer_info)?;
+
+    msg!("Transfer From Spending Account");
+    **spending_info.try_borrow_mut_lamports()? -= args.amount;
+    **signer_info.try_borrow_mut_lamports()? += args.amount;
+
+    msg!("Serialize Spending Account");
+    let mut spending = SpendingAccount::from_account_info(spending_info)?;
+    spending.amount -= args.amount;
+    spending.serialize(&mut *spending_info.try_borrow_mut_data()?)?;
+
+    Ok(())
+}

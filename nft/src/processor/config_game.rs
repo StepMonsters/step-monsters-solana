@@ -70,8 +70,8 @@ pub fn process_create_game_config(
         [1050, 1080, 1040, 1010, 1050, 80]
     ];
 
-    let male = handle_game_config_vector(male_data);
-    let female = handle_game_config_vector(female_data);
+    let male = game_config_to_vector(male_data);
+    let female = game_config_to_vector(female_data);
 
     let mut game_config = GameConfig::from_account_info(game_config_info)?;
     game_config.monster_male = male;
