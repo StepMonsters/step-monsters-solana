@@ -20,19 +20,19 @@ pub enum GameInstruction {
 ```
 ### Config
 
-配置设置
+Configure Account Info
 
 | AccountInfo      | is_signer | is_writable |                                                           |
 | ---------------- | --------- | ----------- | --------------------------------------------------------- |
-| signer           | **true**  | false       | 交易发起者，即钱包地址                                    |
+| signer           | **true**  | false       | transaction signer                                       |
 | config           | false     | false       | ['battle', program_id, 'configure']                  
-| rent             | false     | false       | 系统rent                                                  |
-| system           | false     | false       | 系统 system                                               |
+| rent             | false     | false       | system rent                                                  |
+| system           | false     | false       | system                                               |
 
 ```
-指令下标：0
+Instruction Key: 0
 
-指令参数：
+Instruction Arguments:
 pub struct ConfigureArgs {
     /// Initialized state.
     pub is_initialized: bool,
@@ -56,12 +56,12 @@ pub struct ConfigureArgs {
 ```
 
 
-## 接口查询
+## API
 
-### 查询全局配置
+### Global Configure
 
 ```
-数据结构：
+data structure:
 pub struct ConfigureData {
     /// Initialized state.
     pub is_initialized: bool,
