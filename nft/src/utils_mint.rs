@@ -1,6 +1,7 @@
 use borsh::BorshSerialize;
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts_v2};
 use mpl_token_metadata::state::{Creator, DataV2, Metadata};
+use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
 use solana_program::account_info::AccountInfo;
 use solana_program::msg;
 use solana_program::program::invoke_signed;
@@ -315,4 +316,22 @@ pub fn get_monster_features_from_race(all_features: Vec<Vec<[u16; 7]>>) -> Resul
         monster.push(0);
     }
     Ok(monster)
+}
+
+pub fn spl_token_burn_quick<'a>(
+    mint_info: AccountInfo<'a>,
+    owner_info: AccountInfo<'a>,
+    token_program_info: AccountInfo<'a>,
+    token_account_info: AccountInfo<'a>,
+) -> Result<(), ProgramError> {
+    spl_token_burn(TokenBurnParams {
+        mint: mint_info,
+        amount: 1,
+        authority: owner_info,
+        token_program: token_program_info,
+        source: token_account_info,
+        authority_signer_seeds: None,
+    })?;
+
+    Ok(())
 }
