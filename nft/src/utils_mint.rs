@@ -233,6 +233,7 @@ pub fn init_monster_attributes<'a>(
     monster.breed = 0;
     monster.generation = 1;
     monster.fatigue = 0;
+    monster.walk_target = get_random_walk_target()?;
 
     msg!("Init Battle Attributes");
     let game_config = GameConfig::from_account_info(game_config_info)?;
@@ -334,4 +335,21 @@ pub fn spl_token_burn_quick<'a>(
     })?;
 
     Ok(())
+}
+
+pub fn get_random_walk_target() -> Result<u8, ProgramError> {
+    let r = get_random_u8(0, 100)?;
+    let mut result: u8 = 30;
+    if r < 10 {
+        result = 5;
+    } else if r < 25 {
+        result = 10;
+    } else if r < 50 {
+        result = 15;
+    } else if r < 75 {
+        result = 20;
+    } else if r < 90 {
+        result = 25;
+    }
+    Ok(result)
 }

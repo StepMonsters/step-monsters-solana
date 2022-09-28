@@ -16,7 +16,7 @@ pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
 pub const NUM_MONSTER_RACE: usize = 10;
-pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10) + (32 * 2);
+pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10) + (32 * 2) + 1;
 pub const MAX_GAME_CONFIG_LENGTH: usize = (4 + (4 + 4 * 6) * 10) * 2;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = (4 + (4 + 2 * 7) * 64) * 4;
 
@@ -52,6 +52,7 @@ pub struct Monster {
 
     pub father_mint: Pubkey,
     pub mother_mint: Pubkey,
+    pub walk_target: u8,
 }
 
 impl Monster {
@@ -147,7 +148,7 @@ pub struct ConfigureArgs {
     /// fee_receiver
     pub fee_receiver: Pubkey,
     /// current id
-    pub current_id: u16,
+    pub current_id: u32,
     /// nft price
     pub price: u64,
     /// seller fee
@@ -163,7 +164,7 @@ pub struct ConfigureArgs {
 pub type ConfigureData = ConfigureArgs;
 
 impl ConfigureData {
-    pub const LEN: usize = 1 + 32 + 32 + 32 + 2 + 8 + 2 + 32 + 10 + 200;
+    pub const LEN: usize = 1 + 32 + 32 + 32 + 4 + 8 + 2 + 32 + 10 + 200;
 
     pub fn from_account_info(a: &AccountInfo) -> Result<ConfigureData, ProgramError> {
         if a.data_len() != Self::LEN {
