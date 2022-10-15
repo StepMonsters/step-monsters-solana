@@ -61,15 +61,9 @@ pub fn process_battle(
     //battle
     let win = battle_round(monster.clone(), args.clone());
 
-    //win
-    if win {
-        monster.hp += 1;
-        monster.energy += 20000;
-    }
-
     //after battle logic do  mint_nft
     //monster add fatigue
-    if false {
+    if win {
         let mut config_data = ConfigureData::from_account_info(config_info)?;
         msg!("Create Metadata Edition");
         create_metadata_edition(
