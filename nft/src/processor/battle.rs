@@ -9,6 +9,7 @@ use solana_program::{
 };
 
 use crate::{ferror, state::*, utils::*};
+use crate::utils_battle::battle_round;
 use crate::utils_mint::{create_metadata_edition, create_monster_info, init_monster_attributes};
 
 pub fn process_battle(
@@ -33,7 +34,6 @@ pub fn process_battle(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
-
     assert_monster(&program_id, &monster_mint_info, &monster_info_attacker)?;
     assert_signer(&admin_info)?;
     assert_signer(&signer_info)?;
@@ -44,49 +44,26 @@ pub fn process_battle(
     assert_eq_pubkey(&system_info, &solana_program::system_program::id())?;
     assert_signer(&signer_info)?;
 
-
-    let mut state = false;
-    // todo battle logic
+    //monster attributes
     let mut monster = Monster::from_account_info(monster_info_attacker)?;
-    // max monster fatigue 100, need 2 per battle
+
+    //max monster fatigue 100 and need 2 per battle
     if monster.fatigue > 98 {
         return ferror!("not enough fatigue");
     }
-    monster.energy = monster.calculate_energy();
+
     //require at least 1 energy to battle
+    monster.energy = monster.calculate_energy();
     if monster.energy < 10000 {
         return ferror!("not enough energy");
     }
-    if monster.attack < args.defense {
-        //lose 
-    }
 
-    if monster.attack == args.defense {
-        if args.attack > monster.defense {
-            //lose
-        } else {
-            // no winner
-        }
-    }
-
-    //default monster attack first
-    if monster.attack > args.defense {
-        let arg_hp_lose = monster.attack - args.defense;
-        let monster_hp_lose = args.attack - monster.defense;
-        let monster_round = monster.hp / monster_hp_lose;
-        let args_round = args.hp / arg_hp_lose;
-        if monster_round >= args_round {
-            //win 
-            state = true;
-        } else {
-            //lose
-        }
-    }
-
+    //battle
+    let win = battle_round(monster.clone(), args.clone());
 
     //after battle logic do  mint_nft
     //monster add fatigue
-    if state {
+    if win {
         let mut config_data = ConfigureData::from_account_info(config_info)?;
         msg!("Create Metadata Edition");
         create_metadata_edition(

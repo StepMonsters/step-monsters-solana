@@ -207,6 +207,7 @@ pub struct BattleArgs {
     pub hp: u32,
     pub attack: u32,
     pub defense: u32,
+    pub speed: u32,
     pub race: u8,
     pub attrs: Vec<u8>,
 }
