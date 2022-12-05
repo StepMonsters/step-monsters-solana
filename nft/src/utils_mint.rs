@@ -8,7 +8,7 @@ use solana_program::program::invoke_signed;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
-use crate::state::{ConfigureData, GameConfig, MAX_MONSTER_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_MONSTER};
+use crate::state::{ConfigureData, GameConfig, MAX_BATTLE_HISTORY_LENGTH, MAX_MONSTER_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_BATTLE_HISTORY, SEED_MONSTER};
 use crate::utils::{assert_derivation, assert_pda_creator, create_or_allocate_account_raw, get_random_u8};
 use crate::utils_config::{get_monster_feature_by_index, handle_monster_feature_config};
 
@@ -43,6 +43,39 @@ pub fn create_monster_info<'a>(
         signer_info,
         MAX_MONSTER_LENGTH,
         monster_seeds,
+    )?;
+
+    Ok(())
+}
+
+pub fn create_battle_history_info<'a>(
+    program_id: &Pubkey,
+    battle_history_info: &AccountInfo<'a>,
+    rent_info: &AccountInfo<'a>,
+    system_info: &AccountInfo<'a>,
+    signer_info: &AccountInfo<'a>,
+) -> Result<(), ProgramError> {
+    let bump_seed = assert_derivation(
+        program_id,
+        battle_history_info,
+        &[
+            SEED_BATTLE_HISTORY.as_bytes(),
+            program_id.as_ref(),
+        ],
+    )?;
+    let seeds = &[
+        SEED_BATTLE_HISTORY.as_bytes(),
+        program_id.as_ref(),
+        &[bump_seed],
+    ];
+    create_or_allocate_account_raw(
+        *program_id,
+        battle_history_info,
+        rent_info,
+        system_info,
+        signer_info,
+        MAX_BATTLE_HISTORY_LENGTH,
+        seeds,
     )?;
 
     Ok(())

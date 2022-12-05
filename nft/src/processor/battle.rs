@@ -10,7 +10,7 @@ use solana_program::{
 
 use crate::{ferror, state::*, utils::*};
 use crate::utils_battle::battle_round;
-use crate::utils_mint::{create_metadata_edition, create_monster_info, init_monster_attributes};
+use crate::utils_mint::{create_battle_history_info, create_metadata_edition, create_monster_info, init_monster_attributes};
 
 pub fn process_battle(
     program_id: &Pubkey,
@@ -21,7 +21,6 @@ pub fn process_battle(
     let signer_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
-    let admin_info = next_account_info(account_info_iter)?; //admin signer
     let monster_mint_info = next_account_info(account_info_iter)?;
     let monster_info_attacker = next_account_info(account_info_iter)?;
     let mint_info = next_account_info(account_info_iter)?;
@@ -29,13 +28,13 @@ pub fn process_battle(
     let edition_info = next_account_info(account_info_iter)?;
     let battle_mint_monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
+    let battle_history_info = next_account_info(account_info_iter)?;
     let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
     assert_monster(&program_id, &monster_mint_info, &monster_info_attacker)?;
-    assert_signer(&admin_info)?;
     assert_signer(&signer_info)?;
 
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
@@ -63,7 +62,7 @@ pub fn process_battle(
 
     //after battle logic do  mint_nft
     //monster add fatigue
-    if win {
+    if win > 0 {
         let mut config_data = ConfigureData::from_account_info(config_info)?;
         msg!("Create Metadata Edition");
         create_metadata_edition(
@@ -93,7 +92,7 @@ pub fn process_battle(
         )?;
 
         msg!("Init Monster Attributes");
-        let mint_args = QuickMintArgs { race: args.race, attrs: args.attrs };
+        let mint_args = QuickMintArgs { race: args.race, attrs: args.enemy_feature.clone() };
         init_monster_attributes(
             &battle_mint_monster_info,
             &game_config_info,
@@ -103,9 +102,26 @@ pub fn process_battle(
         )?;
     }
 
+    if battle_history_info.lamports() <= 0 {
+        create_battle_history_info(
+            &program_id,
+            &battle_history_info,
+            &rent_info,
+            &system_info,
+            &signer_info,
+        )?;
+    };
+    let mut battle_history = BattleHistory::from_account_info(battle_history_info)?;
+    battle_history.win = win;
+    battle_history.me_hp = monster.hp;
+    battle_history.enemy_hp = args.hp;
+    battle_history.me_feature = monster.monster_feature.clone();
+    battle_history.enemy_feature = args.enemy_feature.clone();
+    battle_history.serialize(&mut *battle_history_info.try_borrow_mut_data()?)?;
+
     //if need hatch then do hatch
     monster.fatigue += 2;
-    monster.energy -= 10000;
+    monster.energy = 30000;
     monster.last_battle_time = now_timestamp();
     monster.serialize(&mut *monster_info_attacker.try_borrow_mut_data()?)?;
 
