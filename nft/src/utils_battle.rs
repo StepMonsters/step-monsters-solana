@@ -1,10 +1,42 @@
 use crate::state::{BattleArgs, Monster};
 
-pub fn battle_round(monster: Monster, args: BattleArgs) -> u8 {
-    if monster.hp >= args.hp {
-        return 1;
-    };
-    return 0;
+pub fn battle_round(monster: Monster, args: BattleArgs) -> (u8, Vec<u32>) {
+    let mut me_hp = monster.hp.clone();
+    let mut enemy_hp = args.hp.clone();
+    let me_attack = monster.attack.clone();
+    let enemy_attack = args.attack.clone();
+
+    let mut arr = Vec::new();
+
+    for _i in 0..20 {
+        enemy_hp = safe_sub(enemy_hp, me_attack / 10);
+        arr.push(enemy_hp * 10 + 1);
+        if enemy_hp <= 0 {
+            break;
+        }
+
+        me_hp = safe_sub(me_hp, enemy_attack / 10);
+        arr.push(me_hp * 10 + 2);
+        if me_hp <= 0 {
+            break;
+        }
+    }
+
+    let len = 20 * 2 - arr.len().clone();
+    for _i in 0..len {
+        arr.push(0);
+    }
+
+    let mut win = 0;
+    if me_hp > enemy_hp {
+        win = 1;
+    }
+    return (win, arr);
+
+    // if monster.hp >= args.hp {
+    //     return 1;
+    // };
+    // return 0;
 
     // let mut me_hp = monster.hp.clone();
     // let mut enemy_hp = args.hp.clone();

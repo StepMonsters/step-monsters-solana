@@ -58,7 +58,7 @@ pub fn process_battle(
     }
 
     //battle
-    let win = battle_round(monster.clone(), args.clone());
+    let (win, history) = battle_round(monster.clone(), args.clone());
 
     //after battle logic do  mint_nft
     //monster add fatigue
@@ -113,10 +113,22 @@ pub fn process_battle(
     };
     let mut battle_history = BattleHistory::from_account_info(battle_history_info)?;
     battle_history.win = win;
+    battle_history.me_race = monster.race;
     battle_history.me_hp = monster.hp;
+    battle_history.me_attack = monster.attack;
+    battle_history.me_defense = monster.defense;
+    battle_history.me_speed = monster.speed;
+    battle_history.me_agility = monster.agility;
+
     battle_history.enemy_hp = args.hp;
+    battle_history.enemy_attack = args.attack;
+    battle_history.enemy_defense = args.defense;
+    battle_history.enemy_speed = args.speed;
+    battle_history.enemy_agility = args.agility;
+
     battle_history.me_feature = monster.monster_feature.clone();
     battle_history.enemy_feature = args.enemy_feature.clone();
+    battle_history.history = history;
     battle_history.serialize(&mut *battle_history_info.try_borrow_mut_data()?)?;
 
     //if need hatch then do hatch
