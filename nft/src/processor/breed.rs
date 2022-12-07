@@ -1,3 +1,4 @@
+use borsh::BorshSerialize;
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
@@ -39,8 +40,8 @@ pub fn process_breed(
 
     assert_signer(&signer_info)?;
 
-    let father = Monster::from_account_info(father_info)?;
-    let mother = Monster::from_account_info(mother_info)?;
+    let mut father = Monster::from_account_info(father_info)?;
+    let mut mother = Monster::from_account_info(mother_info)?;
     if father.race != mother.race {
         return ferror!("require same race");
     }
@@ -94,6 +95,11 @@ pub fn process_breed(
             system_info.clone()
         ],
     )?;
+
+    father.breed += 1;
+    mother.breed += 1;
+    father.serialize(&mut *father_info.try_borrow_mut_data()?)?;
+    mother.serialize(&mut *mother_info.try_borrow_mut_data()?)?;
 
     Ok(())
 }
