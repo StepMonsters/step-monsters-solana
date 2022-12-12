@@ -258,7 +258,9 @@ pub fn init_monster_attributes<'a>(
     let all_features = handle_monster_feature_config(monster_feature_config);
     if !use_attrs {
         args.attrs = get_monster_features_from_race(all_features.clone())?;
-    };
+    } else {
+        args.attrs = get_monster_features_from_race(all_features.clone())?;
+    }
 
     monster.level = 1;
     monster.gender = get_random_u8(0, 2)?;
