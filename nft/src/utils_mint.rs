@@ -287,7 +287,7 @@ pub fn init_monster_attributes<'a>(
     monster.last_battle_time = 0;
     // monster.hatch_time = now_timestamp() + 3600;
     monster.hatch_time = now_timestamp() + 60;
-    monster.monster_feature = args.attrs;
+    monster.monster_feature = args.attrs.clone();
 
     msg!("Init Battle Attributes By Features");
     for i in 0..all_features.len() {

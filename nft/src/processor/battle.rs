@@ -92,7 +92,7 @@ pub fn process_battle(
         )?;
 
         msg!("Init Monster Attributes");
-        let mint_args = QuickMintArgs { race: args.race, attrs: args.enemy_feature.clone() };
+        let mint_args = QuickMintArgs { race: args.race.clone(), attrs: args.enemy_feature.clone() };
         init_monster_attributes(
             &battle_mint_monster_info,
             &game_config_info,
