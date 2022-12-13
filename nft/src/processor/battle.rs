@@ -58,11 +58,19 @@ pub fn process_battle(
     }
 
     //battle
-    let (win, history) = battle_round(monster.clone(), args.clone());
+    let (mut win, history) = battle_round(monster.clone(), args.clone());
 
     //after battle logic do  mint_nft
     //monster add fatigue
-    if win > 0 {
+    let capture = get_random_u8(0, 10)? == 0;
+    if win > 0 && capture {
+        win = 2;
+    } else if win > 0 && !capture {
+        win = 1;
+    } else {
+        win = 0;
+    }
+    if win == 2 {
         let mut config_data = ConfigureData::from_account_info(config_info)?;
         msg!("Create Metadata Edition");
         create_metadata_edition(
