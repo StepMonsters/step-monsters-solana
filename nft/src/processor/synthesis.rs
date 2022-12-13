@@ -1,6 +1,13 @@
-use solana_program::{account_info::{AccountInfo, next_account_info}, entrypoint::ProgramResult, msg, program::invoke, pubkey::Pubkey};
+use solana_program::{
+    account_info::{AccountInfo, next_account_info},
+    entrypoint::ProgramResult,
+    msg,
+    program::invoke,
+    program_error::ProgramError,
+    pubkey::Pubkey,
+};
 
-use crate::{state::*};
+use crate::{ferror, state::*};
 use crate::instruction::mint;
 use crate::utils::assert_signer;
 use crate::utils_mint::spl_token_burn_quick;
@@ -37,15 +44,20 @@ pub fn process_synthesis(
     let monster_01 = Monster::from_account_info(monster_info_01)?;
     let monster_02 = Monster::from_account_info(monster_info_02)?;
 
-    let mut new_race = monster_01.race + 1;
-    if monster_02.race > monster_01.race {
-        new_race = monster_02.race + 1;
+    let new_race;
+
+    if monster_01.race == 0 && monster_02.race == 1 {
+        new_race = 4;
+    } else if monster_01.race == 1 && monster_02.race == 0 {
+        new_race = 4;
+    } else {
+        return ferror!("wrong race");
     }
 
     let mint_args = MintArgs {
         race: new_race,
         attrs: Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-        generation: 9,
+        generation: 1,
         father_mint: *system_info.key,
         mother_mint: *system_info.key,
     };
