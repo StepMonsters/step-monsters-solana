@@ -52,9 +52,17 @@ pub fn apply_attack(attack: u32, defense: u32) -> u32 {
     let damage: u32;
 
     if attack > defense {
-        damage = attack * (attack / (attack + defense)) * 1600 / 1000 * (defense / (attack + defense));
+        damage = attack
+            * (attack * 100 / (attack + defense))
+            * 1600 / 1000
+            * (defense * 100 / (attack + defense))
+            / (100 * 100);
     } else {
-        damage = attack * (attack / (attack + defense)) * 1600 / 1000 * (defense / (attack + defense));
+        damage = attack
+            * (attack * 100 / (attack + defense))
+            * 1600 / 1000
+            * (defense * 100 / (attack + defense))
+            / (100 * 100);
     }
 
     return damage;
