@@ -51,17 +51,13 @@ pub fn battle_round(monster: Monster, args: BattleArgs) -> (u8, Vec<u32>) {
 pub fn apply_attack(attack: u32, defense: u32) -> u32 {
     let damage: u32;
 
-    if defense > attack * 3 {
-        damage = attack * 10 / 100;
-    } else if defense > attack * 2 {
-        damage = attack * 10 / 100 + (attack * 3 - defense) * 5 / 100;
-    } else if defense > attack {
-        damage = attack * 15 / 100 + (attack * 2 - defense) * 5 / 100;
+    if attack > defense {
+        damage = attack * (attack / (attack + defense)) * 1600 / 1000 * (defense / (attack + defense));
     } else {
-        damage = attack - defense * 7 / 100;
+        damage = attack * (attack / (attack + defense)) * 1600 / 1000 * (defense / (attack + defense));
     }
 
-    return damage / 3;
+    return damage;
 }
 
 pub fn safe_sub(a: u32, b: u32) -> u32 {
