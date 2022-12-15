@@ -373,18 +373,14 @@ pub fn spl_token_burn_quick<'a>(
 }
 
 pub fn get_random_walk_target() -> Result<u8, ProgramError> {
-    let r = get_random_u8(0, 100)?;
-    let mut result: u8 = 30;
-    if r < 10 {
-        result = 5;
-    } else if r < 25 {
+    let r = get_random_u8(0, 3)?;
+    let result;
+    if r == 0 {
+        result = 6;
+    } else if r == 1 {
         result = 10;
-    } else if r < 50 {
+    } else {
         result = 15;
-    } else if r < 75 {
-        result = 20;
-    } else if r < 90 {
-        result = 25;
     }
     Ok(result)
 }
