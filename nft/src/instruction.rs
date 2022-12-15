@@ -30,6 +30,7 @@ pub enum GameInstruction {
     TransferFromSpendingTemp(TransferSpendingArgs),
     CreateMonsterFeatureConfig,
     QuickMint(QuickMintArgs),
+    CreateToken
 }
 
 

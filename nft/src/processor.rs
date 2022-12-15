@@ -16,6 +16,7 @@ pub use mint_quick::*;
 pub use synthesis::*;
 pub use transfer_spending::*;
 pub use upgrade::*;
+pub use create_token::*;
 
 use crate::instruction::*;
 
@@ -34,6 +35,7 @@ pub mod config_monster_feature;
 pub mod cure;
 pub mod transfer_spending;
 pub mod mint_quick;
+pub mod create_token;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -96,6 +98,9 @@ pub fn process_instruction(
         }
         GameInstruction::QuickMint(args) => {
             process_mint_quick(program_id, accounts, args)
+        }
+        GameInstruction::CreateToken => {
+            process_create_token(program_id, accounts)
         }
     }
 }
