@@ -13,6 +13,7 @@ pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config_1701";
 pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config_07271508";
 pub const SEED_BATTLE_HISTORY: &str = "battle_history_12061358";
+pub const SEED_TOKEN_ADMIN: &str = "token_admin_12152048";
 pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
