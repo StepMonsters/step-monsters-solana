@@ -412,3 +412,14 @@ pub fn get_monster_basic_attrs_sum(race: u8) -> u32 {
     }
     return sum;
 }
+
+pub fn calculate_battle_receive_game_token(win: u8, race: u8, level: u8) -> u64 {
+    let mut attrs: f32 = get_monster_basic_attrs_sum(race) as f32;
+    attrs *= 1.06_f32.powf(level as f32 - 1.0);
+    attrs = attrs.powf(0.35);
+    if win <= 0 {
+        attrs /= 3.0;
+    }
+    let receive: u64 = (attrs * 1_000_000_000.0) as u64;
+    return receive;
+}

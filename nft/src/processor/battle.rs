@@ -10,6 +10,7 @@ use solana_program::{
 
 use crate::{ferror, state::*, utils::*};
 use crate::utils_battle::battle_round;
+use crate::utils_config::calculate_battle_receive_game_token;
 use crate::utils_mint::{create_battle_history_info, create_metadata_edition, create_monster_info, init_monster_attributes, mint_game_token_to_ata};
 
 pub fn process_battle(
@@ -76,10 +77,7 @@ pub fn process_battle(
     }
 
     msg!("Receive Game Token");
-    let mut coin = 10;
-    if win >= 1 {
-        coin = 20;
-    }
+    let coin: u64 = calculate_battle_receive_game_token(win, monster.race, monster.level);
     mint_game_token_to_ata(
         program_id,
         signer_info,
