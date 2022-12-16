@@ -4,9 +4,11 @@ use mpl_token_metadata::state::{Creator, DataV2, Metadata};
 use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
 use solana_program::account_info::AccountInfo;
 use solana_program::msg;
-use solana_program::program::invoke_signed;
+use solana_program::program::{invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
+use spl_associated_token_account::instruction::create_associated_token_account;
+use spl_token::instruction::mint_to;
 
 use crate::state::{ConfigureData, GameConfig, MAX_BATTLE_HISTORY_LENGTH, MAX_MONSTER_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_BATTLE_HISTORY, SEED_MONSTER, SEED_TOKEN_ADMIN};
 use crate::utils::{assert_derivation, assert_pda_creator, create_or_allocate_account_raw, get_random_u8};
@@ -109,6 +111,75 @@ pub fn create_token_admin_info<'a>(
         signer_info,
         0,
         seeds,
+    )?;
+
+    Ok(())
+}
+
+pub fn mint_game_token_to_ata<'a>(
+    program_id: &Pubkey,
+    signer_info: &AccountInfo<'a>,
+    signer_ata_info: &AccountInfo<'a>,
+    mint_info: &AccountInfo<'a>,
+    token_admin_info: &AccountInfo<'a>,
+    ass_token_program_info: &AccountInfo<'a>,
+    token_program_info: &AccountInfo<'a>,
+    system_info: &AccountInfo<'a>,
+    amount:u64
+) -> Result<(), ProgramError> {
+    msg!("Token Admin Seeds");
+    let bump_seed = assert_derivation(
+        program_id,
+        token_admin_info,
+        &[
+            SEED_TOKEN_ADMIN.as_bytes(),
+            program_id.as_ref(),
+        ],
+    )?;
+    let token_admin_seeds = [
+        SEED_TOKEN_ADMIN.as_bytes(),
+        program_id.as_ref(),
+        &[bump_seed],
+    ];
+
+    msg!("Create Signer Associated Token Account");
+    if signer_ata_info.lamports() <= 0 {
+        invoke(
+            &create_associated_token_account(
+                signer_info.key,
+                signer_info.key,
+                mint_info.key,
+            ),
+            &[
+                signer_info.clone(),
+                signer_ata_info.clone(),
+                ass_token_program_info.clone(),
+                mint_info.clone(),
+                token_program_info.clone(),
+                system_info.clone()
+            ],
+        )?;
+    }
+
+    msg!("Mint To Signer");
+    invoke_signed(
+        &mint_to(
+            token_program_info.key,
+            mint_info.key,
+            signer_ata_info.key,
+            token_admin_info.key,
+            &[token_admin_info.key],
+            amount,
+        )?,
+        &[
+            signer_info.clone(),
+            signer_ata_info.clone(),
+            mint_info.clone(),
+            token_program_info.clone(),
+            system_info.clone(),
+            token_admin_info.clone()
+        ],
+        &[&token_admin_seeds],
     )?;
 
     Ok(())

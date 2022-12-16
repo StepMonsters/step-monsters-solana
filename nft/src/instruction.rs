@@ -30,9 +30,9 @@ pub enum GameInstruction {
     TransferFromSpendingTemp(TransferSpendingArgs),
     CreateMonsterFeatureConfig,
     QuickMint(QuickMintArgs),
-    CreateToken
+    CreateToken,
+    MintToken
 }
-
 
 pub fn config(
     program_id: &Pubkey,

@@ -17,6 +17,7 @@ pub use synthesis::*;
 pub use transfer_spending::*;
 pub use upgrade::*;
 pub use create_token::*;
+pub use create_token_mint::*;
 
 use crate::instruction::*;
 
@@ -36,6 +37,7 @@ pub mod cure;
 pub mod transfer_spending;
 pub mod mint_quick;
 pub mod create_token;
+pub mod create_token_mint;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -101,6 +103,9 @@ pub fn process_instruction(
         }
         GameInstruction::CreateToken => {
             process_create_token(program_id, accounts)
+        }
+        GameInstruction::MintToken => {
+            process_create_token_mint(program_id, accounts)
         }
     }
 }
