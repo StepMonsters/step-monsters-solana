@@ -77,7 +77,7 @@ pub fn process_battle(
     }
 
     msg!("Receive Game Token");
-    let coin: u64 = calculate_battle_receive_game_token(win, monster.race, monster.level);
+    let token: u64 = calculate_battle_receive_game_token(win, monster.race, monster.level);
     mint_game_token_to_ata(
         program_id,
         signer_info,
@@ -87,7 +87,7 @@ pub fn process_battle(
         ass_token_program_info,
         token_program_info,
         system_info,
-        coin,
+        token,
     )?;
 
     if win == 2 {
@@ -141,6 +141,7 @@ pub fn process_battle(
     };
     let mut battle_history = BattleHistory::from_account_info(battle_history_info)?;
     battle_history.win = win;
+    battle_history.token = token;
     battle_history.me_race = monster.race;
     battle_history.me_hp = monster.hp;
     battle_history.me_attack = monster.attack;
