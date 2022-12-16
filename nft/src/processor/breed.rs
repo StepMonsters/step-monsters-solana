@@ -46,6 +46,10 @@ pub fn process_breed(
         return ferror!("require same race");
     }
 
+    if father.breed >= 5 || mother.breed >= 5 {
+        return ferror!("reach max breed times");
+    }
+
     let breed_attrs = calculate_breed_attrs(
         father.monster_feature.clone(),
         mother.monster_feature.clone(),
