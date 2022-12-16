@@ -125,8 +125,11 @@ pub fn mint_game_token_to_ata<'a>(
     ass_token_program_info: &AccountInfo<'a>,
     token_program_info: &AccountInfo<'a>,
     system_info: &AccountInfo<'a>,
-    amount:u64
+    mut amount: u64,
 ) -> Result<(), ProgramError> {
+    let decimal = 1_000_000_000;
+    amount *= decimal;
+
     msg!("Token Admin Seeds");
     let bump_seed = assert_derivation(
         program_id,

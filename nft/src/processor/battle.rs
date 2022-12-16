@@ -10,7 +10,7 @@ use solana_program::{
 
 use crate::{ferror, state::*, utils::*};
 use crate::utils_battle::battle_round;
-use crate::utils_mint::{create_battle_history_info, create_metadata_edition, create_monster_info, init_monster_attributes};
+use crate::utils_mint::{create_battle_history_info, create_metadata_edition, create_monster_info, init_monster_attributes, mint_game_token_to_ata};
 
 pub fn process_battle(
     program_id: &Pubkey,
@@ -19,6 +19,10 @@ pub fn process_battle(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
+    let signer_ata_info = next_account_info(account_info_iter)?;
+    let game_token_info = next_account_info(account_info_iter)?;
+    let token_admin_info = next_account_info(account_info_iter)?;
+    let ass_token_program_info = next_account_info(account_info_iter)?;
     let config_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
     let monster_mint_info = next_account_info(account_info_iter)?;
@@ -70,6 +74,24 @@ pub fn process_battle(
     } else {
         win = 0;
     }
+
+    msg!("Receive Game Token");
+    let mut coin = 10;
+    if win >= 1 {
+        coin = 20;
+    }
+    mint_game_token_to_ata(
+        program_id,
+        signer_info,
+        signer_ata_info,
+        game_token_info,
+        token_admin_info,
+        ass_token_program_info,
+        token_program_info,
+        system_info,
+        coin,
+    )?;
+
     if win == 2 {
         let mut config_data = ConfigureData::from_account_info(config_info)?;
         msg!("Create Metadata Edition");

@@ -7,6 +7,7 @@ use solana_program::{
 };
 
 use crate::{state::*, utils::*};
+use crate::utils_config::{get_monster_female_basic_attrs, get_monster_male_basic_attrs};
 
 pub fn process_create_game_config(
     program_id: &Pubkey,
@@ -44,31 +45,8 @@ pub fn process_create_game_config(
         game_config_seeds,
     )?;
 
-    let male_data: [[u32; 6]; 10] = [
-        [100, 100, 120, 100, 120, 20],
-        [100, 140, 110, 120, 150, 24],
-        [150, 170, 160, 165, 165, 30],
-        [235, 230, 240, 230, 205, 32],
-        [100, 150, 120, 100, 120, 45],
-        [630, 640, 620, 610, 650, 48],
-        [700, 720, 690, 710, 700, 56],
-        [830, 840, 820, 810, 850, 60],
-        [940, 920, 890, 910, 940, 65],
-        [1090, 1040, 1060, 1010, 1030, 80]
-    ];
-
-    let female_data: [[u32; 6]; 10] = [
-        [100, 120, 100, 120, 100, 20],
-        [90, 140, 130, 130, 130, 24],
-        [165, 165, 150, 170, 160, 30],
-        [240, 230, 235, 230, 205, 32],
-        [110, 160, 100, 120, 100, 45],
-        [650, 610, 620, 630, 640, 48],
-        [720, 690, 710, 700, 700, 56],
-        [850, 810, 820, 830, 840, 60],
-        [900, 890, 940, 960, 910, 65],
-        [1050, 1080, 1040, 1010, 1050, 80]
-    ];
+    let male_data: [[u32; 6]; 10] = get_monster_male_basic_attrs();
+    let female_data: [[u32; 6]; 10] = get_monster_female_basic_attrs();
 
     let male = game_config_to_vector(male_data);
     let female = game_config_to_vector(female_data);
