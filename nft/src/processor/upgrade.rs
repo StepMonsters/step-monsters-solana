@@ -3,10 +3,12 @@ use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
+    program_error::ProgramError,
     pubkey::Pubkey,
 };
 
-use crate::{state::*, utils::*};
+use crate::{ferror, state::*, utils::*};
+use crate::utils_config::calculate_upgrade_spend_game_token;
 
 pub fn process_upgrade(
     _program_id: &Pubkey,
@@ -15,11 +17,29 @@ pub fn process_upgrade(
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
+    let signer_ata_info = next_account_info(account_info_iter)?;
+    let token_admin_info = next_account_info(account_info_iter)?;
+    let token_program_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
 
-    msg!("Upgrade Monster");
     let mut monster = Monster::from_account_info(monster_info)?;
+
+    if monster.level >= 30 {
+        return ferror!("Reach max level.");
+    };
+
+    msg!("Upgrade Monster");
+    let spend = calculate_upgrade_spend_game_token(monster.level);
+    spl_token_transfer_invoke(
+        token_program_info.clone(),
+        signer_ata_info.clone(),
+        token_admin_info.clone(),
+        signer_info.clone(),
+        spend,
+    )?;
+
+    msg!("Upgrade Monster");
     monster.level += 1;
     monster.hp = monster.hp * 106 / 100;
     monster.attack = monster.attack * 106 / 100;
