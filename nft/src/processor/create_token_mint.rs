@@ -25,7 +25,7 @@ pub fn process_create_token_mint(
     assert_signer(&signer_info)?;
 
     let decimal: u64 = 1_000_000_000;
-    let amount: u64 = 10 * decimal;
+    let amount: u64 = 100 * decimal;
     mint_game_token_to_ata(
         program_id,
         signer_info,
