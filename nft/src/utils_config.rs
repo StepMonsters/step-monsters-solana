@@ -423,3 +423,16 @@ pub fn calculate_battle_receive_game_token(win: u8, race: u8, level: u8) -> u64 
     let receive: u64 = (attrs * 1_000_000_000.0) as u64;
     return receive;
 }
+
+pub fn calculate_cure_spend_game_token(level: u8, cure: u8) -> u64 {
+    let basic: u64;
+    if level <= 10 {
+        basic = 15;
+    } else if level <= 20 {
+        basic = 20;
+    } else {
+        basic = 25;
+    }
+    let spend: u64 = (basic * cure as u64 / 25 * 1_000_000_000) as u64;
+    return spend;
+}
