@@ -28,7 +28,7 @@ pub fn process_synthesis(
     let monster_info = next_account_info(account_info_iter)?;
     let program_info = next_account_info(account_info_iter)?;
     let signer_ata_info = next_account_info(account_info_iter)?;
-    let token_admin_info = next_account_info(account_info_iter)?;
+    let program_ata_info = next_account_info(account_info_iter)?;
 
     let token_account_01 = next_account_info(account_info_iter)?;
     let token_account_02 = next_account_info(account_info_iter)?;
@@ -62,7 +62,7 @@ pub fn process_synthesis(
     spl_token_transfer_invoke(
         token_program_info.clone(),
         signer_ata_info.clone(),
-        token_admin_info.clone(),
+        program_ata_info.clone(),
         signer_info.clone(),
         spend,
     )?;

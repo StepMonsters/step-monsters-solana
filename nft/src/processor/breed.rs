@@ -29,7 +29,7 @@ pub fn process_breed(
     let monster_info = next_account_info(account_info_iter)?;
     let program_info = next_account_info(account_info_iter)?;
     let signer_ata_info = next_account_info(account_info_iter)?;
-    let token_admin_info = next_account_info(account_info_iter)?;
+    let program_ata_info = next_account_info(account_info_iter)?;
 
     let father_mint_info = next_account_info(account_info_iter)?;
     let mother_mint_info = next_account_info(account_info_iter)?;
@@ -58,7 +58,7 @@ pub fn process_breed(
     spl_token_transfer_invoke(
         token_program_info.clone(),
         signer_ata_info.clone(),
-        token_admin_info.clone(),
+        program_ata_info.clone(),
         signer_info.clone(),
         spend,
     )?;

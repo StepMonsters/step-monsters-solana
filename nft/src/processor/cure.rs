@@ -18,7 +18,7 @@ pub fn process_cure(
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let signer_ata_info = next_account_info(account_info_iter)?;
-    let token_admin_info = next_account_info(account_info_iter)?;
+    let program_ata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
 
@@ -36,7 +36,7 @@ pub fn process_cure(
         spl_token_transfer_invoke(
             token_program_info.clone(),
             signer_ata_info.clone(),
-            token_admin_info.clone(),
+            program_ata_info.clone(),
             signer_info.clone(),
             spend,
         )?;
