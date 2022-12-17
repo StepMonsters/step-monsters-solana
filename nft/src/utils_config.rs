@@ -449,3 +449,15 @@ pub fn calculate_breed_spend_game_token(breed01: u8, breed02: u8) -> u64 {
     let spend = (breed01 as u64 * 10 + breed02 as u64 * 10) / 2 * 50 / 10;
     return spend * 1_000_000_000;
 }
+
+pub fn calculate_synthesize_spend_game_token(race01: u8, race02: u8) -> u64 {
+    let spend: u64;
+    if race01 == 0 && race02 == 1 {
+        spend = 50;
+    } else if race01 == 1 && race02 == 0 {
+        spend = 50;
+    } else {
+        spend = 0;
+    }
+    return spend * 1_000_000_000;
+}

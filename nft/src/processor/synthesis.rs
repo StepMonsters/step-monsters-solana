@@ -9,7 +9,8 @@ use solana_program::{
 
 use crate::{ferror, state::*};
 use crate::instruction::mint;
-use crate::utils::assert_signer;
+use crate::utils::{assert_signer, spl_token_transfer_invoke};
+use crate::utils_config::calculate_synthesize_spend_game_token;
 use crate::utils_mint::spl_token_burn_quick;
 
 pub fn process_synthesis(
@@ -26,6 +27,8 @@ pub fn process_synthesis(
     let edition_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
     let program_info = next_account_info(account_info_iter)?;
+    let signer_ata_info = next_account_info(account_info_iter)?;
+    let token_admin_info = next_account_info(account_info_iter)?;
 
     let token_account_01 = next_account_info(account_info_iter)?;
     let token_account_02 = next_account_info(account_info_iter)?;
@@ -53,6 +56,16 @@ pub fn process_synthesis(
     } else {
         return ferror!("wrong race");
     }
+
+    msg!("Synthesize LST spending");
+    let spend = calculate_synthesize_spend_game_token(monster_01.race, monster_02.race);
+    spl_token_transfer_invoke(
+        token_program_info.clone(),
+        signer_ata_info.clone(),
+        token_admin_info.clone(),
+        signer_info.clone(),
+        spend,
+    )?;
 
     let mint_args = MintArgs {
         race: new_race,
