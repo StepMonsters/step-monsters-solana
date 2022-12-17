@@ -29,7 +29,7 @@ pub fn process_upgrade(
         return ferror!("Reach max level.");
     };
 
-    msg!("Upgrade Monster");
+    msg!("Upgrade LST spending");
     let spend = calculate_upgrade_spend_game_token(monster.level);
     spl_token_transfer_invoke(
         token_program_info.clone(),

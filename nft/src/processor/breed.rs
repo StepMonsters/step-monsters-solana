@@ -11,6 +11,7 @@ use solana_program::{
 use crate::{ferror, utils::*};
 use crate::instruction::mint;
 use crate::state::{MintArgs, Monster};
+use crate::utils_config::calculate_breed_spend_game_token;
 use crate::utils_mint::calculate_breed_attrs;
 
 pub fn process_breed(
@@ -27,6 +28,8 @@ pub fn process_breed(
     let edition_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
     let program_info = next_account_info(account_info_iter)?;
+    let signer_ata_info = next_account_info(account_info_iter)?;
+    let token_admin_info = next_account_info(account_info_iter)?;
 
     let father_mint_info = next_account_info(account_info_iter)?;
     let mother_mint_info = next_account_info(account_info_iter)?;
@@ -49,6 +52,16 @@ pub fn process_breed(
     if father.breed >= 5 || mother.breed >= 5 {
         return ferror!("reach max breed times");
     }
+
+    msg!("Breed LST spending");
+    let spend = calculate_breed_spend_game_token(father.breed,mother.breed);
+    spl_token_transfer_invoke(
+        token_program_info.clone(),
+        signer_ata_info.clone(),
+        token_admin_info.clone(),
+        signer_info.clone(),
+        spend,
+    )?;
 
     let breed_attrs = calculate_breed_attrs(
         father.monster_feature.clone(),

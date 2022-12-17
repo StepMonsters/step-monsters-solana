@@ -433,8 +433,8 @@ pub fn calculate_cure_spend_game_token(level: u8, cure: u8) -> u64 {
     } else {
         basic = 25;
     }
-    let spend: u64 = (basic * cure as u64 / 25 * 1_000_000_000) as u64;
-    return spend;
+    let spend: u64 = (basic * cure as u64 / 25) as u64;
+    return spend * 1_000_000_000;
 }
 
 pub fn calculate_upgrade_spend_game_token(level: u8) -> u64 {
@@ -442,5 +442,10 @@ pub fn calculate_upgrade_spend_game_token(level: u8) -> u64 {
     if level % 5 == 0 {
         spend = (level as u64 / 5 + 1) * 50;
     };
-    return spend;
+    return spend * 1_000_000_000;
+}
+
+pub fn calculate_breed_spend_game_token(breed01: u8, breed02: u8) -> u64 {
+    let spend = (breed01 as u64 * 10 + breed02 as u64 * 10) / 2 * 50 / 10;
+    return spend * 1_000_000_000;
 }
