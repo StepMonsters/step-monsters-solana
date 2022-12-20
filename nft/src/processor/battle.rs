@@ -61,6 +61,7 @@ pub fn process_battle(
     if monster.energy < 10000 {
         return ferror!("not enough energy");
     }
+    monster.energy -= 10000;
 
     //battle
     let (mut win, history) = battle_round(monster.clone(), args.clone());
@@ -162,7 +163,6 @@ pub fn process_battle(
 
     //if need hatch then do hatch
     monster.fatigue += 2;
-    monster.energy = 30000;
     monster.last_battle_time = now_timestamp();
     monster.serialize(&mut *monster_info_attacker.try_borrow_mut_data()?)?;
 
