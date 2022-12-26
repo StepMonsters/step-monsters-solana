@@ -63,11 +63,13 @@ pub fn create_battle_history_info<'a>(
         &[
             SEED_BATTLE_HISTORY.as_bytes(),
             program_id.as_ref(),
+            signer_info.key.as_ref()
         ],
     )?;
     let seeds = &[
         SEED_BATTLE_HISTORY.as_bytes(),
         program_id.as_ref(),
+        signer_info.key.as_ref(),
         &[bump_seed],
     ];
     create_or_allocate_account_raw(
