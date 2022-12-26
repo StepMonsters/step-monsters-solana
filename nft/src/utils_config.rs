@@ -440,12 +440,12 @@ pub fn calculate_cure_spend_game_token(level: u8, cure: u8) -> u64 {
 pub fn calculate_upgrade_spend_game_token(level: u8) -> u64 {
     let mut spend: f64 = 10.0;
     if level <= 1 {
-        return spend as u64;
+        return spend as u64 * 1_000_000_000;
     }
     for _i in 0..level - 1 {
         spend = (spend * 1.1).ceil();
     }
-    return spend as u64;
+    return spend as u64 * 1_000_000_000;
 }
 
 pub fn calculate_breed_spend_game_token(breed01: u8, breed02: u8) -> u64 {
