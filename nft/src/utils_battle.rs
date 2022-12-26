@@ -9,15 +9,15 @@ pub fn battle_round(monster: Monster, args: BattleArgs) -> (u8, Vec<u32>) {
     let enemy_defense = args.defense.clone();
     let me_speed = monster.speed.clone();
     let enemy_speed = args.speed.clone();
-    let mut me_distance = 1000;
-    let mut enemy_distance = 1000;
+    let mut me_distance = 100000;
+    let mut enemy_distance = 100000;
 
     let mut arr = Vec::new();
 
     for _i in 0..20 {
         if me_distance / me_speed <= enemy_distance / enemy_speed {
             enemy_distance -= (me_distance / me_speed) * enemy_speed;
-            me_distance = 1000;
+            me_distance = 100000;
             let damage = apply_attack(me_attack, enemy_defense);
             enemy_hp = safe_sub(enemy_hp, damage);
             arr.push(enemy_hp * 10 + 1);
@@ -26,7 +26,7 @@ pub fn battle_round(monster: Monster, args: BattleArgs) -> (u8, Vec<u32>) {
             }
         } else {
             me_distance -= (enemy_distance / enemy_speed) * me_speed;
-            enemy_distance = 1000;
+            enemy_distance = 100000;
             let damage = apply_attack(enemy_attack, me_defense);
             me_hp = safe_sub(me_hp, damage);
             arr.push(me_hp * 10 + 2);
