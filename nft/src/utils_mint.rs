@@ -2,8 +2,8 @@ use borsh::BorshSerialize;
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts_v2};
 use mpl_token_metadata::state::{Creator, DataV2, Metadata};
 use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
-use solana_program::account_info::AccountInfo;
 use solana_program::{msg, system_instruction};
+use solana_program::account_info::AccountInfo;
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
@@ -472,8 +472,7 @@ pub fn init_monster_attributes<'a>(
 
     monster.energy = 10000;
     monster.last_battle_time = 0;
-    // monster.hatch_time = now_timestamp() + 3600;
-    monster.hatch_time = now_timestamp() + 60;
+    monster.hatch_time = now_timestamp() + 2 * 60 * 60;
     monster.monster_feature = args.attrs.clone();
 
     msg!("Init Battle Attributes By Features");
