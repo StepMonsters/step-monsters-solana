@@ -31,14 +31,14 @@ pub enum GameInstruction {
     CreateMonsterFeatureConfig,
     QuickMint(QuickMintArgs),
     CreateToken,
-    MintToken
+    MintToken,
 }
 
 pub fn config(
     program_id: &Pubkey,
     signer: &Pubkey,
     config: &Pubkey,
-    args: ConfigureArgs
+    args: ConfigureArgs,
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
         AccountMeta::new(*signer, true),
@@ -54,6 +54,50 @@ pub fn config(
     })
 }
 
+pub fn init_mint(
+    program_id: &Pubkey,
+    signer: &Pubkey,
+    mint: &Pubkey,
+    mint_ata: &Pubkey,
+    token_program: &Pubkey,
+    ass_program: &Pubkey,
+    rent_program: &Pubkey,
+    system_program: &Pubkey,
+) -> Result<Instruction, ProgramError> {
+    let accounts = vec![
+        AccountMeta::new(*signer, true),
+        AccountMeta::new(*mint, true),
+        AccountMeta::new(*mint_ata, false),
+        AccountMeta::new_readonly(*token_program, false),
+        AccountMeta::new_readonly(*ass_program, false),
+        AccountMeta::new_readonly(*rent_program, false),
+        AccountMeta::new_readonly(*system_program, false),
+    ];
+
+    Ok(Instruction {
+        program_id: *program_id,
+        accounts,
+        data: GameInstruction::InitMint.try_to_vec().unwrap(),
+    })
+}
+
+pub fn instruction_upgrade(
+    program_id: &Pubkey,
+    signer: &Pubkey,
+    monster_info: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new(*signer, true),
+        AccountMeta::new(*monster_info, false),
+    ];
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: GameInstruction::Upgrade.try_to_vec().unwrap(),
+    }
+}
+
 pub fn mint(
     program_id: &Pubkey,
     signer: &Pubkey,
@@ -66,7 +110,7 @@ pub fn mint(
     monster: &Pubkey,
     metadata_program: &Pubkey,
     token_program: &Pubkey,
-    args:MintArgs
+    args: MintArgs,
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
         AccountMeta::new(*signer, true),
@@ -101,7 +145,7 @@ pub fn battle(
     edition: &Pubkey,
     metadata_program: &Pubkey,
     token_program: &Pubkey,
-    args: BattleArgs
+    args: BattleArgs,
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
         AccountMeta::new(*signer, true),

@@ -11,7 +11,7 @@ use solana_program::{
 use crate::{ferror, state::*, utils::*};
 use crate::utils_battle::battle_round;
 use crate::utils_config::calculate_battle_receive_game_token;
-use crate::utils_mint::{create_battle_history_info, create_metadata_edition, create_monster_info, init_monster_attributes, mint_game_token_to_ata};
+use crate::utils_mint::{create_battle_history_info, create_metadata_edition, create_monster_info, handle_init_mint, init_monster_attributes, mint_game_token_to_ata};
 
 pub fn process_battle(
     program_id: &Pubkey,
@@ -24,16 +24,21 @@ pub fn process_battle(
     let game_token_info = next_account_info(account_info_iter)?;
     let token_admin_info = next_account_info(account_info_iter)?;
     let ass_token_program_info = next_account_info(account_info_iter)?;
+
     let config_info = next_account_info(account_info_iter)?;
-    let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
+    let pda_creator_info = next_account_info(account_info_iter)?;
     let monster_mint_info = next_account_info(account_info_iter)?;
     let monster_info_attacker = next_account_info(account_info_iter)?;
+
     let mint_info = next_account_info(account_info_iter)?;
+    let mint_ata_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
+
     let battle_mint_monster_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
     let battle_history_info = next_account_info(account_info_iter)?;
+
     let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
@@ -92,6 +97,17 @@ pub fn process_battle(
     )?;
 
     if win == 2 {
+        handle_init_mint(
+            program_id,
+            signer_info,
+            mint_info,
+            mint_ata_info,
+            token_program_info,
+            ass_token_program_info,
+            rent_info,
+            system_info,
+        )?;
+
         let mut config_data = ConfigureData::from_account_info(config_info)?;
         msg!("Create Metadata Edition");
         create_metadata_edition(

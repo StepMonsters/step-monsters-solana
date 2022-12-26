@@ -3,16 +3,95 @@ use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_
 use mpl_token_metadata::state::{Creator, DataV2, Metadata};
 use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
 use solana_program::account_info::AccountInfo;
-use solana_program::msg;
+use solana_program::{msg, system_instruction};
 use solana_program::program::{invoke, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
+use solana_program::rent::Rent;
+use solana_program::sysvar::Sysvar;
 use spl_associated_token_account::instruction::create_associated_token_account;
-use spl_token::instruction::mint_to;
+use spl_token::instruction::{initialize_mint, mint_to};
 
 use crate::state::{ConfigureData, GameConfig, MAX_BATTLE_HISTORY_LENGTH, MAX_MONSTER_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_BATTLE_HISTORY, SEED_MONSTER, SEED_TOKEN_ADMIN};
 use crate::utils::{assert_derivation, assert_pda_creator, create_or_allocate_account_raw, get_random_u8};
 use crate::utils_config::{get_monster_feature_by_index, handle_monster_feature_config};
+
+pub fn handle_init_mint<'a>(
+    _program_id: &Pubkey,
+    signer_info: &AccountInfo<'a>,
+    mint_info: &AccountInfo<'a>,
+    ata_info: &AccountInfo<'a>,
+    token_program_info: &AccountInfo<'a>,
+    ass_token_program_info: &AccountInfo<'a>,
+    rent_info: &AccountInfo<'a>,
+    system_info: &AccountInfo<'a>,
+) -> Result<(), ProgramError> {
+    let size = 82;
+    let rent = &Rent::from_account_info(&rent_info)?;
+    let required_lamports = rent.minimum_balance(size);
+
+    msg!("Create Account");
+    invoke(
+        &system_instruction::create_account(
+            signer_info.key,
+            mint_info.key,
+            required_lamports,
+            size as u64,
+            token_program_info.key,
+        ),
+        &[signer_info.clone(), mint_info.clone()],
+    )?;
+
+    msg!("Initialize Mint");
+    invoke(
+        &initialize_mint(
+            token_program_info.key,
+            mint_info.key,
+            signer_info.key,
+            Some(signer_info.key),
+            0,
+        )?,
+        &[signer_info.clone(), mint_info.clone(), rent_info.clone(), token_program_info.clone()],
+    )?;
+
+    msg!("Create Associated Token Account");
+    invoke(
+        &create_associated_token_account(
+            signer_info.key,
+            signer_info.key,
+            mint_info.key,
+        ),
+        &[
+            signer_info.clone(),
+            ata_info.clone(),
+            ass_token_program_info.clone(),
+            mint_info.clone(),
+            token_program_info.clone(),
+            system_info.clone()
+        ],
+    )?;
+
+    msg!("Mint To");
+    invoke(
+        &mint_to(
+            token_program_info.key,
+            mint_info.key,
+            ata_info.key,
+            signer_info.key,
+            &[signer_info.key],
+            1,
+        )?,
+        &[
+            signer_info.clone(),
+            ata_info.clone(),
+            mint_info.clone(),
+            token_program_info.clone(),
+            system_info.clone()
+        ],
+    )?;
+
+    Ok(())
+}
 
 pub fn create_monster_info<'a>(
     program_id: &Pubkey,
