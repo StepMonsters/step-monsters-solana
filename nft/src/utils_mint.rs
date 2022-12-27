@@ -451,9 +451,12 @@ pub fn init_monster_attributes<'a>(
     monster.gender = get_random_u8(0, 2)?;
     monster.race = args.race;
     monster.breed = 0;
-    monster.generation = 1;
     monster.fatigue = 0;
     monster.walk_target = get_random_walk_target()?;
+
+    if monster.generation < 1 {
+        monster.generation = 1;
+    }
 
     msg!("Init Battle Attributes");
     let game_config = GameConfig::from_account_info(game_config_info)?;
