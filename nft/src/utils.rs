@@ -363,7 +363,7 @@ pub fn check_soul_recycle(args: RecycleArgs) -> u64 {
     return total / 100;
 }
 
-pub fn check_soul_revive(args: RecycleArgs) -> u64 {
+pub fn check_soul_revive(args: ReviveArgs) -> u64 {
     let total = args.hp + args.attack + args.defense +
         args.speed + args.agility + args.efficiency;
     return total * 5 / 100;

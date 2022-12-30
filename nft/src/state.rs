@@ -334,6 +334,23 @@ pub struct RecycleArgs {
     pub enemy_feature: Vec<u8>,
 }
 
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct ReviveArgs {
+    pub index: u8,
+    pub race: u8,
+    pub level: u8,
+    pub gender: u8,
+    pub soul: u64,
+    pub hp: u64,
+    pub attack: u64,
+    pub defense: u64,
+    pub speed: u64,
+    pub agility: u64,
+    pub efficiency: u64,
+    pub enemy_feature: Vec<u8>,
+}
+
 pub fn now_timestamp() -> u64 {
     Clock::get().unwrap().unix_timestamp as u64
 }

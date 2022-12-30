@@ -16,6 +16,7 @@ pub use mint::*;
 pub use mint_init::*;
 pub use mint_quick::*;
 pub use recycle::*;
+pub use revive::*;
 pub use synthesis::*;
 pub use transfer_spending::*;
 pub use upgrade::*;
@@ -40,6 +41,7 @@ pub mod mint_quick;
 pub mod create_token;
 pub mod create_token_mint;
 pub mod recycle;
+pub mod revive;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -111,6 +113,9 @@ pub fn process_instruction(
         }
         GameInstruction::Recycle(args) => {
             process_recycle(program_id, accounts, args)
+        }
+        GameInstruction::Revive(args) => {
+            process_revive(program_id, accounts, args)
         }
     }
 }

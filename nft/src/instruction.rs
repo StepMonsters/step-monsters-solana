@@ -33,6 +33,7 @@ pub enum GameInstruction {
     CreateToken,
     MintToken,
     Recycle(RecycleArgs),
+    Revive(ReviveArgs),
 }
 
 pub fn config(
