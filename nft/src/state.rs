@@ -12,7 +12,7 @@ pub const SEED_MONSTER: &str = "monster";
 pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config_1701";
 pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config_07271508";
-pub const SEED_BATTLE_HISTORY: &str = "battle_history_12291259";
+pub const SEED_BATTLE_HISTORY: &str = "battle_history_12291655";
 pub const SEED_BATTLE_HISTORY_BODIES: &str = "battle_history_bodies";
 pub const SEED_TOKEN_ADMIN: &str = "token_admin_12152048";
 pub const MAX_BATTLE_LENGTH: usize = 1;
@@ -22,8 +22,8 @@ pub const NUM_MONSTER_RACE: usize = 10;
 pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10) + (32 * 2) + 1;
 pub const MAX_GAME_CONFIG_LENGTH: usize = (4 + (4 + 4 * 6) * 10) * 2;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = (4 + (4 + 2 * 7) * 64) * 4;
-pub const MAX_BATTLE_HISTORY_LENGTH: usize = 1 + 8 + (1 + 14 + 4 * 5) * 2 + (4 + 4 * 40) + (4 + (4 + 2 + 10) * 50);
-pub const MAX_BATTLE_HISTORY_BODIES_LENGTH: usize = 4 + (4 + 2 + 10) * 100;
+pub const MAX_BATTLE_HISTORY_LENGTH: usize = 1 + 8 * 2 + (1 + 14 + 4 * 5) * 2 + (4 + 4 * 40) + (4 + (4 + 3 + 10) * 50);
+pub const MAX_BATTLE_HISTORY_BODIES_LENGTH: usize = 4 + (4 + 3 + 10) * 100;
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
@@ -211,6 +211,7 @@ impl Incubator {
 pub struct BattleArgs {
     pub race: u8,
     pub level: u8,
+    pub gender: u8,
     pub hp: u32,
     pub attack: u32,
     pub defense: u32,
@@ -270,6 +271,7 @@ pub struct QuickMintArgs {
 pub struct BattleHistory {
     pub win: u8,
     pub token: u64,
+    pub soul: u64,
 
     pub me_race: u8,
     pub me_feature: Vec<u8>,
@@ -321,6 +323,14 @@ pub struct RecycleArgs {
     pub index: u8,
     pub race: u8,
     pub level: u8,
+    pub gender: u8,
+    pub soul: u64,
+    pub hp: u64,
+    pub attack: u64,
+    pub defense: u64,
+    pub speed: u64,
+    pub agility: u64,
+    pub efficiency: u64,
     pub enemy_feature: Vec<u8>,
 }
 

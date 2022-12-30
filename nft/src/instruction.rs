@@ -32,6 +32,7 @@ pub enum GameInstruction {
     QuickMint(QuickMintArgs),
     CreateToken,
     MintToken,
+    Recycle(RecycleArgs),
 }
 
 pub fn config(

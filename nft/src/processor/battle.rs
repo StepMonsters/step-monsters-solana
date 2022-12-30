@@ -73,7 +73,7 @@ pub fn process_battle(
 
     //after battle logic do  mint_nft
     //monster add fatigue
-    let capture = get_random_u8(0, 10)? == 0;
+    let capture = get_random_u8(0, 2)? == 0;
     if win > 0 && capture {
         win = 2;
     } else if win > 0 && !capture {
@@ -131,6 +131,7 @@ pub fn process_battle(
         let mut body = Vec::new();
         body.push(args.race);
         body.push(args.level);
+        body.push(args.gender);
         body.append(&mut args.enemy_feature.clone());
         all.push(body);
         battle_history.bodies = all.clone();

@@ -326,18 +326,45 @@ pub fn try_from_slice_unchecked<T: BorshDeserialize>(data: &[u8]) -> Result<T, E
     Ok(result)
 }
 
-pub fn game_config_to_vector(data:[[u32; 6]; 10])->Vec<Vec<u32>>{
+pub fn game_config_to_vector(data: [[u32; 6]; 10]) -> Vec<Vec<u32>> {
     let mut config = Vec::new();
-    for item in data{
+    for item in data {
         config.push(Vec::from(item));
     }
     return config;
 }
 
-pub fn feature_config_to_vector(data:[[u16; 7]; 64])->Vec<Vec<u16>>{
+pub fn feature_config_to_vector(data: [[u16; 7]; 64]) -> Vec<Vec<u16>> {
     let mut config = Vec::new();
-    for item in data{
+    for item in data {
         config.push(Vec::from(item));
     }
     return config;
+}
+
+pub fn check_body_array(mut body: Vec<u8>, attrs: Vec<u8>) -> bool {
+    body.remove(0);
+    body.remove(0);
+    body.remove(0);
+    if body.len() != attrs.len() {
+        return false;
+    }
+    for i in 0..body.len() {
+        if body[i] != attrs[i] {
+            return false;
+        }
+    }
+    return true;
+}
+
+pub fn check_soul_recycle(args: RecycleArgs) -> u64 {
+    let total = args.hp + args.attack + args.defense +
+        args.speed + args.agility + args.efficiency;
+    return total / 100;
+}
+
+pub fn check_soul_revive(args: RecycleArgs) -> u64 {
+    let total = args.hp + args.attack + args.defense +
+        args.speed + args.agility + args.efficiency;
+    return total * 5 / 100;
 }
