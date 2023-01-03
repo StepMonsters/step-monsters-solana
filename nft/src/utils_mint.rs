@@ -480,7 +480,7 @@ pub fn init_monster_attributes<'a>(
     monster.agility = basic[4];
     monster.efficiency = basic[5];
 
-    monster.energy = 10000;
+    monster.energy = 30000;
     monster.last_battle_time = 0;
     monster.hatch_time = now_timestamp() + 2 * 60 * 60;
     monster.monster_feature = args.attrs.clone();
