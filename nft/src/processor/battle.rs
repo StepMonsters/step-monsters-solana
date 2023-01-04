@@ -11,7 +11,7 @@ use solana_program::{
 use crate::{ferror, state::*, utils::*};
 use crate::utils_battle::battle_round;
 use crate::utils_config::calculate_battle_receive_game_token;
-use crate::utils_mint::{create_battle_history_info, create_metadata_edition, create_monster_info, handle_init_mint, init_monster_attributes, mint_game_token_to_ata};
+use crate::utils_mint::{create_battle_history_info, mint_game_token_to_ata};
 
 pub fn process_battle(
     program_id: &Pubkey,
@@ -25,18 +25,18 @@ pub fn process_battle(
     let token_admin_info = next_account_info(account_info_iter)?;
     let ass_token_program_info = next_account_info(account_info_iter)?;
 
-    let config_info = next_account_info(account_info_iter)?;
-    let pda_creator_info = next_account_info(account_info_iter)?;
+    let _config_info = next_account_info(account_info_iter)?;
+    let _pda_creator_info = next_account_info(account_info_iter)?;
     let monster_mint_info = next_account_info(account_info_iter)?;
     let monster_info_attacker = next_account_info(account_info_iter)?;
 
-    let mint_info = next_account_info(account_info_iter)?;
-    let mint_ata_info = next_account_info(account_info_iter)?;
-    let metadata_info = next_account_info(account_info_iter)?;
-    let edition_info = next_account_info(account_info_iter)?;
+    let _mint_info = next_account_info(account_info_iter)?;
+    let _mint_ata_info = next_account_info(account_info_iter)?;
+    let _metadata_info = next_account_info(account_info_iter)?;
+    let _edition_info = next_account_info(account_info_iter)?;
 
-    let battle_mint_monster_info = next_account_info(account_info_iter)?;
-    let game_config_info = next_account_info(account_info_iter)?;
+    let _battle_mint_monster_info = next_account_info(account_info_iter)?;
+    let _game_config_info = next_account_info(account_info_iter)?;
     let battle_history_info = next_account_info(account_info_iter)?;
 
     let metadata_program_info = next_account_info(account_info_iter)?;
@@ -73,7 +73,7 @@ pub fn process_battle(
 
     //after battle logic do  mint_nft
     //monster add fatigue
-    let capture = get_random_u8(0, 10)? == 0;
+    let capture = get_random_u8(0, 2)? == 0;
     if win > 0 && capture {
         win = 2;
     } else if win > 0 && !capture {
@@ -96,57 +96,6 @@ pub fn process_battle(
         token,
     )?;
 
-    if win == 2 {
-        handle_init_mint(
-            program_id,
-            signer_info,
-            mint_info,
-            mint_ata_info,
-            token_program_info,
-            ass_token_program_info,
-            rent_info,
-            system_info,
-        )?;
-
-        let mut config_data = ConfigureData::from_account_info(config_info)?;
-        msg!("Create Metadata Edition");
-        create_metadata_edition(
-            &program_id,
-            &pda_creator_info,
-            config_data.clone(),
-            &signer_info,
-            &mint_info,
-            &metadata_info,
-            &edition_info,
-            &metadata_program_info,
-            &token_program_info,
-            &system_info,
-            &rent_info,
-        )?;
-        config_data.current_id += 1;
-        config_data.serialize(&mut *config_info.try_borrow_mut_data()?)?;
-
-        msg!("Create Monster Info");
-        create_monster_info(
-            &program_id,
-            &battle_mint_monster_info,
-            &mint_info,
-            &rent_info,
-            &system_info,
-            &signer_info,
-        )?;
-
-        msg!("Init Monster Attributes");
-        let mint_args = QuickMintArgs { race: args.race.clone(), attrs: args.enemy_feature.clone() };
-        init_monster_attributes(
-            &battle_mint_monster_info,
-            &game_config_info,
-            true,
-            true,
-            mint_args,
-        )?;
-    }
-
     if battle_history_info.lamports() <= 0 {
         create_battle_history_info(
             &program_id,
@@ -154,6 +103,7 @@ pub fn process_battle(
             &rent_info,
             &system_info,
             &signer_info,
+            false,
         )?;
     };
     let mut battle_history = BattleHistory::from_account_info(battle_history_info)?;
@@ -175,6 +125,18 @@ pub fn process_battle(
     battle_history.me_feature = monster.monster_feature.clone();
     battle_history.enemy_feature = args.enemy_feature.clone();
     battle_history.history = history;
+
+    if win > 1 {
+        let mut all = battle_history.bodies.clone();
+        let mut body = Vec::new();
+        body.push(args.race);
+        body.push(args.level);
+        body.push(args.gender);
+        body.append(&mut args.enemy_feature.clone());
+        all.push(body);
+        battle_history.bodies = all.clone();
+    }
+
     battle_history.serialize(&mut *battle_history_info.try_borrow_mut_data()?)?;
 
     //if need hatch then do hatch

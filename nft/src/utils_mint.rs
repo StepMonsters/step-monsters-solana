@@ -12,7 +12,7 @@ use solana_program::sysvar::Sysvar;
 use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
 
-use crate::state::{ConfigureData, GameConfig, MAX_BATTLE_HISTORY_LENGTH, MAX_MONSTER_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_BATTLE_HISTORY, SEED_MONSTER, SEED_TOKEN_ADMIN};
+use crate::state::{ConfigureData, GameConfig, MAX_BATTLE_HISTORY_BODIES_LENGTH, MAX_BATTLE_HISTORY_LENGTH, MAX_MONSTER_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_BATTLE_HISTORY, SEED_BATTLE_HISTORY_BODIES, SEED_MONSTER, SEED_TOKEN_ADMIN};
 use crate::utils::{assert_derivation, assert_pda_creator, create_or_allocate_account_raw, get_random_u8};
 use crate::utils_config::{get_monster_feature_by_index, handle_monster_feature_config};
 
@@ -135,18 +135,25 @@ pub fn create_battle_history_info<'a>(
     rent_info: &AccountInfo<'a>,
     system_info: &AccountInfo<'a>,
     signer_info: &AccountInfo<'a>,
+    extend: bool,
 ) -> Result<(), ProgramError> {
+    let mut seed = SEED_BATTLE_HISTORY;
+    let mut max = MAX_BATTLE_HISTORY_LENGTH;
+    if extend {
+        seed = SEED_BATTLE_HISTORY_BODIES;
+        max = MAX_BATTLE_HISTORY_BODIES_LENGTH;
+    }
     let bump_seed = assert_derivation(
         program_id,
         battle_history_info,
         &[
-            SEED_BATTLE_HISTORY.as_bytes(),
+            seed.as_bytes(),
             program_id.as_ref(),
             signer_info.key.as_ref()
         ],
     )?;
     let seeds = &[
-        SEED_BATTLE_HISTORY.as_bytes(),
+        seed.as_bytes(),
         program_id.as_ref(),
         signer_info.key.as_ref(),
         &[bump_seed],
@@ -157,7 +164,7 @@ pub fn create_battle_history_info<'a>(
         rent_info,
         system_info,
         signer_info,
-        MAX_BATTLE_HISTORY_LENGTH,
+        max,
         seeds,
     )?;
 
@@ -473,7 +480,7 @@ pub fn init_monster_attributes<'a>(
     monster.agility = basic[4];
     monster.efficiency = basic[5];
 
-    monster.energy = 10000;
+    monster.energy = 30000;
     monster.last_battle_time = 0;
     monster.hatch_time = now_timestamp() + 2 * 60 * 60;
     monster.monster_feature = args.attrs.clone();
