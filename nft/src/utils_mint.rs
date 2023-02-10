@@ -432,6 +432,103 @@ pub fn update_metadata<'a>(
     Ok(())
 }
 
+pub fn create_metadata_edition_create_collection<'a>(
+    program_id: &Pubkey,
+    pda_creator_info: &AccountInfo<'a>,
+    config_data: ConfigureData,
+    signer_info: &AccountInfo<'a>,
+    mint_info: &AccountInfo<'a>,
+    metadata_info: &AccountInfo<'a>,
+    edition_info: &AccountInfo<'a>,
+    metadata_program_info: &AccountInfo<'a>,
+    token_program_info: &AccountInfo<'a>,
+    system_info: &AccountInfo<'a>,
+    rent_info: &AccountInfo<'a>,
+) -> Result<(), ProgramError> {
+    let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
+    let pda_seed = [
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        "pda_creator".as_bytes(),
+        &[pda_bump],
+    ];
+
+    let creators = vec![
+        mpl_token_metadata::state::Creator {
+            address: *pda_creator_info.key,
+            verified: true,
+            share: 0,
+        },
+        mpl_token_metadata::state::Creator {
+            address: *program_id,
+            verified: false,
+            share: 100,
+        },
+    ];
+
+    let metadata_name = config_data.name.clone();
+    let metadata_uri = config_data.uri.clone() + &String::from("collection.json");
+    msg!("Create Metadata");
+    invoke_signed(
+        &create_metadata_accounts_v2(
+            *metadata_program_info.key,
+            *metadata_info.key,
+            *mint_info.key,
+            *signer_info.key,
+            *signer_info.key,
+            *pda_creator_info.key, //pda must be signer
+            metadata_name.clone(),
+            config_data.symbol.clone(),
+            metadata_uri.clone(),
+            Some(creators),
+            config_data.fee,
+            true,
+            true,
+            None,
+            None,
+        ),
+        &[
+            metadata_info.clone(),
+            mint_info.clone(),
+            signer_info.clone(),
+            metadata_program_info.clone(),
+            token_program_info.clone(),
+            system_info.clone(),
+            rent_info.clone(),
+            pda_creator_info.clone(),
+        ],
+        &[&pda_seed],
+    )?;
+
+    msg!("Create Master Edition");
+    invoke_signed(
+        &create_master_edition_v3(
+            *metadata_program_info.key,
+            *edition_info.key,
+            *mint_info.key,
+            *pda_creator_info.key,
+            *signer_info.key,
+            *metadata_info.key,
+            *signer_info.key,
+            Some(1),
+        ),
+        &[
+            edition_info.clone(),
+            mint_info.clone(),
+            signer_info.clone(),
+            metadata_info.clone(),
+            metadata_program_info.clone(),
+            token_program_info.clone(),
+            system_info.clone(),
+            rent_info.clone(),
+            pda_creator_info.clone(),
+        ],
+        &[&pda_seed],
+    )?;
+
+    Ok(())
+}
+
 pub fn init_monster_attributes<'a>(
     monster_info: &AccountInfo<'a>,
     game_config_info: &AccountInfo<'a>,

@@ -20,6 +20,7 @@ pub use revive::*;
 pub use synthesis::*;
 pub use transfer_spending::*;
 pub use upgrade::*;
+pub use create_collection::*;
 
 use crate::instruction::*;
 
@@ -42,6 +43,7 @@ pub mod create_token;
 pub mod create_token_mint;
 pub mod recycle;
 pub mod revive;
+pub mod create_collection;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -116,6 +118,9 @@ pub fn process_instruction(
         }
         GameInstruction::Revive(args) => {
             process_revive(program_id, accounts, args)
+        }
+        GameInstruction::CreateCollection(args) => {
+            process_create_collection(program_id, accounts, args)
         }
     }
 }
