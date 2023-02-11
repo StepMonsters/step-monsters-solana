@@ -20,7 +20,7 @@ pub fn process_mint(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let config_info = next_account_info(account_info_iter)?;
+    let _config_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
     let fee_receiver_info = next_account_info(account_info_iter)?; // fee_receiver: wallet
     let mint_info = next_account_info(account_info_iter)?;
@@ -32,6 +32,13 @@ pub fn process_mint(
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+
+    //check authority
+    let config_info = next_account_info(account_info_iter)?;
+    let config_data = ConfigureData::from_account_info(config_info)?;
+    if config_data.authority != *signer_info.key {
+        return ferror!("invalid authority");
+    }
 
     msg!("Assert Public Key");
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;

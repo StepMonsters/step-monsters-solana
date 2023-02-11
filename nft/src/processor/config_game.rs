@@ -3,10 +3,11 @@ use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
+    program_error::ProgramError,
     pubkey::Pubkey,
 };
 
-use crate::{state::*, utils::*};
+use crate::{ferror, state::*, utils::*};
 use crate::utils_config::{get_monster_female_basic_attrs, get_monster_male_basic_attrs};
 
 pub fn process_create_game_config(
@@ -18,6 +19,13 @@ pub fn process_create_game_config(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
     let game_config_info = next_account_info(account_info_iter)?;
+
+    //check authority
+    let config_info = next_account_info(account_info_iter)?;
+    let config_data = ConfigureData::from_account_info(config_info)?;
+    if config_data.authority != *signer_info.key {
+        return ferror!("invalid authority");
+    }
 
     assert_signer(&signer_info)?;
 

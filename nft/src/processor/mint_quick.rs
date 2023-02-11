@@ -18,7 +18,7 @@ pub fn process_mint_quick(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let config_info = next_account_info(account_info_iter)?;
+    let _config_info = next_account_info(account_info_iter)?;
     let pda_creator_info = next_account_info(account_info_iter)?;
     let fee_receiver_info = next_account_info(account_info_iter)?;
     let mint_info = next_account_info(account_info_iter)?;
@@ -31,6 +31,13 @@ pub fn process_mint_quick(
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+
+    //check authority
+    let config_info = next_account_info(account_info_iter)?;
+    let config_data = ConfigureData::from_account_info(config_info)?;
+    if config_data.authority != *signer_info.key {
+        return ferror!("invalid authority");
+    }
 
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
     assert_eq_pubkey(&token_program_info, &spl_token::id())?;

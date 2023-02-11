@@ -2,6 +2,7 @@ use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     msg,
+    program_error::ProgramError,
     program::invoke,
     pubkey::Pubkey,
     system_instruction,
@@ -11,8 +12,8 @@ use solana_program::program::invoke_signed;
 use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
 
-use crate::{utils::*};
-use crate::state::SEED_TOKEN_ADMIN;
+use crate::{ferror, utils::*};
+use crate::state::{ConfigureData, SEED_TOKEN_ADMIN};
 use crate::utils_mint::create_token_admin_info;
 
 pub fn process_create_token(
@@ -31,6 +32,13 @@ pub fn process_create_token(
     let ass_token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+
+    //check authority
+    let config_info = next_account_info(account_info_iter)?;
+    let config_data = ConfigureData::from_account_info(config_info)?;
+    if config_data.authority != *signer_info.key {
+        return ferror!("invalid authority");
+    }
 
     assert_signer(&signer_info)?;
     let size = 82;

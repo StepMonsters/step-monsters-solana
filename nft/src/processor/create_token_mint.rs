@@ -2,9 +2,12 @@ use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
     pubkey::Pubkey,
+    msg,
+    program_error::ProgramError,
 };
 
-use crate::{utils::*};
+use crate::{ferror, utils::*};
+use crate::state::ConfigureData;
 use crate::utils_mint::mint_game_token_to_ata;
 
 pub fn process_create_token_mint(
@@ -21,6 +24,13 @@ pub fn process_create_token_mint(
     let token_program_info = next_account_info(account_info_iter)?;
     let ass_token_program_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+
+    //check authority
+    let config_info = next_account_info(account_info_iter)?;
+    let config_data = ConfigureData::from_account_info(config_info)?;
+    if config_data.authority != *signer_info.key {
+        return ferror!("invalid authority");
+    }
 
     assert_signer(&signer_info)?;
 
