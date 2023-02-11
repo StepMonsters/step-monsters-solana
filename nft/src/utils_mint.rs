@@ -308,6 +308,7 @@ pub fn create_metadata_edition<'a>(
     ];
 
     let name_id = String::from(" #") + &config_data.current_id.to_string();
+    let metadata_uri = config_data.uri.clone() + &*mint_info.key.to_string().clone();
     msg!("Create Metadata");
     invoke_signed(
         &create_metadata_accounts_v2(
@@ -319,7 +320,7 @@ pub fn create_metadata_edition<'a>(
             *pda_creator_info.key, //pda must be signer
             config_data.name.clone() + &name_id,
             config_data.symbol.clone(),
-            config_data.uri.clone(),
+            metadata_uri.clone(),
             Some(creators),
             config_data.fee,
             true,
