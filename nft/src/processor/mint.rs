@@ -27,6 +27,9 @@ pub fn process_mint(
     let metadata_info = next_account_info(account_info_iter)?;
     let edition_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
+    let collection_info = next_account_info(account_info_iter)?;
+    let collection_metadata_info = next_account_info(account_info_iter)?;
+    let collection_edition_info = next_account_info(account_info_iter)?;
 
     let metadata_program_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
@@ -82,6 +85,9 @@ pub fn process_mint(
         &token_program_info,
         &system_info,
         &rent_info,
+        &collection_info,
+        &collection_metadata_info,
+        &collection_edition_info,
     )?;
     config_data.current_id += 1;
     config_data.serialize(&mut *config_info.try_borrow_mut_data()?)?;

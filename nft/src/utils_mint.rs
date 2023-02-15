@@ -1,5 +1,5 @@
 use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts_v2};
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts_v2, verify_collection};
 use mpl_token_metadata::state::{Creator, DataV2, Metadata};
 use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
 use solana_program::{msg, system_instruction};
@@ -285,6 +285,9 @@ pub fn create_metadata_edition<'a>(
     token_program_info: &AccountInfo<'a>,
     system_info: &AccountInfo<'a>,
     rent_info: &AccountInfo<'a>,
+    collection_info: &AccountInfo<'a>,
+    collection_metadata_info: &AccountInfo<'a>,
+    collection_edition_info: &AccountInfo<'a>,
 ) -> Result<(), ProgramError> {
     let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
     let pda_seed = [
@@ -307,8 +310,15 @@ pub fn create_metadata_edition<'a>(
         },
     ];
 
+    let collection = mpl_token_metadata::state::Collection {
+        key: *collection_info.key,
+        verified: false,
+    };
+
+    //name and uri
     let name_id = String::from(" #") + &config_data.current_id.to_string();
     let metadata_uri = config_data.uri.clone() + &*mint_info.key.to_string().clone();
+
     msg!("Create Metadata");
     invoke_signed(
         &create_metadata_accounts_v2(
@@ -325,7 +335,7 @@ pub fn create_metadata_edition<'a>(
             config_data.fee,
             true,
             true,
-            None,
+            Some(collection.clone()),
             None,
         ),
         &[
@@ -351,7 +361,7 @@ pub fn create_metadata_edition<'a>(
             *signer_info.key,
             *metadata_info.key,
             *signer_info.key,
-            Some(1),
+            Some(0),
         ),
         &[
             edition_info.clone(),
@@ -363,6 +373,33 @@ pub fn create_metadata_edition<'a>(
             system_info.clone(),
             rent_info.clone(),
             pda_creator_info.clone(),
+        ],
+        &[&pda_seed],
+    )?;
+
+    msg!("Verify Collection");
+    invoke_signed(
+        &verify_collection(
+            *metadata_program_info.key,
+            *metadata_info.key,
+            *pda_creator_info.key,
+            *signer_info.key,
+            *collection_info.key,
+            *collection_metadata_info.key,
+            *collection_edition_info.key,
+            None,
+        ),
+        &[
+            signer_info.clone(),
+            metadata_info.clone(),
+            metadata_program_info.clone(),
+            token_program_info.clone(),
+            system_info.clone(),
+            rent_info.clone(),
+            pda_creator_info.clone(),
+            collection_info.clone(),
+            collection_metadata_info.clone(),
+            collection_edition_info.clone(),
         ],
         &[&pda_seed],
     )?;
@@ -467,8 +504,10 @@ pub fn create_metadata_edition_create_collection<'a>(
         },
     ];
 
+    //name and uri
     let metadata_name = config_data.name.clone();
     let metadata_uri = config_data.uri.clone() + &String::from("collection.json");
+
     msg!("Create Metadata");
     invoke_signed(
         &create_metadata_accounts_v2(
@@ -511,7 +550,7 @@ pub fn create_metadata_edition_create_collection<'a>(
             *signer_info.key,
             *metadata_info.key,
             *signer_info.key,
-            Some(1),
+            Some(0),
         ),
         &[
             edition_info.clone(),
