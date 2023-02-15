@@ -8,7 +8,7 @@ use solana_program::{
 };
 
 pub const SEED_STEP_MONSTER: &str = "step_monster_172336";
-pub const SEED_MONSTER: &str = "monster";
+pub const SEED_MONSTER: &str = "monster_20230215";
 pub const SEED_BATTLE: &str = "battle";
 pub const SEED_GAME_CONFIG: &str = "game_config_1701";
 pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config_07271508";
@@ -19,7 +19,7 @@ pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
 pub const NUM_MONSTER_RACE: usize = 10;
-pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10) + (32 * 2) + 1;
+pub const MAX_MONSTER_LENGTH: usize = 1 * NUM_MONSTER_VALUE + 4 * NUM_MONSTER_ATTR + (4 + 8) + 8 + (4 + 1 * 10) + (32 * 2) + 1 + 1 + 8;
 pub const MAX_GAME_CONFIG_LENGTH: usize = (4 + (4 + 4 * 6) * 10) * 2;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = (4 + (4 + 2 * 7) * 64) * 4;
 pub const MAX_BATTLE_HISTORY_LENGTH: usize = 1 + 8 * 2 + (1 + 14 + 4 * 5) * 2 + (4 + 4 * 40) + (4 + (4 + 3 + 10) * 50);
@@ -58,6 +58,8 @@ pub struct Monster {
     pub father_mint: Pubkey,
     pub mother_mint: Pubkey,
     pub walk_target: u8,
+    pub rarity: u8,
+    pub extra: u64,
 }
 
 impl Monster {
