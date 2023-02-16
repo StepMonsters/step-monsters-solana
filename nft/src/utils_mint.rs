@@ -301,11 +301,6 @@ pub fn create_metadata_edition<'a>(
         mpl_token_metadata::state::Creator {
             address: *pda_creator_info.key,
             verified: true,
-            share: 0,
-        },
-        mpl_token_metadata::state::Creator {
-            address: *program_id,
-            verified: false,
             share: 100,
         },
     ];

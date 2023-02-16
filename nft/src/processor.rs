@@ -21,6 +21,7 @@ pub use synthesis::*;
 pub use transfer_spending::*;
 pub use upgrade::*;
 pub use create_collection::*;
+pub use update_metadata::*;
 
 use crate::instruction::*;
 
@@ -44,6 +45,7 @@ pub mod create_token_mint;
 pub mod recycle;
 pub mod revive;
 pub mod create_collection;
+pub mod update_metadata;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -121,6 +123,9 @@ pub fn process_instruction(
         }
         GameInstruction::CreateCollection(args) => {
             process_create_collection(program_id, accounts, args)
+        }
+        GameInstruction::UpdateMetadata => {
+            process_update_metadata(program_id, accounts)
         }
     }
 }
