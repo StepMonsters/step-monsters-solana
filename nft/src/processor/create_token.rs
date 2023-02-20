@@ -46,7 +46,7 @@ pub fn process_create_token(
     let required_lamports = rent.minimum_balance(size);
 
     let decimal: u64 = 1_000_000_000;
-    let amount: u64 = 152112 * decimal;
+    let amount: u64 = 1 * decimal;
 
     msg!("Token Admin Seeds");
     let bump_seed = assert_derivation(
