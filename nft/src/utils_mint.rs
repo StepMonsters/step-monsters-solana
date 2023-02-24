@@ -1,5 +1,5 @@
 use borsh::BorshSerialize;
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts_v2, verify_collection};
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts, update_metadata_accounts_v2, verify_collection};
 use mpl_token_metadata::state::{Creator, DataV2, Metadata};
 use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
 use solana_program::{msg, system_instruction};
@@ -395,6 +395,64 @@ pub fn create_metadata_edition<'a>(
             collection_info.clone(),
             collection_metadata_info.clone(),
             collection_edition_info.clone(),
+        ],
+        &[&pda_seed],
+    )?;
+
+    Ok(())
+}
+
+pub fn hatch_update_metadata<'a>(
+    program_id: &Pubkey,
+    signer_info: &AccountInfo<'a>,
+    metadata_info: &AccountInfo<'a>,
+    pda_creator_info: &AccountInfo<'a>,
+    metadata_program_info: &AccountInfo<'a>,
+) -> Result<(), ProgramError> {
+    //metadata
+    let metadata = Metadata::from_account_info(metadata_info)?;
+
+    //pda creator
+    let pda_bump = assert_pda_creator(&program_id, pda_creator_info)?;
+    let pda_seed = [
+        SEED_BATTLE.as_bytes(),
+        program_id.as_ref(),
+        "pda_creator".as_bytes(),
+        &[pda_bump],
+    ];
+
+    //update creators
+    let creators = vec![
+        mpl_token_metadata::state::Creator {
+            address: *pda_creator_info.key,
+            verified: true,
+            share: 100,
+        },
+        mpl_token_metadata::state::Creator {
+            address: *signer_info.key,
+            verified: false,
+            share: 0,
+        }
+    ];
+
+    let mut data = metadata.data.clone();
+    data.creators = Some(creators.clone());
+
+    msg!("Update Metadata");
+    invoke_signed(
+        &update_metadata_accounts(
+            *metadata_program_info.key,
+            *metadata_info.key,
+            *pda_creator_info.key,
+            Some(*pda_creator_info.key),
+            Some(data.clone()),
+            Some(true),
+        ),
+        &[
+            signer_info.clone(),
+            metadata_info.clone(),
+            pda_creator_info.clone(),
+            metadata_program_info.clone(),
         ],
         &[&pda_seed],
     )?;

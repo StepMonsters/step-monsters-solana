@@ -7,7 +7,7 @@ use solana_program::{
 };
 
 use crate::{state::*, utils::*};
-use crate::utils_mint::{init_monster_attributes, update_metadata};
+use crate::utils_mint::{hatch_update_metadata};
 
 pub fn process_hatch(
     program_id: &Pubkey,
@@ -15,8 +15,8 @@ pub fn process_hatch(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let monster_info = next_account_info(account_info_iter)?;
-    let game_config_info = next_account_info(account_info_iter)?;
+    let _monster_info = next_account_info(account_info_iter)?;
+    let _game_config_info = next_account_info(account_info_iter)?;
     let _monster_feature_config_info = next_account_info(account_info_iter)?;
     let incubator_info = next_account_info(account_info_iter)?;
     let metadata_info = next_account_info(account_info_iter)?;
@@ -33,24 +33,13 @@ pub fn process_hatch(
 
     assert_signer(&signer_info)?;
 
-    msg!("Update Monster Info");
-    let mint_args = QuickMintArgs { race: 0, attrs: Vec::new() };
-    init_monster_attributes(
-        &monster_info,
-        game_config_info,
-        false,
-        false,
-        mint_args,
-    )?;
-
     msg!("Update Metadata Account");
-    update_metadata(
+    hatch_update_metadata(
         program_id,
         signer_info,
         metadata_info,
         pda_creator_info,
         metadata_program_info,
-        String::from("null"),
     )?;
 
     msg!("Create Store");

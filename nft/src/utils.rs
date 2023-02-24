@@ -368,3 +368,12 @@ pub fn check_soul_revive(args: ReviveArgs) -> u64 {
         args.speed + args.agility + args.efficiency;
     return total * 5 / 100;
 }
+
+pub fn rarity_formula(mut p: f64, mut min: f64, mut max: f64) -> f64 {
+    p *= 100.0_f64;
+    min *= 100.0_f64;
+    max *= 100.0_f64;
+    let a = p.log10() - min.log10();
+    let b = max.log10() - min.log10();
+    return 1.0_f64 - a / b;
+}

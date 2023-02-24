@@ -2,9 +2,9 @@ use borsh::BorshSerialize;
 use solana_program::{account_info::{AccountInfo, next_account_info}, entrypoint::ProgramResult, msg, program::invoke, program_error::ProgramError, pubkey::Pubkey, system_instruction, sysvar};
 
 use crate::{ferror, utils::*};
-use crate::state::{ConfigureData, MintArgs, Monster};
+use crate::state::{ConfigureData, Monster, QuickMintArgs};
 use crate::utils_config::calculate_breed_spend_game_token;
-use crate::utils_mint::{calculate_breed_attrs, create_metadata_edition, create_monster_info};
+use crate::utils_mint::{calculate_breed_attrs, create_metadata_edition, create_monster_info, init_monster_attributes};
 
 pub fn process_breed(
     program_id: &Pubkey,
@@ -22,6 +22,7 @@ pub fn process_breed(
     let _program_info = next_account_info(account_info_iter)?;
     let signer_ata_info = next_account_info(account_info_iter)?;
     let program_ata_info = next_account_info(account_info_iter)?;
+    let game_config_info = next_account_info(account_info_iter)?;
 
     let father_mint_info = next_account_info(account_info_iter)?;
     let mother_mint_info = next_account_info(account_info_iter)?;
@@ -49,7 +50,7 @@ pub fn process_breed(
     }
 
     msg!("Breed LST spending");
-    let spend = calculate_breed_spend_game_token(father.breed,mother.breed);
+    let spend = calculate_breed_spend_game_token(father.breed, mother.breed);
     spl_token_transfer_invoke(
         token_program_info.clone(),
         signer_ata_info.clone(),
@@ -67,14 +68,6 @@ pub fn process_breed(
     if father.generation > mother.generation {
         breed_generation = mother.generation + 1;
     }
-
-    let args = MintArgs {
-        race: father.race,
-        attrs: breed_attrs,
-        generation: breed_generation,
-        father_mint: *father_mint_info.key,
-        mother_mint: *mother_mint_info.key,
-    };
 
     msg!("Assert Public Key");
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
@@ -134,14 +127,27 @@ pub fn process_breed(
         &system_info,
         &signer_info,
     )?;
+
+    let args = QuickMintArgs { race: father.race.clone(), attrs: breed_attrs.clone() };
+
+    msg!("Init Monster Attributes");
+    init_monster_attributes(
+        &monster_info,
+        &game_config_info,
+        true,
+        false,
+        args,
+    )?;
+
+    //monster egg attrs
     let mut monster = Monster::from_account_info(monster_info)?;
-    monster.race = args.race;
-    monster.generation = args.generation;
-    monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-    monster.father_mint = args.father_mint;
-    monster.mother_mint = args.mother_mint;
+    monster.generation = breed_generation.clone();
+    monster.father_mint = *father_mint_info.key;
+    monster.mother_mint = *mother_mint_info.key;
+    monster.level = 0;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
+    //update father mother breed amount
     father.breed += 1;
     mother.breed += 1;
     father.serialize(&mut *father_info.try_borrow_mut_data()?)?;

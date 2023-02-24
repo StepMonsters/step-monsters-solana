@@ -8,26 +8,25 @@ use solana_program::{
 };
 
 use crate::{ferror, state::*, utils::*};
-use crate::utils_mint::update_metadata;
 
 pub fn process_claim_monster(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    args: ClaimMonsterArgs,
+    _args: ClaimMonsterArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
-    let metadata_info = next_account_info(account_info_iter)?;
+    let _metadata_info = next_account_info(account_info_iter)?;
     let incubator_info = next_account_info(account_info_iter)?;
-    let pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
+    let _pda_creator_info = next_account_info(account_info_iter)?; //nft creator: pda
 
     let nft_mint_info = next_account_info(account_info_iter)?; // NFT mint address
     let nft_account_info = next_account_info(account_info_iter)?; // account own the nft has been approve for authority
     let nft_store_info = next_account_info(account_info_iter)?; // owned by authority_info to keep NFT
     let authority_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
-    let metadata_program_info = next_account_info(account_info_iter)?;
+    let _metadata_program_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
 
@@ -43,6 +42,7 @@ pub fn process_claim_monster(
         return ferror!("hatching");
     };
     monster.hatch_time = now_timestamp();
+    monster.level = 1;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     msg!("Assert Store Authority");
@@ -62,16 +62,6 @@ pub fn process_claim_monster(
             "authority".as_bytes(),
             &[auth_bump],
         ],
-    )?;
-
-    msg!("Update Metadata Account");
-    update_metadata(
-        program_id,
-        signer_info,
-        metadata_info,
-        pda_creator_info,
-        metadata_program_info,
-        args.uri,
     )?;
 
     msg!("Update Incubator");
