@@ -136,7 +136,7 @@ pub fn process_breed(
         monster.clone(),
         &game_config_info,
         true,
-        false,
+        true,
         args,
     )?;
     monster = init_attrs.clone();

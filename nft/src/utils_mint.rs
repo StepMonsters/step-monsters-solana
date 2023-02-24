@@ -637,7 +637,7 @@ pub fn init_monster_attributes(
     if !use_attrs {
         args.attrs = get_monster_features_from_race(all_features.clone())?;
     } else {
-        args.attrs = get_monster_features_from_race(all_features.clone())?;
+        args.attrs = args.attrs.clone()
     }
 
     monster.level = 1;
