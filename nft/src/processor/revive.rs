@@ -112,13 +112,16 @@ pub fn process_revive(
     )?;
 
     msg!("Init Monster Attributes");
-    init_monster_attributes(
-        &monster_info,
+    let mut monster = Monster::from_account_info(monster_info)?;
+    let init_attrs = init_monster_attributes(
+        monster.clone(),
         &game_config_info,
         true,
         true,
         mint_args,
     )?;
+    monster = init_attrs.clone();
+    monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     Ok(())
 }

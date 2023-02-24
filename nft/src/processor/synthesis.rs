@@ -4,7 +4,7 @@ use solana_program::{account_info::{AccountInfo, next_account_info}, entrypoint:
 use crate::{ferror, state::*};
 use crate::utils::{assert_config, assert_eq_pubkey, assert_signer, spl_token_transfer_invoke};
 use crate::utils_config::calculate_synthesize_spend_game_token;
-use crate::utils_mint::{create_metadata_edition, create_monster_info, spl_token_burn_quick};
+use crate::utils_mint::{create_metadata_edition, create_monster_info, init_monster_attributes, spl_token_burn_quick};
 
 pub fn process_synthesis(
     program_id: &Pubkey,
@@ -22,6 +22,7 @@ pub fn process_synthesis(
     let _program_info = next_account_info(account_info_iter)?;
     let signer_ata_info = next_account_info(account_info_iter)?;
     let program_ata_info = next_account_info(account_info_iter)?;
+    let game_config_info = next_account_info(account_info_iter)?;
 
     let token_account_01 = next_account_info(account_info_iter)?;
     let token_account_02 = next_account_info(account_info_iter)?;
@@ -62,14 +63,6 @@ pub fn process_synthesis(
         signer_info.clone(),
         spend,
     )?;
-
-    let args = MintArgs {
-        race: new_race,
-        attrs: Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-        generation: 1,
-        father_mint: *system_info.key,
-        mother_mint: *system_info.key,
-    };
 
     msg!("Burn Token");
     spl_token_burn_quick(
@@ -145,12 +138,21 @@ pub fn process_synthesis(
         &system_info,
         &signer_info,
     )?;
+
+    let args = QuickMintArgs { race: new_race.clone(), attrs: Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) };
+
+    msg!("Init Monster Attributes");
     let mut monster = Monster::from_account_info(monster_info)?;
-    monster.race = args.race;
-    monster.generation = args.generation;
-    monster.monster_feature = Vec::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-    monster.father_mint = args.father_mint;
-    monster.mother_mint = args.mother_mint;
+    let init_attrs = init_monster_attributes(
+        monster.clone(),
+        &game_config_info,
+        true,
+        false,
+        args,
+    )?;
+    monster = init_attrs.clone();
+    monster.generation = 1;
+    monster.level = 0;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
     Ok(())

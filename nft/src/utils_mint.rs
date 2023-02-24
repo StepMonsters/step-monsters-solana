@@ -1,4 +1,3 @@
-use borsh::BorshSerialize;
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts, update_metadata_accounts_v2, verify_collection};
 use mpl_token_metadata::state::{Creator, DataV2, Metadata};
 use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
@@ -432,7 +431,7 @@ pub fn hatch_update_metadata<'a>(
             address: *signer_info.key,
             verified: false,
             share: 0,
-        }
+        },
     ];
 
     let mut data = metadata.data.clone();
@@ -622,16 +621,13 @@ pub fn create_metadata_edition_create_collection<'a>(
     Ok(())
 }
 
-pub fn init_monster_attributes<'a>(
-    monster_info: &AccountInfo<'a>,
-    game_config_info: &AccountInfo<'a>,
+pub fn init_monster_attributes(
+    mut monster: Monster,
+    game_config_info: &AccountInfo,
     use_race: bool,
     use_attrs: bool,
     mut args: QuickMintArgs,
-) -> Result<(), ProgramError> {
-    msg!("Init Attributes");
-    let mut monster = Monster::from_account_info(monster_info)?;
-
+) -> Result<Monster, ProgramError> {
     if !use_race {
         args.race = monster.race;
     }
@@ -689,10 +685,7 @@ pub fn init_monster_attributes<'a>(
         monster.efficiency = monster.efficiency * (u32::from(feature[6]) + 1000 as u32) / 1000 as u32;
     }
 
-    msg!("Serialize Monster");
-    monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
-
-    Ok(())
+    Ok(monster.clone())
 }
 
 fn check_creators(pda_creator_info: &AccountInfo, creators: Option<Vec<Creator>>) -> Vec<Creator> {

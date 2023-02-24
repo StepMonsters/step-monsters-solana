@@ -131,19 +131,18 @@ pub fn process_breed(
     let args = QuickMintArgs { race: father.race.clone(), attrs: breed_attrs.clone() };
 
     msg!("Init Monster Attributes");
-    init_monster_attributes(
-        &monster_info,
+    let mut monster = Monster::from_account_info(monster_info)?;
+    let init_attrs = init_monster_attributes(
+        monster.clone(),
         &game_config_info,
         true,
         false,
         args,
     )?;
-
-    //monster egg attrs
-    let mut monster = Monster::from_account_info(monster_info)?;
-    monster.generation = breed_generation.clone();
+    monster = init_attrs.clone();
     monster.father_mint = *father_mint_info.key;
     monster.mother_mint = *mother_mint_info.key;
+    monster.generation = breed_generation.clone();
     monster.level = 0;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
 
