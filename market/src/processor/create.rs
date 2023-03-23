@@ -142,6 +142,7 @@ pub fn process_create(
     auction_data.is_claim = false;
     auction_data.last_bid = None;
     auction_data.price = args.price;
+    auction_data.price_type = args.price_type;
 
     spl_token_transfer_invoke(
         spl_token_info.clone(),

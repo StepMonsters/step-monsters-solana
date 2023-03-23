@@ -78,6 +78,10 @@ impl SetCreatorWhitelistData {
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, Clone, Copy, Debug, Default, PartialEq)]
 pub struct CreateArgs {
+
+    /// Price type of sale
+    pub price_type: u8,
+
     /// Price of sale
     pub price: Option<u64>,
 
@@ -101,6 +105,8 @@ pub struct AuctionData {
     pub nft_mint: Pubkey,
     /// NFT store by auction
     pub nft_store: Pubkey,
+    /// Price type of sale
+    pub price_type: u8,
     /// fixed price sale
     /// Price of sale
     pub price: Option<u64>,
@@ -115,7 +121,7 @@ pub struct AuctionData {
 }
 
 impl AuctionData {
-    pub const LEN: usize = 8 + 1 + 32 * 3 + 9 * 3 + 1 + (BidData::LEN + 1);
+    pub const LEN: usize = 8 + 1 + 32 * 3 + 9 * 3 + 1 + 1 + (BidData::LEN + 1);
 
     pub fn from_account_info(a: &AccountInfo) -> Result<AuctionData, ProgramError> {
         if a.data_len() != Self::LEN {
@@ -134,6 +140,10 @@ impl AuctionData {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, Copy, Debug, Default, PartialEq)]
 pub struct PlaceBidArgs {
+
+    /// Price type of bid
+    pub price_type: u8,
+
     /// Price of bid
     pub price: u64,
 }

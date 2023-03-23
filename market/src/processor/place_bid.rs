@@ -26,6 +26,9 @@ pub fn process_place_bid(
     let authority_info = next_account_info(account_info_iter)?;
     let bid_info = next_account_info(account_info_iter)?;
     let auction_creator_info = next_account_info(account_info_iter)?;
+    let auction_creator_pda_info = next_account_info(account_info_iter)?;
+    let signer_lst_pda_info = next_account_info(account_info_iter)?;
+    let token_mint_lst_info = next_account_info(account_info_iter)?;
     let nft_store_info = next_account_info(account_info_iter)?;
     let nft_mint_info = next_account_info(account_info_iter)?;
     let nft_return_info = next_account_info(account_info_iter)?;
@@ -123,58 +126,86 @@ pub fn process_place_bid(
     let nft_metadata = Metadata::from_account_info(nft_metadata_info)?;
     let mut royalty_amt = 0;
 
-    //transfer sol to creators
-    if nft_metadata.data.seller_fee_basis_points > 0 {
-        royalty_amt = fixed_price
-            .checked_mul(nft_metadata.data.seller_fee_basis_points as u64)
-            .ok_or(ProgramError::BorshIoError("royalty_amt cal error".into()))?
+    if args.price_type == 0 {
+        //transfer sol to creators
+        if nft_metadata.data.seller_fee_basis_points > 0 {
+            royalty_amt = fixed_price
+                .checked_mul(nft_metadata.data.seller_fee_basis_points as u64)
+                .ok_or(ProgramError::BorshIoError("royalty_amt cal error".into()))?
+                .checked_div(10000 as u64)
+                .ok_or(ProgramError::BorshIoError("royalty_amt cal error".into()))?;
+            if royalty_amt > 0 {
+                // msg!("royalty transfer  {} {}", &creator.address, amount);
+                invoke(
+                    &system_instruction::transfer(&signer_info.key, &nft_creator_info.key, royalty_amt),
+                    &[
+                        signer_info.clone(),
+                        nft_creator_info.clone(),
+                        system_info.clone(),
+                    ],
+                )?;
+            }
+        }
+
+        //transfer sol to fee reciver
+        let fee_amt = fixed_price
+            .checked_mul(config_data.charge_rate as u64)
+            .ok_or(ProgramError::BorshIoError("fee_amt cal error".into()))?
             .checked_div(10000 as u64)
-            .ok_or(ProgramError::BorshIoError("royalty_amt cal error".into()))?;
-        if royalty_amt > 0 {
-            // msg!("royalty transfer  {} {}", &creator.address, amount);
+            .ok_or(ProgramError::BorshIoError("fee_amt cal error".into()))?;
+        invoke(
+            &system_instruction::transfer(&signer_info.key, &charge_addr_info.key, fee_amt),
+            &[
+                signer_info.clone(),
+                charge_addr_info.clone(),
+                system_info.clone(),
+            ],
+        )?;
+
+        //transfer sol to seller
+        invoke(
+            &system_instruction::transfer(
+                &signer_info.key,
+                &auction_data.creator,
+                bid_price
+                    .checked_sub(royalty_amt)
+                    .ok_or(ProgramError::BorshIoError("seller_amt cal error".into()))?
+                    .checked_sub(fee_amt)
+                    .ok_or(ProgramError::BorshIoError("seller_amt cal error".into()))?,
+            ),
+            &[
+                signer_info.clone(),
+                auction_creator_info.clone(),
+                system_info.clone(),
+            ],
+        )?;
+    } else {
+        if auction_creator_pda_info.lamports() <= 0 {
             invoke(
-                &system_instruction::transfer(&signer_info.key, &nft_creator_info.key, royalty_amt),
+                &create_associated_token_account(
+                    signer_info.key,
+                    auction_creator_info.key,
+                    token_mint_lst_info.key,
+                ),
                 &[
                     signer_info.clone(),
-                    nft_creator_info.clone(),
-                    system_info.clone(),
+                    auction_creator_info.clone(),
+                    auction_creator_pda_info.clone(),
+                    token_mint_lst_info.clone(),
+                    ass_token_program_info.clone(),
+                    spl_token_info.clone(),
+                    system_info.clone()
                 ],
             )?;
         }
+        spl_token_transfer_invoke(
+            spl_token_info.clone(),
+            signer_lst_pda_info.clone(),
+            auction_creator_pda_info.clone(),
+            signer_info.clone(),
+            args.price,
+        )?;
     }
-
-    //transfer sol to fee reciver
-    let fee_amt = fixed_price
-        .checked_mul(config_data.charge_rate as u64)
-        .ok_or(ProgramError::BorshIoError("fee_amt cal error".into()))?
-        .checked_div(10000 as u64)
-        .ok_or(ProgramError::BorshIoError("fee_amt cal error".into()))?;
-    invoke(
-        &system_instruction::transfer(&signer_info.key, &charge_addr_info.key, fee_amt),
-        &[
-            signer_info.clone(),
-            charge_addr_info.clone(),
-            system_info.clone(),
-        ],
-    )?;
-
-    //transfer sol to seller
-    invoke(
-        &system_instruction::transfer(
-            &signer_info.key,
-            &auction_data.creator,
-            bid_price
-                .checked_sub(royalty_amt)
-                .ok_or(ProgramError::BorshIoError("seller_amt cal error".into()))?
-                .checked_sub(fee_amt)
-                .ok_or(ProgramError::BorshIoError("seller_amt cal error".into()))?,
-        ),
-        &[
-            signer_info.clone(),
-            auction_creator_info.clone(),
-            system_info.clone(),
-        ],
-    )?;
 
     auction_data.is_claim = true;
     bid_data.is_done = true;
