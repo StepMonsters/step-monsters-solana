@@ -69,7 +69,7 @@ pub fn process_create_token_mint(
         &[bump_seed],
     ];
 
-    let name = String::from("LST");
+    let name = String::from("Lite Satoshi Token");
     let symbol = String::from("LST");
     let uri = String::from("https://api.stepmonsters.xyz/metadata/lst.json");
 
