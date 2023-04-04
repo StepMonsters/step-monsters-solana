@@ -92,7 +92,7 @@ pub fn process_create_token(
             token_program_info.key,
             mint_info.key,
             token_admin_info.key,
-            Some(signer_info.key),
+            None,
             9,
         )?,
         &[signer_info.clone(), mint_info.clone(), rent_info.clone(), token_program_info.clone(), token_admin_info.clone()],
