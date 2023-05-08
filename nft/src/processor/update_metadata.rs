@@ -1,5 +1,5 @@
-use mpl_token_metadata::instruction::{update_metadata_accounts};
-use mpl_token_metadata::state::{Metadata};
+use mpl_token_metadata::instruction::update_metadata_accounts_v2;
+use mpl_token_metadata::state::{DataV2, Metadata, TokenMetadataAccount};
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
@@ -40,26 +40,26 @@ pub fn process_update_metadata(
         },
     ];
 
-    let mut data = metadata.data.clone();
-    data.creators = Some(creators.clone());
-    // let data_v2 = DataV2 {
-    //     name: data.name.clone(),
-    //     symbol: data.symbol.clone(),
-    //     uri: data.uri.clone(),
-    //     seller_fee_basis_points: data.seller_fee_basis_points.clone(),
-    //     creators: Some(creators),
-    //     collection: None,
-    //     uses: None,
-    // };
+    let data = metadata.data.clone();
+    let data_v2 = DataV2 {
+        name: data.name.clone(),
+        symbol: data.symbol.clone(),
+        uri: data.uri.clone(),
+        seller_fee_basis_points: data.seller_fee_basis_points.clone(),
+        creators: Some(creators.clone()),
+        collection: metadata.collection,
+        uses: metadata.uses,
+    };
 
     msg!("Update Metadata");
     invoke_signed(
-        &update_metadata_accounts(
+        &update_metadata_accounts_v2(
             *metadata_program_info.key,
             *metadata_info.key,
             *pda_creator_info.key,
             Some(*pda_creator_info.key),
-            Some(data),
+            Some(data_v2.clone()),
+            Some(true),
             Some(true),
         ),
         &[

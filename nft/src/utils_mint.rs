@@ -1,6 +1,6 @@
-use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v2, update_metadata_accounts, update_metadata_accounts_v2, verify_collection};
-use mpl_token_metadata::state::{Creator, DataV2, Metadata};
-use mpl_token_metadata::utils::{spl_token_burn, TokenBurnParams};
+use mpl_token_metadata::*;
+use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v3, update_metadata_accounts_v2, verify_collection};
+use mpl_token_metadata::state::{Creator, DataV2, Metadata, TokenMetadataAccount};
 use solana_program::{msg, system_instruction};
 use solana_program::account_info::AccountInfo;
 use solana_program::program::{invoke, invoke_signed};
@@ -59,6 +59,7 @@ pub fn handle_init_mint<'a>(
             signer_info.key,
             signer_info.key,
             mint_info.key,
+            token_program_info.key,
         ),
         &[
             signer_info.clone(),
@@ -236,6 +237,7 @@ pub fn mint_game_token_to_ata<'a>(
                 signer_info.key,
                 signer_info.key,
                 mint_info.key,
+                token_program_info.key,
             ),
             &[
                 signer_info.clone(),
@@ -315,7 +317,7 @@ pub fn create_metadata_edition<'a>(
 
     msg!("Create Metadata");
     invoke_signed(
-        &create_metadata_accounts_v2(
+        &create_metadata_accounts_v3(
             *metadata_program_info.key,
             *metadata_info.key,
             *mint_info.key,
@@ -330,6 +332,7 @@ pub fn create_metadata_edition<'a>(
             true,
             true,
             Some(collection.clone()),
+            None,
             None,
         ),
         &[
@@ -434,17 +437,26 @@ pub fn hatch_update_metadata<'a>(
         },
     ];
 
-    let mut data = metadata.data.clone();
-    data.creators = Some(creators.clone());
+    let data = metadata.data.clone();
+    let data_v2 = DataV2 {
+        name: data.name.clone(),
+        symbol: data.symbol.clone(),
+        uri: data.uri.clone(),
+        seller_fee_basis_points: data.seller_fee_basis_points.clone(),
+        creators: Some(creators.clone()),
+        collection: metadata.collection,
+        uses: metadata.uses,
+    };
 
     msg!("Update Metadata");
     invoke_signed(
-        &update_metadata_accounts(
+        &update_metadata_accounts_v2(
             *metadata_program_info.key,
             *metadata_info.key,
             *pda_creator_info.key,
             Some(*pda_creator_info.key),
-            Some(data.clone()),
+            Some(data_v2.clone()),
+            Some(true),
             Some(true),
         ),
         &[
@@ -562,7 +574,7 @@ pub fn create_metadata_edition_create_collection<'a>(
 
     msg!("Create Metadata");
     invoke_signed(
-        &create_metadata_accounts_v2(
+        &create_metadata_accounts_v3(
             *metadata_program_info.key,
             *metadata_info.key,
             *mint_info.key,
@@ -576,6 +588,7 @@ pub fn create_metadata_edition_create_collection<'a>(
             config_data.fee,
             true,
             true,
+            None,
             None,
             None,
         ),
@@ -737,14 +750,22 @@ pub fn spl_token_burn_quick<'a>(
     token_program_info: AccountInfo<'a>,
     token_account_info: AccountInfo<'a>,
 ) -> Result<(), ProgramError> {
-    spl_token_burn(TokenBurnParams {
-        mint: mint_info,
-        amount: 1,
-        authority: owner_info,
-        token_program: token_program_info,
-        source: token_account_info,
-        authority_signer_seeds: None,
-    })?;
+    let token_program = token_program_info.clone();
+    let source = token_account_info.clone();
+    let destination = mint_info.clone();
+    let authority = owner_info.clone();
+
+    invoke(
+        &spl_token::instruction::burn(
+            token_program.key,
+            source.key,
+            destination.key,
+            authority.key,
+            &[],
+            1,
+        )?,
+        &[source, destination, authority, token_program],
+    )?;
 
     Ok(())
 }

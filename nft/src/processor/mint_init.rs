@@ -61,6 +61,7 @@ pub fn process_mint_init(
             signer_info.key,
             signer_info.key,
             mint_info.key,
+            token_program_info.key
         ),
         &[
             signer_info.clone(),

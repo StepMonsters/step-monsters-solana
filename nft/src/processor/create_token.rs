@@ -104,6 +104,7 @@ pub fn process_create_token(
             signer_info.key,
             signer_info.key,
             mint_info.key,
+            token_program_info.key
         ),
         &[
             signer_info.clone(),
@@ -142,6 +143,7 @@ pub fn process_create_token(
             signer_info.key,
             token_admin_info.key,
             mint_info.key,
+            token_program_info.key
         ),
         &[
             signer_info.clone(),
