@@ -1,4 +1,4 @@
-use mpl_token_metadata::instruction::create_metadata_accounts_v2;
+use mpl_token_metadata::instruction::create_metadata_accounts_v3;
 use solana_program::{
     account_info::{AccountInfo, next_account_info},
     entrypoint::ProgramResult,
@@ -75,7 +75,7 @@ pub fn process_create_token_mint(
 
     msg!("Create Metadata");
     invoke_signed(
-        &create_metadata_accounts_v2(
+        &create_metadata_accounts_v3(
             *metadata_program_info.key,
             *metadata_info.key,
             *mint_info.key,
@@ -91,6 +91,7 @@ pub fn process_create_token_mint(
             true,
             None,
             None,
+            None
         ),
         &[
             metadata_program_info.clone(),
