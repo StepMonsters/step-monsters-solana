@@ -73,7 +73,7 @@ pub fn process_battle(
 
     //after battle logic do  mint_nft
     //monster add fatigue
-    let capture = get_random_u8(0, 2)? == 0;
+    let capture = get_random_u8(0, 10)? == 0;
     if win > 0 && capture {
         win = 2;
     } else if win > 0 && !capture {
@@ -83,7 +83,8 @@ pub fn process_battle(
     }
 
     msg!("Receive Game Token");
-    let token: u64 = calculate_battle_receive_game_token(win, monster.race, monster.level);
+    let mut token: u64 = calculate_battle_receive_game_token(win, monster.race, monster.level);
+    token = token * 115 / 100;
     mint_game_token_to_ata(
         program_id,
         signer_info,
