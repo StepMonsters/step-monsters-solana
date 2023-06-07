@@ -117,7 +117,7 @@ pub fn process_revive(
         monster.clone(),
         &game_config_info,
         true,
-        true,
+        false,
         mint_args,
     )?;
     monster = init_attrs.clone();
