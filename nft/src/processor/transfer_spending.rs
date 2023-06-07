@@ -8,6 +8,7 @@ use solana_program::{
     system_instruction,
 };
 use solana_program::program::{invoke, invoke_signed};
+use spl_associated_token_account::instruction::create_associated_token_account;
 
 use crate::{ferror, state::*, utils::*};
 
@@ -123,22 +124,50 @@ pub fn process_transfer_from_spending(
 pub fn process_transfer_from_spending_temp(
     _program_id: &Pubkey,
     accounts: &[AccountInfo],
-    args: TransferSpendingArgs,
+    _args: TransferSpendingArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let spending_info = next_account_info(account_info_iter)?;
+    let signer_ata_info = next_account_info(account_info_iter)?;
+    let target_info = next_account_info(account_info_iter)?;
+    let target_ata_info = next_account_info(account_info_iter)?;
+    let mint_info = next_account_info(account_info_iter)?;
+    let system_info = next_account_info(account_info_iter)?;
+    let token_program_info = next_account_info(account_info_iter)?;
+    let ass_token_program_info = next_account_info(account_info_iter)?;
+    let rent_info = next_account_info(account_info_iter)?;
 
     assert_signer(&signer_info)?;
 
-    msg!("Transfer From Spending Account");
-    **spending_info.try_borrow_mut_lamports()? -= args.amount;
-    **signer_info.try_borrow_mut_lamports()? += args.amount;
+    if target_ata_info.lamports() <= 0 {
+        invoke(
+            &create_associated_token_account(
+                signer_info.key,
+                target_info.key,
+                mint_info.key,
+                token_program_info.key,
+            ),
+            &[
+                signer_info.clone(),
+                signer_ata_info.clone(),
+                target_info.clone(),
+                target_ata_info.clone(),
+                mint_info.clone(),
+                ass_token_program_info.clone(),
+                token_program_info.clone(),
+                system_info.clone(),
+                rent_info.clone(),
+            ],
+        )?;
+    };
 
-    msg!("Serialize Spending Account");
-    let mut spending = SpendingAccount::from_account_info(spending_info)?;
-    spending.amount -= args.amount;
-    spending.serialize(&mut *spending_info.try_borrow_mut_data()?)?;
+    spl_token_transfer_invoke(
+        token_program_info.clone(),
+        signer_ata_info.clone(),
+        target_ata_info.clone(),
+        signer_info.clone(),
+        1,
+    )?;
 
     Ok(())
 }
