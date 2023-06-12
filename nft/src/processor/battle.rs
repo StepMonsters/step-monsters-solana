@@ -84,7 +84,7 @@ pub fn process_battle(
 
     msg!("Receive Game Token");
     let mut token: u64 = calculate_battle_receive_game_token(win, monster.race, monster.level);
-    token = token * 115 / 100;
+    token = token * 90 / 100;
     mint_game_token_to_ata(
         program_id,
         signer_info,
