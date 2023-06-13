@@ -449,7 +449,9 @@ pub fn calculate_upgrade_spend_game_token(level: u8) -> u64 {
 }
 
 pub fn calculate_breed_spend_game_token(breed01: u8, breed02: u8) -> u64 {
-    let spend = ((breed01 as u64 + 1) * 10 + (breed02 as u64 + 1) * 10) / 2 * 75 / 10;
+    let price01 = breed01 as u64;
+    let price02 = breed02 as u64;
+    let spend = (price01 + price02 + 2) * 100 * (price01 + price02 + 1) / 2;
     return spend * 1_000_000_000;
 }
 
