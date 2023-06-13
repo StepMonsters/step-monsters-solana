@@ -42,6 +42,8 @@ pub fn process_mint(
     if config_data.authority != *signer_info.key {
         return ferror!("invalid authority");
     }
+    assert_config(&program_id, &config_info)?;
+    assert_owned_by(config_info, &program_id)?;
 
     msg!("Assert Public Key");
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;

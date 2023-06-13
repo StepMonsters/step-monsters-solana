@@ -47,6 +47,7 @@ pub fn process_configure(
         if config_data.authority != *signer_info.key {
             return ferror!("invalid authority");
         }
+        assert_config(&program_id, &config_info)?;
         assert_owned_by(config_info, &program_id)?;
     }
 

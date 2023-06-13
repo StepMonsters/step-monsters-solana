@@ -37,6 +37,8 @@ pub fn process_create_collection(
     if config_data.authority != *signer_info.key {
         return ferror!("invalid authority");
     }
+    assert_config(&program_id, &config_info)?;
+    assert_owned_by(config_info, &program_id)?;
 
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
     assert_eq_pubkey(&token_program_info, &spl_token::id())?;
