@@ -86,37 +86,57 @@ pub fn process_transfer_from_spending(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let spending_info = next_account_info(account_info_iter)?;
+    let signer_ata_info = next_account_info(account_info_iter)?;
+    let token_admin_info = next_account_info(account_info_iter)?;
+    let program_ata_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+    let token_program_info = next_account_info(account_info_iter)?;
+
+    //check authority
+    let config_info = next_account_info(account_info_iter)?;
+    let config_data = ConfigureData::from_account_info(config_info)?;
+    if config_data.authority != *signer_info.key {
+        return ferror!("invalid authority");
+    }
+    assert_config(&program_id, &config_info)?;
+    assert_owned_by(config_info, &program_id)?;
 
     assert_signer(&signer_info)?;
 
-    msg!("Transfer To Spending Account");
-    let bump_seed = assert_spending(&program_id, &spending_info, &signer_info)?;
-    let spending_seeds = [
-        SEED_STEP_MONSTER.as_bytes(),
+    msg!("Token Admin Seeds");
+    let bump_seed = assert_derivation(
+        program_id,
+        token_admin_info,
+        &[
+            SEED_TOKEN_ADMIN.as_bytes(),
+            program_id.as_ref(),
+        ],
+    )?;
+    let token_admin_seeds = [
+        SEED_TOKEN_ADMIN.as_bytes(),
         program_id.as_ref(),
-        "spending".as_bytes(),
-        signer_info.key.as_ref(),
         &[bump_seed],
     ];
-    invoke_signed(
-        &system_instruction::transfer(
-            spending_info.key,
-            signer_info.key,
-            args.amount),
-        &[
-            signer_info.clone(),
-            spending_info.clone(),
-            system_info.clone(),
-        ],
-        &[&spending_seeds],
-    )?;
 
-    msg!("Serialize Spending Account");
-    let mut spending = SpendingAccount::from_account_info(spending_info)?;
-    spending.amount -= args.amount;
-    spending.serialize(&mut *spending_info.try_borrow_mut_data()?)?;
+    msg!("Transfer token to signer");
+    invoke_signed(
+        &spl_token::instruction::transfer(
+            token_program_info.key,
+            program_ata_info.key,
+            signer_ata_info.key,
+            token_admin_info.key,
+            &[token_admin_info.key],
+            args.amount,
+        )?,
+        &[
+            program_ata_info.clone(),
+            signer_ata_info.clone(),
+            token_program_info.clone(),
+            system_info.clone(),
+            token_admin_info.clone()
+        ],
+        &[&token_admin_seeds],
+    )?;
 
     Ok(())
 }
