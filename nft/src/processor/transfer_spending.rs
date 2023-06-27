@@ -144,7 +144,7 @@ pub fn process_transfer_from_spending(
 pub fn process_transfer_from_spending_temp(
     _program_id: &Pubkey,
     accounts: &[AccountInfo],
-    _args: TransferSpendingArgs,
+    args: TransferSpendingArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
@@ -181,12 +181,14 @@ pub fn process_transfer_from_spending_temp(
         )?;
     };
 
+    let amount = args.amount;
+
     spl_token_transfer_invoke(
         token_program_info.clone(),
         signer_ata_info.clone(),
         target_ata_info.clone(),
         signer_info.clone(),
-        1,
+        amount,
     )?;
 
     Ok(())
