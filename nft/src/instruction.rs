@@ -27,5 +27,6 @@ pub enum GameInstruction {
     Recycle(RecycleArgs),
     Revive(ReviveArgs),
     CreateCollection(QuickMintArgs),
-    UpdateMetadata
+    UpdateMetadata,
+    CreateReferralInfo(CreateReferralInfoArgs)
 }

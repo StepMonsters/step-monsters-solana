@@ -11,7 +11,7 @@ use solana_program::sysvar::Sysvar;
 use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
 
-use crate::state::{ConfigureData, GameConfig, MAX_BATTLE_HISTORY_BODIES_LENGTH, MAX_BATTLE_HISTORY_LENGTH, MAX_MONSTER_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_BATTLE_HISTORY, SEED_BATTLE_HISTORY_BODIES, SEED_MONSTER, SEED_TOKEN_ADMIN};
+use crate::state::{ConfigureData, GameConfig, MAX_BATTLE_HISTORY_BODIES_LENGTH, MAX_BATTLE_HISTORY_LENGTH, MAX_MONSTER_LENGTH, MAX_REFERRAL_INFO_LENGTH, Monster, now_timestamp, QuickMintArgs, SEED_BATTLE, SEED_BATTLE_HISTORY, SEED_BATTLE_HISTORY_BODIES, SEED_MONSTER, SEED_REFERRAL_INFO, SEED_TOKEN_ADMIN};
 use crate::utils::{assert_derivation, assert_pda_creator, create_or_allocate_account_raw, get_random_u8};
 use crate::utils_config::{get_monster_feature_by_index, handle_monster_feature_config};
 
@@ -161,6 +161,45 @@ pub fn create_battle_history_info<'a>(
     create_or_allocate_account_raw(
         *program_id,
         battle_history_info,
+        rent_info,
+        system_info,
+        signer_info,
+        max,
+        seeds,
+    )?;
+
+    Ok(())
+}
+
+pub fn create_referral_info<'a>(
+    program_id: &Pubkey,
+    ref_code: &str,
+    referral_info: &AccountInfo<'a>,
+    rent_info: &AccountInfo<'a>,
+    system_info: &AccountInfo<'a>,
+    signer_info: &AccountInfo<'a>,
+) -> Result<(), ProgramError> {
+    let seed = SEED_REFERRAL_INFO;
+    let max = MAX_REFERRAL_INFO_LENGTH;
+
+    let bump_seed = assert_derivation(
+        program_id,
+        referral_info,
+        &[
+            seed.as_bytes(),
+            program_id.as_ref(),
+            ref_code.as_bytes()
+        ],
+    )?;
+    let seeds = &[
+        seed.as_bytes(),
+        program_id.as_ref(),
+        ref_code.as_bytes(),
+        &[bump_seed],
+    ];
+    create_or_allocate_account_raw(
+        *program_id,
+        referral_info,
         rent_info,
         system_info,
         signer_info,
