@@ -11,9 +11,9 @@ use solana_program::{
 use crate::{ferror, state::*, utils::*};
 use crate::utils_battle::battle_round;
 use crate::utils_config::calculate_battle_receive_game_token;
-use crate::utils_mint::{create_battle_history_info, mint_game_token_to_ata};
+use crate::utils_mint::{create_battle_history_info, mint_game_token_to_ata, mint_game_token_to_ata_with_ref};
 
-pub fn process_battle(
+pub fn process_battle_with_ref(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
     args: BattleArgs,
@@ -21,6 +21,11 @@ pub fn process_battle(
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
     let signer_ata_info = next_account_info(account_info_iter)?;
+    let father_info = next_account_info(account_info_iter)?;
+    let father_ata_info = next_account_info(account_info_iter)?;
+    let grandfather_info = next_account_info(account_info_iter)?;
+    let grandfather_ata_info = next_account_info(account_info_iter)?;
+
     let game_token_info = next_account_info(account_info_iter)?;
     let token_admin_info = next_account_info(account_info_iter)?;
     let ass_token_program_info = next_account_info(account_info_iter)?;
@@ -96,6 +101,40 @@ pub fn process_battle(
         system_info,
         token,
     )?;
+
+    msg!("Father Token");
+    if signer_ata_info.key.to_string() != father_ata_info.key.to_string() {
+        let father_token = token * 500 / 10000;
+        mint_game_token_to_ata_with_ref(
+            program_id,
+            signer_info,
+            father_info,
+            father_ata_info,
+            game_token_info,
+            token_admin_info,
+            ass_token_program_info,
+            token_program_info,
+            system_info,
+            father_token,
+        )?;
+    }
+
+    msg!("Grandfather Token");
+    if signer_ata_info.key.to_string() != grandfather_ata_info.key.to_string() {
+        let grandfather_token = token * 200 / 10000;
+        mint_game_token_to_ata_with_ref(
+            program_id,
+            signer_info,
+            grandfather_info,
+            grandfather_ata_info,
+            game_token_info,
+            token_admin_info,
+            ass_token_program_info,
+            token_program_info,
+            system_info,
+            grandfather_token,
+        )?;
+    }
 
     if battle_history_info.lamports() <= 0 {
         create_battle_history_info(

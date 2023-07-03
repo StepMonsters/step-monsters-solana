@@ -316,7 +316,8 @@ pub fn mint_game_token_to_ata<'a>(
 pub fn mint_game_token_to_ata_with_ref<'a>(
     program_id: &Pubkey,
     signer_info: &AccountInfo<'a>,
-    signer_ata_info: &AccountInfo<'a>,
+    target_info: &AccountInfo<'a>,
+    target_ata_info: &AccountInfo<'a>,
     mint_info: &AccountInfo<'a>,
     token_admin_info: &AccountInfo<'a>,
     ass_token_program_info: &AccountInfo<'a>,
@@ -340,17 +341,18 @@ pub fn mint_game_token_to_ata_with_ref<'a>(
     ];
 
     msg!("Create Signer Associated Token Account");
-    if signer_ata_info.lamports() <= 0 {
+    if target_ata_info.lamports() <= 0 {
         invoke(
             &create_associated_token_account(
                 signer_info.key,
-                signer_info.key,
+                target_info.key,
                 mint_info.key,
                 token_program_info.key,
             ),
             &[
                 signer_info.clone(),
-                signer_ata_info.clone(),
+                target_info.clone(),
+                target_ata_info.clone(),
                 ass_token_program_info.clone(),
                 mint_info.clone(),
                 token_program_info.clone(),
@@ -364,14 +366,15 @@ pub fn mint_game_token_to_ata_with_ref<'a>(
         &mint_to(
             token_program_info.key,
             mint_info.key,
-            signer_ata_info.key,
+            target_ata_info.key,
             token_admin_info.key,
             &[token_admin_info.key],
             amount,
         )?,
         &[
             signer_info.clone(),
-            signer_ata_info.clone(),
+            target_info.clone(),
+            target_ata_info.clone(),
             mint_info.clone(),
             token_program_info.clone(),
             system_info.clone(),
@@ -382,6 +385,7 @@ pub fn mint_game_token_to_ata_with_ref<'a>(
 
     Ok(())
 }
+
 pub fn create_metadata_edition<'a>(
     program_id: &Pubkey,
     pda_creator_info: &AccountInfo<'a>,
