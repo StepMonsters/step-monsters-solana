@@ -2,6 +2,7 @@ use borsh::BorshDeserialize;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
 pub use battle::*;
+pub use battle_with_ref::*;
 pub use breed::*;
 pub use claim_monster::*;
 pub use config_game::*;
@@ -48,6 +49,7 @@ pub mod revive;
 pub mod create_collection;
 pub mod update_metadata;
 pub mod create_referral_info;
+pub mod battle_with_ref;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -131,6 +133,9 @@ pub fn process_instruction(
         }
         GameInstruction::CreateReferralInfo(args) => {
             process_create_referral_info(program_id, accounts, args)
+        }
+        GameInstruction::BattleWithRef(args) => {
+            process_battle_with_ref(program_id, accounts, args)
         }
     }
 }

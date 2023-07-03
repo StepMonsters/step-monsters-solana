@@ -28,5 +28,6 @@ pub enum GameInstruction {
     Revive(ReviveArgs),
     CreateCollection(QuickMintArgs),
     UpdateMetadata,
-    CreateReferralInfo(CreateReferralInfoArgs)
+    CreateReferralInfo(CreateReferralInfoArgs),
+    BattleWithRef(BattleArgs),
 }
