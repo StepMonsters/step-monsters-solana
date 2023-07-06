@@ -15,7 +15,7 @@ pub const SEED_MONSTER_FEATURE_CONFIG: &str = "monster_feature_config_07271508";
 pub const SEED_BATTLE_HISTORY: &str = "battle_history_12291655";
 pub const SEED_BATTLE_HISTORY_BODIES: &str = "battle_history_bodies";
 pub const SEED_TOKEN_ADMIN: &str = "token_admin_12152048";
-pub const SEED_REFERRAL_INFO: &str = "referral_202306291731";
+pub const SEED_REFERRAL_INFO: &str = "referral_202307061126";
 pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
@@ -25,7 +25,7 @@ pub const MAX_GAME_CONFIG_LENGTH: usize = (4 + (4 + 4 * 6) * 10) * 2;
 pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = (4 + (4 + 2 * 7) * 64) * 4;
 pub const MAX_BATTLE_HISTORY_LENGTH: usize = 1 + 8 * 2 + (1 + 14 + 4 * 5) * 2 + (4 + 4 * 40) + (4 + (4 + 3 + 10) * 50);
 pub const MAX_BATTLE_HISTORY_BODIES_LENGTH: usize = 4 + (4 + 3 + 10) * 100;
-pub const MAX_REFERRAL_INFO_LENGTH: usize = 32 * 2 + (4 + 8);
+pub const MAX_REFERRAL_INFO_LENGTH: usize = 32 * 2 + 8 * 2 + (4 + 8);
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]
@@ -326,6 +326,8 @@ impl BattleHistoryBodies {
 pub struct ReferralInfo {
     pub addr: Pubkey,
     pub father_addr: Pubkey,
+    pub invited: u64,
+    pub reward: u64,
     pub ref_code: String,
 }
 

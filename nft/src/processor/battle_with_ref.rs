@@ -25,6 +25,8 @@ pub fn process_battle_with_ref(
     let father_ata_info = next_account_info(account_info_iter)?;
     let grandfather_info = next_account_info(account_info_iter)?;
     let grandfather_ata_info = next_account_info(account_info_iter)?;
+    let father_ref_info = next_account_info(account_info_iter)?;
+    let grandfather_ref_info = next_account_info(account_info_iter)?;
 
     let game_token_info = next_account_info(account_info_iter)?;
     let token_admin_info = next_account_info(account_info_iter)?;
@@ -117,6 +119,9 @@ pub fn process_battle_with_ref(
             system_info,
             father_token,
         )?;
+        let mut father_ref = ReferralInfo::from_account_info(father_ref_info)?;
+        father_ref.reward += father_token;
+        father_ref.serialize(&mut *father_ref_info.try_borrow_mut_data()?)?;
     }
 
     msg!("Grandfather Token");
@@ -134,6 +139,9 @@ pub fn process_battle_with_ref(
             system_info,
             grandfather_token,
         )?;
+        let mut grandfather_ref = ReferralInfo::from_account_info(grandfather_ref_info)?;
+        grandfather_ref.reward += grandfather_token;
+        grandfather_ref.serialize(&mut *grandfather_ref_info.try_borrow_mut_data()?)?;
     }
 
     if battle_history_info.lamports() <= 0 {

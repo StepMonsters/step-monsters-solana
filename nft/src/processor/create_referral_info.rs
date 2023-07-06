@@ -17,8 +17,9 @@ pub fn process_create_referral_info(
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let signer_info = next_account_info(account_info_iter)?;
-    let father_info = next_account_info(account_info_iter)?;
     let referral_info = next_account_info(account_info_iter)?;
+    let father_info = next_account_info(account_info_iter)?;
+    let father_ref_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
 
@@ -44,11 +45,19 @@ pub fn process_create_referral_info(
         )?;
     };
 
+    msg!("User Referral Info");
     let mut ref_info = ReferralInfo::from_account_info(referral_info)?;
     ref_info.addr = *signer_info.key;
     ref_info.father_addr = *father_info.key;
     ref_info.ref_code = ref_code;
     ref_info.serialize(&mut *referral_info.try_borrow_mut_data()?)?;
+
+    msg!("Father Referral Info");
+    if father_ref_info.key != referral_info.key {
+        let mut father_ref = ReferralInfo::from_account_info(father_ref_info)?;
+        father_ref.invited += 1;
+        father_ref.serialize(&mut *father_ref_info.try_borrow_mut_data()?)?;
+    }
 
     Ok(())
 }
