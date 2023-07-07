@@ -139,9 +139,11 @@ pub fn process_battle_with_ref(
             system_info,
             grandfather_token,
         )?;
-        let mut grandfather_ref = ReferralInfo::from_account_info(grandfather_ref_info)?;
-        grandfather_ref.reward += grandfather_token;
-        grandfather_ref.serialize(&mut *grandfather_ref_info.try_borrow_mut_data()?)?;
+        if grandfather_ref_info.key != father_ref_info.key {
+            let mut grandfather_ref = ReferralInfo::from_account_info(grandfather_ref_info)?;
+            grandfather_ref.reward += grandfather_token;
+            grandfather_ref.serialize(&mut *grandfather_ref_info.try_borrow_mut_data()?)?;
+        }
     }
 
     if battle_history_info.lamports() <= 0 {
