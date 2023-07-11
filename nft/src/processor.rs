@@ -2,11 +2,14 @@ use borsh::BorshDeserialize;
 use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, msg, pubkey::Pubkey};
 
 pub use battle::*;
+pub use battle_with_ref::*;
 pub use breed::*;
 pub use claim_monster::*;
 pub use config_game::*;
 pub use config_monster_feature::*;
 pub use configure::*;
+pub use create_collection::*;
+pub use create_referral_info::*;
 pub use create_token::*;
 pub use create_token_mint::*;
 pub use cure::*;
@@ -19,9 +22,8 @@ pub use recycle::*;
 pub use revive::*;
 pub use synthesis::*;
 pub use transfer_spending::*;
-pub use upgrade::*;
-pub use create_collection::*;
 pub use update_metadata::*;
+pub use upgrade::*;
 
 use crate::instruction::*;
 
@@ -46,6 +48,8 @@ pub mod recycle;
 pub mod revive;
 pub mod create_collection;
 pub mod update_metadata;
+pub mod create_referral_info;
+pub mod battle_with_ref;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -126,6 +130,12 @@ pub fn process_instruction(
         }
         GameInstruction::UpdateMetadata => {
             process_update_metadata(program_id, accounts)
+        }
+        GameInstruction::CreateReferralInfo(args) => {
+            process_create_referral_info(program_id, accounts, args)
+        }
+        GameInstruction::BattleWithRef(args) => {
+            process_battle_with_ref(program_id, accounts, args)
         }
     }
 }
