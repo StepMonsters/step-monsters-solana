@@ -11,7 +11,7 @@ use crate::{ferror, state::*, utils::*};
 use crate::utils_config::calculate_upgrade_spend_game_token;
 
 pub fn process_upgrade(
-    _program_id: &Pubkey,
+    program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
@@ -20,6 +20,8 @@ pub fn process_upgrade(
     let signer_ata_info = next_account_info(account_info_iter)?;
     let program_ata_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
+
+    let admin_fund_info = next_account_info(account_info_iter);
 
     assert_signer(&signer_info)?;
 
@@ -48,6 +50,9 @@ pub fn process_upgrade(
     monster.agility = monster.agility * 106 / 100;
     monster.efficiency = monster.efficiency * 106 / 100;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }

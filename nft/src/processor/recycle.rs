@@ -24,9 +24,12 @@ pub fn process_recycle(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
+    let admin_fund_info = next_account_info(account_info_iter);
+
     assert_signer(&signer_info)?;
 
     if battle_history_info.lamports() <= 0 {
+        send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_BATTLE_HISTORY_LENGTH)?;
         create_battle_history_info(
             &program_id,
             &battle_history_info,
@@ -35,7 +38,7 @@ pub fn process_recycle(
             &signer_info,
             false,
         )?;
-    };
+    }
 
     msg!("Recycle Monster");
     let mut battle_history = BattleHistory::from_account_info(battle_history_info)?;
@@ -70,6 +73,9 @@ pub fn process_recycle(
 
     battle_history.soul += args.soul;
     battle_history.serialize(&mut *battle_history_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }

@@ -36,6 +36,8 @@ pub fn process_revive(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
+    let admin_fund_info = next_account_info(account_info_iter);
+
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
     assert_eq_pubkey(&token_program_info, &spl_token::id())?;
     assert_eq_pubkey(&rent_info, &sysvar::rent::id())?;
@@ -82,6 +84,10 @@ pub fn process_revive(
     let mint_args = QuickMintArgs { race: args.race.clone(), attrs: args.enemy_feature.clone() };
 
     msg!("Create Metadata Edition");
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_METADATA_EDITION_MONSTER)?;
+
     create_metadata_edition(
         &program_id,
         &pda_creator_info,
@@ -122,6 +128,9 @@ pub fn process_revive(
     )?;
     monster = init_attrs.clone();
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }

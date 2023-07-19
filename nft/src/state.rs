@@ -27,6 +27,12 @@ pub const MAX_MONSTER_FEATURE_CONFIG_LENGTH: usize = (4 + (4 + 2 * 7) * 64) * 4;
 pub const MAX_BATTLE_HISTORY_LENGTH: usize = 1 + 8 * 2 + (1 + 14 + 4 * 5) * 2 + (4 + 4 * 40) + (4 + (4 + 3 + 10) * 50);
 pub const MAX_BATTLE_HISTORY_BODIES_LENGTH: usize = 4 + (4 + 3 + 10) * 100;
 pub const MAX_REFERRAL_INFO_LENGTH: usize = 32 * 2 + 8 * 2 + (4 + 8);
+pub const MAX_INCUBATOR_INFO_LENGTH: usize = 8 + 32 + 32 + 32 + 32 + 1;
+pub const MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH: usize = 165;
+pub const MAX_METADATA_ACCOUNT_LENGTH: usize = 679;
+pub const MAX_EDITION_ACCOUNT_LENGTH: usize = 282;
+pub const MAX_METADATA_EDITION_MONSTER: usize = 679 + 282 + MAX_MONSTER_LENGTH;
+pub const MAX_MINT_INIT: usize = 82 + MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH;
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]

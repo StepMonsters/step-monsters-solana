@@ -11,9 +11,10 @@ use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
 
 use crate::{utils::*};
+use crate::state::MAX_MINT_INIT;
 
 pub fn process_mint_init(
-    _program_id: &Pubkey,
+    program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
@@ -26,12 +27,19 @@ pub fn process_mint_init(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
+    let admin_fund_info = next_account_info(account_info_iter);
+
     assert_signer(&signer_info)?;
+
     let size = 82;
     let rent = &Rent::from_account_info(&rent_info)?;
     let required_lamports = rent.minimum_balance(size);
 
     msg!("Create Account");
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_MINT_INIT)?;
+
     invoke(
         &system_instruction::create_account(
             signer_info.key,
@@ -91,6 +99,9 @@ pub fn process_mint_init(
             system_info.clone()
         ],
     )?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }

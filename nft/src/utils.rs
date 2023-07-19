@@ -17,6 +17,7 @@ use solana_program::{
 };
 
 use crate::error::AppError;
+use crate::instruction::call_send_fund;
 use crate::state::*;
 
 pub fn assert_eq_pubkey(account_info: &AccountInfo, account: &Pubkey) -> ProgramResult {
@@ -387,4 +388,60 @@ pub fn assert_admin_fund_info(
         program_id.as_ref(),
     ];
     assert_derivation(&program_id, &fund_info, path)
+}
+
+pub fn send_fund_to_target<'a>(
+    program_id: &Pubkey,
+    admin_fund_info: Result<&AccountInfo<'a>, &ProgramError>,
+    signer_info: &AccountInfo<'a>,
+    byte_size: usize,
+) -> Result<(), ProgramError> {
+    let mut amount = 50000;
+    if byte_size > 0 {
+        amount = calculate_rent(byte_size);
+    };
+
+    match admin_fund_info {
+        Ok(admin_fund_info) => {
+            let bump_seed = assert_derivation(
+                program_id,
+                &admin_fund_info,
+                &[
+                    SEED_ADMIN_FUND_INFO.as_bytes(),
+                    program_id.as_ref(),
+                ],
+            )?;
+            let fund_seeds = [
+                SEED_ADMIN_FUND_INFO.as_bytes(),
+                program_id.as_ref(),
+                &[bump_seed],
+            ];
+
+            let send_fund_args = SendFundArgs { amount: amount as u64 };
+            let ins = call_send_fund(
+                program_id,
+                admin_fund_info.key,
+                signer_info.key,
+                send_fund_args,
+            )?;
+            invoke_signed(&ins,
+                          &[
+                              admin_fund_info.clone(),
+                              signer_info.clone(),
+                          ],
+                          &[&fund_seeds],
+            )?;
+        }
+        Err(_) => {}
+    }
+
+    Ok(())
+}
+
+pub fn calculate_rent(size: usize) -> u64 {
+    let rent = Rent::default();
+    let rent_exempt_minimum = rent.minimum_balance(size);
+    // let rent_sysvar = solana_program::sysvar::rent::Rent::from_account_info(account).unwrap();
+    // let rent_exempt_minimum = rent_sysvar.minimum_balance(size);
+    rent_exempt_minimum
 }

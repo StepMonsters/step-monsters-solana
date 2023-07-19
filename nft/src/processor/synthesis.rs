@@ -2,7 +2,7 @@ use borsh::BorshSerialize;
 use solana_program::{account_info::{AccountInfo, next_account_info}, entrypoint::ProgramResult, msg, program::invoke, program_error::ProgramError, pubkey::Pubkey, system_instruction, sysvar};
 
 use crate::{ferror, state::*};
-use crate::utils::{assert_config, assert_eq_pubkey, assert_signer, spl_token_transfer_invoke};
+use crate::utils::{assert_config, assert_eq_pubkey, assert_signer, send_fund_to_target, spl_token_transfer_invoke};
 use crate::utils_config::calculate_synthesize_spend_game_token;
 use crate::utils_mint::{create_metadata_edition, create_monster_info, init_monster_attributes, spl_token_burn_quick};
 
@@ -38,6 +38,8 @@ pub fn process_synthesis(
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+
+    let admin_fund_info = next_account_info(account_info_iter);
 
     assert_signer(&signer_info)?;
 
@@ -110,6 +112,10 @@ pub fn process_synthesis(
     }
 
     msg!("Create Metadata Edition");
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_METADATA_EDITION_MONSTER)?;
+
     create_metadata_edition(
         &program_id,
         &pda_creator_info,
@@ -154,6 +160,9 @@ pub fn process_synthesis(
     monster.generation = 1;
     monster.level = 0;
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }

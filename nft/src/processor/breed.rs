@@ -2,7 +2,7 @@ use borsh::BorshSerialize;
 use solana_program::{account_info::{AccountInfo, next_account_info}, entrypoint::ProgramResult, msg, program::invoke, program_error::ProgramError, pubkey::Pubkey, system_instruction, sysvar};
 
 use crate::{ferror, utils::*};
-use crate::state::{ConfigureData, Monster, QuickMintArgs};
+use crate::state::{ConfigureData, MAX_METADATA_EDITION_MONSTER, Monster, QuickMintArgs};
 use crate::utils_config::calculate_breed_spend_game_token;
 use crate::utils_mint::{calculate_breed_attrs, create_metadata_edition, create_monster_info, init_monster_attributes};
 
@@ -36,6 +36,8 @@ pub fn process_breed(
     let token_program_info = next_account_info(account_info_iter)?;
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
+
+    let admin_fund_info = next_account_info(account_info_iter);
 
     assert_signer(&signer_info)?;
 
@@ -99,6 +101,7 @@ pub fn process_breed(
     }
 
     msg!("Create Metadata Edition");
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_METADATA_EDITION_MONSTER)?;
     create_metadata_edition(
         &program_id,
         &pda_creator_info,
@@ -151,6 +154,9 @@ pub fn process_breed(
     mother.breed += 1;
     father.serialize(&mut *father_info.try_borrow_mut_data()?)?;
     mother.serialize(&mut *mother_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }

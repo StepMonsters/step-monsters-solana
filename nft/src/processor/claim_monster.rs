@@ -28,6 +28,8 @@ pub fn process_claim_monster(
     let token_program_info = next_account_info(account_info_iter)?;
     let _metadata_program_info = next_account_info(account_info_iter)?;
 
+    let admin_fund_info = next_account_info(account_info_iter);
+
     assert_signer(&signer_info)?;
 
     msg!("Assert Public Key");
@@ -67,5 +69,9 @@ pub fn process_claim_monster(
     msg!("Update Incubator");
     incubator.is_done = true;
     incubator.serialize(&mut *incubator_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
+
     Ok(())
 }

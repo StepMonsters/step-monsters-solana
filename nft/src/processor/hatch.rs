@@ -31,6 +31,8 @@ pub fn process_hatch(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
+    let admin_fund_info = next_account_info(account_info_iter);
+
     assert_signer(&signer_info)?;
 
     msg!("Update Metadata Account");
@@ -78,6 +80,10 @@ pub fn process_hatch(
     )?;
 
     msg!("Create incubator Info");
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_INCUBATOR_INFO_LENGTH)?;
+
     let bump_seed = assert_incubator(&program_id, &nft_mint_info, &incubator_info)?;
     let incubator_seeds = &[
         SEED_BATTLE.as_bytes(),
@@ -100,5 +106,9 @@ pub fn process_hatch(
     incubator.nft_store = nft_store_info.key.clone();
     incubator.user = signer_info.key.clone();
     incubator.serialize(&mut *incubator_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
+
     Ok(())
 }

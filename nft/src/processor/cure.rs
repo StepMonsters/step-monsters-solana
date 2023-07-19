@@ -11,7 +11,7 @@ use crate::{ferror, state::*, utils::*};
 use crate::utils_config::calculate_cure_spend_game_token;
 
 pub fn process_cure(
-    _program_id: &Pubkey,
+    program_id: &Pubkey,
     accounts: &[AccountInfo],
     args: CureArgs,
 ) -> ProgramResult {
@@ -21,6 +21,8 @@ pub fn process_cure(
     let program_ata_info = next_account_info(account_info_iter)?;
     let monster_info = next_account_info(account_info_iter)?;
     let token_program_info = next_account_info(account_info_iter)?;
+
+    let admin_fund_info = next_account_info(account_info_iter);
 
     assert_signer(&signer_info)?;
 
@@ -45,6 +47,9 @@ pub fn process_cure(
     }
 
     monster.serialize(&mut *monster_info.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }

@@ -44,6 +44,8 @@ pub fn process_battle(
     let rent_info = next_account_info(account_info_iter)?;
     let system_info = next_account_info(account_info_iter)?;
 
+    let admin_fund_info = next_account_info(account_info_iter);
+
     assert_monster(&program_id, &monster_mint_info, &monster_info_attacker)?;
     assert_signer(&signer_info)?;
 
@@ -85,6 +87,9 @@ pub fn process_battle(
     msg!("Receive Game Token");
     let mut token: u64 = calculate_battle_receive_game_token(win, monster.race, monster.level);
     token = token * 90 / 100;
+    if signer_ata_info.lamports() <= 0 {
+        send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH)?;
+    }
     mint_game_token_to_ata(
         program_id,
         signer_info,
@@ -98,6 +103,7 @@ pub fn process_battle(
     )?;
 
     if battle_history_info.lamports() <= 0 {
+        send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_BATTLE_HISTORY_LENGTH)?;
         create_battle_history_info(
             &program_id,
             &battle_history_info,
@@ -144,6 +150,9 @@ pub fn process_battle(
     monster.fatigue += 2;
     monster.last_battle_time = now_timestamp();
     monster.serialize(&mut *monster_info_attacker.try_borrow_mut_data()?)?;
+
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, 0)?;
 
     Ok(())
 }
