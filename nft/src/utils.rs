@@ -377,3 +377,14 @@ pub fn rarity_formula(mut p: f64, mut min: f64, mut max: f64) -> f64 {
     let b = max.log10() - min.log10();
     return 1.0_f64 - a / b;
 }
+
+pub fn assert_admin_fund_info(
+    program_id: &Pubkey,
+    fund_info: &AccountInfo,
+) -> Result<u8, ProgramError> {
+    let path = &[
+        SEED_ADMIN_FUND_INFO.as_bytes(),
+        program_id.as_ref(),
+    ];
+    assert_derivation(&program_id, &fund_info, path)
+}

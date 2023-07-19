@@ -16,6 +16,7 @@ pub const SEED_BATTLE_HISTORY: &str = "battle_history_12291655";
 pub const SEED_BATTLE_HISTORY_BODIES: &str = "battle_history_bodies";
 pub const SEED_TOKEN_ADMIN: &str = "token_admin_12152048";
 pub const SEED_REFERRAL_INFO: &str = "referral_202307101823";
+pub const SEED_ADMIN_FUND_INFO: &str = "admin_fund_20230712_1514";
 pub const MAX_BATTLE_LENGTH: usize = 1;
 pub const NUM_MONSTER_VALUE: usize = 6;
 pub const NUM_MONSTER_ATTR: usize = 6;
@@ -378,6 +379,12 @@ pub struct ReviveArgs {
     pub agility: u64,
     pub efficiency: u64,
     pub enemy_feature: Vec<u8>,
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct SendFundArgs {
+    pub amount: u64,
 }
 
 pub fn now_timestamp() -> u64 {

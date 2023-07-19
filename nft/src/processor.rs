@@ -8,6 +8,7 @@ pub use claim_monster::*;
 pub use config_game::*;
 pub use config_monster_feature::*;
 pub use configure::*;
+pub use create_admin_fund::*;
 pub use create_collection::*;
 pub use create_referral_info::*;
 pub use create_token::*;
@@ -20,6 +21,7 @@ pub use mint_init::*;
 pub use mint_quick::*;
 pub use recycle::*;
 pub use revive::*;
+pub use send_fund::*;
 pub use synthesis::*;
 pub use transfer_spending::*;
 pub use update_metadata::*;
@@ -50,6 +52,8 @@ pub mod create_collection;
 pub mod update_metadata;
 pub mod create_referral_info;
 pub mod battle_with_ref;
+pub mod create_admin_fund;
+pub mod send_fund;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -136,6 +140,12 @@ pub fn process_instruction(
         }
         GameInstruction::BattleWithRef(args) => {
             process_battle_with_ref(program_id, accounts, args)
+        }
+        GameInstruction::CreateAdminFundAccount => {
+            process_create_admin_fund(program_id, accounts)
+        }
+        GameInstruction::SendFund(args) => {
+            process_send_fund(program_id, accounts, args)
         }
     }
 }
