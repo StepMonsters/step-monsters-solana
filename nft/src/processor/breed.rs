@@ -50,7 +50,7 @@ pub fn process_breed(
     }
 
     msg!("Breed LST spending");
-    let spend = calculate_breed_spend_game_token(father.breed, mother.breed);
+    let spend = calculate_breed_spend_game_token(father.race, father.breed, mother.breed);
     spl_token_transfer_invoke(
         token_program_info.clone(),
         signer_ata_info.clone(),

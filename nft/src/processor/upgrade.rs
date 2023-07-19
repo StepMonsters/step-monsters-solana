@@ -30,7 +30,7 @@ pub fn process_upgrade(
     };
 
     msg!("Upgrade LST spending");
-    let spend = calculate_upgrade_spend_game_token(monster.level);
+    let spend = calculate_upgrade_spend_game_token(monster.race, monster.level);
     spl_token_transfer_invoke(
         token_program_info.clone(),
         signer_ata_info.clone(),

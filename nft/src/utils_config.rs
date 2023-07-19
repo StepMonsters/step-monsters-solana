@@ -376,7 +376,7 @@ pub fn get_monster_male_basic_attrs() -> [[u32; 6]; 10] {
         [100, 100, 120, 100, 120, 20],
         [100, 140, 110, 120, 150, 24],
         [150, 170, 160, 165, 165, 30],
-        [306, 299, 312, 299, 267, 42],
+        [816, 800, 832, 800, 712, 112],
         [100, 150, 120, 100, 120, 45],
         [630, 640, 620, 610, 650, 48],
         [700, 720, 690, 710, 700, 56],
@@ -393,7 +393,7 @@ pub fn get_monster_female_basic_attrs() -> [[u32; 6]; 10] {
         [100, 120, 100, 120, 100, 20],
         [90, 140, 130, 130, 130, 24],
         [165, 165, 150, 170, 160, 30],
-        [312, 299, 306, 299, 267, 42],
+        [832, 800, 816, 800, 712, 112],
         [110, 160, 100, 120, 100, 45],
         [650, 610, 620, 630, 640, 48],
         [720, 690, 710, 700, 700, 56],
@@ -438,8 +438,24 @@ pub fn calculate_cure_spend_game_token(level: u8, cure: u8) -> u64 {
     return spend * 1_000_000_000;
 }
 
-pub fn calculate_upgrade_spend_game_token(level: u8) -> u64 {
-    let mut spend: f64 = 50.0;
+pub fn get_upgrade_base_lst(race: u8) -> u64 {
+    if race == 0 {
+        return 50;
+    } else if race == 1 {
+        return 58;
+    } else if race == 2 {
+        return 78;
+    } else if race == 3 {
+        return 390;
+    } else if race == 4 {
+        return 60;
+    } else {
+        return 100;
+    }
+}
+
+pub fn calculate_upgrade_spend_game_token(race: u8, level: u8) -> u64 {
+    let mut spend: f64 = get_upgrade_base_lst(race) as f64;
     if level <= 1 {
         return spend as u64 * 1_000_000_000;
     }
@@ -449,10 +465,27 @@ pub fn calculate_upgrade_spend_game_token(level: u8) -> u64 {
     return spend as u64 * 1_000_000_000;
 }
 
-pub fn calculate_breed_spend_game_token(breed01: u8, breed02: u8) -> u64 {
+pub fn get_breed_base_lst(race: u8) -> u64 {
+    if race == 0 {
+        return 1000;
+    } else if race == 1 {
+        return 1200;
+    } else if race == 2 {
+        return 1600;
+    } else if race == 3 {
+        return 3200;
+    } else if race == 4 {
+        return 1200;
+    } else {
+        return 2000;
+    }
+}
+
+pub fn calculate_breed_spend_game_token(race: u8, breed01: u8, breed02: u8) -> u64 {
+    let base = get_breed_base_lst(race);
     let price01 = breed01 as u64;
     let price02 = breed02 as u64;
-    let spend = (price01 + price02 + 2) * 100 * (price01 + price02 + 1) / 2;
+    let spend = (price01 + price02 + 2) * base * (price01 + price02 + 1) / 2;
     return spend * 1_000_000_000;
 }
 
