@@ -45,6 +45,10 @@ pub fn process_hatch(
         metadata_program_info,
     )?;
 
+    //send fund
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_INCUBATOR_INFO_LENGTH)?;
+
     msg!("Create Store");
     let nft_store_bump = assert_nft_store(&program_id, &nft_mint_info, &nft_store_info)?;
     let auth_bump = assert_monster_authority(&program_id, &authority_info)?;
@@ -81,10 +85,6 @@ pub fn process_hatch(
     )?;
 
     msg!("Create incubator Info");
-
-    //send fund
-    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_INCUBATOR_INFO_LENGTH)?;
-
     let bump_seed = assert_incubator(&program_id, &nft_mint_info, &incubator_info)?;
     let incubator_seeds = &[
         SEED_BATTLE.as_bytes(),
