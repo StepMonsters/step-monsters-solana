@@ -22,6 +22,7 @@ pub fn process_upgrade(
     let token_program_info = next_account_info(account_info_iter)?;
 
     let admin_fund_info = next_account_info(account_info_iter);
+    let _program_info = next_account_info(account_info_iter);
 
     assert_signer(&signer_info)?;
 

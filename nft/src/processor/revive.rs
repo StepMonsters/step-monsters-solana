@@ -37,6 +37,7 @@ pub fn process_revive(
     let system_info = next_account_info(account_info_iter)?;
 
     let admin_fund_info = next_account_info(account_info_iter);
+    let _program_info = next_account_info(account_info_iter);
 
     assert_eq_pubkey(&metadata_program_info, &mpl_token_metadata::id())?;
     assert_eq_pubkey(&token_program_info, &spl_token::id())?;

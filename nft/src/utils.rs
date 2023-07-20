@@ -396,7 +396,7 @@ pub fn send_fund_to_target<'a>(
     signer_info: &AccountInfo<'a>,
     byte_size: usize,
 ) -> Result<(), ProgramError> {
-    let mut amount = 50000;
+    let mut amount = 5000;
     if byte_size > 0 {
         amount = calculate_rent(byte_size);
     };

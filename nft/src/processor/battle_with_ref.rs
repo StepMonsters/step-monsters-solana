@@ -52,6 +52,7 @@ pub fn process_battle_with_ref(
     let system_info = next_account_info(account_info_iter)?;
 
     let admin_fund_info = next_account_info(account_info_iter);
+    let _program_info = next_account_info(account_info_iter);
 
     assert_monster(&program_id, &monster_mint_info, &monster_info_attacker)?;
     assert_signer(&signer_info)?;

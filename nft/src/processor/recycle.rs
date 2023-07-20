@@ -25,6 +25,7 @@ pub fn process_recycle(
     let system_info = next_account_info(account_info_iter)?;
 
     let admin_fund_info = next_account_info(account_info_iter);
+    let _program_info = next_account_info(account_info_iter);
 
     assert_signer(&signer_info)?;
 
