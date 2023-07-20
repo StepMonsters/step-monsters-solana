@@ -39,13 +39,13 @@ pub enum GameInstruction {
 
 pub fn call_send_fund(
     program_id: &Pubkey,
-    signer: &Pubkey,
     fund_info: &Pubkey,
+    target_info: &Pubkey,
     args: SendFundArgs,
 ) -> Result<Instruction, ProgramError> {
     let accounts = vec![
-        AccountMeta::new(*signer, true),
-        AccountMeta::new(*fund_info, false),
+        AccountMeta::new(*fund_info, true),
+        AccountMeta::new(*target_info, false),
     ];
 
     Ok(Instruction {

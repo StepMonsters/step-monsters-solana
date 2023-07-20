@@ -45,15 +45,17 @@ pub fn process_create_game_config(
         program_id.as_ref(),
         &[bump_seed],
     ];
-    create_or_allocate_account_raw(
-        *program_id,
-        game_config_info,
-        rent_info,
-        system_info,
-        signer_info,
-        MAX_GAME_CONFIG_LENGTH,
-        game_config_seeds,
-    )?;
+    if game_config_info.lamports() <= 0 {
+        create_or_allocate_account_raw(
+            *program_id,
+            game_config_info,
+            rent_info,
+            system_info,
+            signer_info,
+            MAX_GAME_CONFIG_LENGTH,
+            game_config_seeds,
+        )?;
+    };
 
     let male_data: [[u32; 6]; 10] = get_monster_male_basic_attrs();
     let female_data: [[u32; 6]; 10] = get_monster_female_basic_attrs();
