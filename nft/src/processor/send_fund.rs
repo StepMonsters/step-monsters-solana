@@ -1,5 +1,4 @@
 use solana_program::{account_info::{AccountInfo, next_account_info}, entrypoint::ProgramResult, pubkey::Pubkey};
-use solana_program::sysvar::Sysvar;
 
 use crate::{state::*, utils::*};
 

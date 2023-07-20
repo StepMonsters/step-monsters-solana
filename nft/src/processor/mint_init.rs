@@ -11,7 +11,7 @@ use spl_associated_token_account::instruction::create_associated_token_account;
 use spl_token::instruction::{initialize_mint, mint_to};
 
 use crate::{utils::*};
-use crate::state::MAX_MINT_INIT;
+use crate::state::{MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH, MAX_MINT_INIT};
 
 pub fn process_mint_init(
     program_id: &Pubkey,
@@ -40,6 +40,7 @@ pub fn process_mint_init(
 
     //send fund
     send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_MINT_INIT)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH)?;
 
     invoke(
         &system_instruction::create_account(

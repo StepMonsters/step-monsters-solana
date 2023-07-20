@@ -31,8 +31,7 @@ pub const MAX_INCUBATOR_INFO_LENGTH: usize = 8 + 32 + 32 + 32 + 32 + 1;
 pub const MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH: usize = 165;
 pub const MAX_METADATA_ACCOUNT_LENGTH: usize = 679;
 pub const MAX_EDITION_ACCOUNT_LENGTH: usize = 282;
-pub const MAX_METADATA_EDITION_MONSTER: usize = 679 + 282 + MAX_MONSTER_LENGTH;
-pub const MAX_MINT_INIT: usize = 82 + MAX_ASSOCIATED_TOKEN_ACCOUNT_LENGTH;
+pub const MAX_MINT_INIT: usize = 82;
 
 #[repr(C)]
 #[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug, Clone, Copy)]

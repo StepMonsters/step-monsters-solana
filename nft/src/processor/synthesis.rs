@@ -115,7 +115,9 @@ pub fn process_synthesis(
     msg!("Create Metadata Edition");
 
     //send fund
-    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_METADATA_EDITION_MONSTER)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_METADATA_ACCOUNT_LENGTH)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_EDITION_ACCOUNT_LENGTH)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_MONSTER_LENGTH)?;
 
     create_metadata_edition(
         &program_id,

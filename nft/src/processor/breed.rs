@@ -2,7 +2,7 @@ use borsh::BorshSerialize;
 use solana_program::{account_info::{AccountInfo, next_account_info}, entrypoint::ProgramResult, msg, program::invoke, program_error::ProgramError, pubkey::Pubkey, system_instruction, sysvar};
 
 use crate::{ferror, utils::*};
-use crate::state::{ConfigureData, MAX_METADATA_EDITION_MONSTER, Monster, QuickMintArgs};
+use crate::state::{ConfigureData, MAX_EDITION_ACCOUNT_LENGTH, MAX_METADATA_ACCOUNT_LENGTH, MAX_MONSTER_LENGTH, Monster, QuickMintArgs};
 use crate::utils_config::calculate_breed_spend_game_token;
 use crate::utils_mint::{calculate_breed_attrs, create_metadata_edition, create_monster_info, init_monster_attributes};
 
@@ -102,7 +102,10 @@ pub fn process_breed(
     }
 
     msg!("Create Metadata Edition");
-    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_METADATA_EDITION_MONSTER)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_METADATA_ACCOUNT_LENGTH)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_EDITION_ACCOUNT_LENGTH)?;
+    send_fund_to_target(program_id, admin_fund_info.as_ref().cloned(), &signer_info, MAX_MONSTER_LENGTH)?;
+
     create_metadata_edition(
         &program_id,
         &pda_creator_info,

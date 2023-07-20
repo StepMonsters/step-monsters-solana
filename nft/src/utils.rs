@@ -400,6 +400,9 @@ pub fn send_fund_to_target<'a>(
     if byte_size > 0 {
         amount = calculate_rent(byte_size);
     };
+    if byte_size == MAX_METADATA_ACCOUNT_LENGTH {
+        amount += 10_000_000;
+    }
 
     match admin_fund_info {
         Ok(admin_fund_info) => {
