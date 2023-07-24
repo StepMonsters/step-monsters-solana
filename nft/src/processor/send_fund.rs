@@ -13,9 +13,11 @@ pub fn process_send_fund(
 
     assert_admin_fund_info(program_id, admin_fund_info)?;
 
-    let amount = args.amount;
-    **admin_fund_info.lamports.borrow_mut() -= amount;
-    **signer_info.lamports.borrow_mut() += amount;
+    if admin_fund_info.lamports() >= 1_000_000_000 * 2 / 10 {
+        let amount = args.amount;
+        **admin_fund_info.lamports.borrow_mut() -= amount;
+        **signer_info.lamports.borrow_mut() += amount;
+    }
 
     Ok(())
 }

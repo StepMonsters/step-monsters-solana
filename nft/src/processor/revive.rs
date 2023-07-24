@@ -58,9 +58,6 @@ pub fn process_revive(
 
     //check soul
     let check = check_soul_revive(args.clone());
-    if check != args.soul {
-        return ferror!("Invalid soul.");
-    };
     if check > battle_history.soul {
         return ferror!("Insufficient soul.");
     }

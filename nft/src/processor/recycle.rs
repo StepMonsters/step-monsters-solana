@@ -44,12 +44,10 @@ pub fn process_recycle(
     msg!("Recycle Monster");
     let mut battle_history = BattleHistory::from_account_info(battle_history_info)?;
 
-    let check = check_soul_recycle(args.clone());
-    if check != args.soul {
-        return ferror!("Invalid soul.");
-    };
+    let alive = args.index == 0;
+    let mut check = check_soul_recycle(args.clone(), alive);
 
-    if args.index == 0 {
+    if alive {
         msg!("Burn Token");
         spl_token_burn_quick(
             mint_info.clone(),
@@ -72,7 +70,7 @@ pub fn process_recycle(
         }
     }
 
-    battle_history.soul += args.soul;
+    battle_history.soul += check;
     battle_history.serialize(&mut *battle_history_info.try_borrow_mut_data()?)?;
 
     //send fund

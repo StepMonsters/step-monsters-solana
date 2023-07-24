@@ -358,16 +358,20 @@ pub fn check_body_array(mut body: Vec<u8>, attrs: Vec<u8>) -> bool {
     return true;
 }
 
-pub fn check_soul_recycle(args: RecycleArgs) -> u64 {
+pub fn check_soul_recycle(args: RecycleArgs, alive: bool) -> u64 {
     let total = args.hp + args.attack + args.defense +
         args.speed + args.agility + args.efficiency;
-    return total / 100;
+    if alive {
+        return total * 90 / 100 / 100 * 3;
+    } else {
+        return total * 90 / 100 / 100;
+    }
 }
 
 pub fn check_soul_revive(args: ReviveArgs) -> u64 {
     let total = args.hp + args.attack + args.defense +
         args.speed + args.agility + args.efficiency;
-    return total * 5 / 100;
+    return total * 5 * 150 / 100 / 100;
 }
 
 pub fn rarity_formula(mut p: f64, mut min: f64, mut max: f64) -> f64 {
