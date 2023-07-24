@@ -45,7 +45,7 @@ pub fn process_recycle(
     let mut battle_history = BattleHistory::from_account_info(battle_history_info)?;
 
     let alive = args.index == 0;
-    let mut check = check_soul_recycle(args.clone(), alive);
+    let check = check_soul_recycle(args.clone(), alive);
 
     if alive {
         msg!("Burn Token");
