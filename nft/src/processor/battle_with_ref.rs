@@ -83,7 +83,7 @@ pub fn process_battle_with_ref(
 
     //after battle logic do  mint_nft
     //monster add fatigue
-    let capture = get_random_u8(0, 20)? == 0;
+    let capture = get_random_u8(0, 30)? == 0;
     if win > 0 && capture {
         win = 2;
     } else if win > 0 && !capture {
